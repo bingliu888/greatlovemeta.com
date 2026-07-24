@@ -6,13 +6,13 @@ import { LanguageLink } from "./LanguageMemory";
 import { HeaderAccount } from "./HeaderAccount";
 
 const labels = {
-  en: { members: "Members", academy: "BingAcademy", claw: "MyClaw", real: "WhatsReal" },
-  zh: { members: "会员", academy: "BingAcademy", claw: "MyClaw", real: "WhatsReal" },
+  en: { members: "Members", community: "Community", academy: "BingAcademy", claw: "MyClaw", real: "WhatsReal", guru: "Ask Guru" },
+  zh: { members: "会员", community: "社区", academy: "BingAcademy", claw: "MyClaw", real: "WhatsReal", guru: "问 Guru" },
 };
 
 function GlobalLinks({ lang }: { lang: "en" | "zh" }) {
   const copy = labels[lang];
-  return <><Link href={`/${lang}/members`}>{copy.members}</Link><a href="https://bingacademy.com">{copy.academy}</a><a href="https://myclaw.one">{copy.claw}</a><a href="https://whatsreal.com">{copy.real}</a></>;
+  return <><Link href={`/${lang}/members`}>{copy.members}</Link><Link href={`/${lang}/community`}>{copy.community}</Link><Link href={`/${lang}/assistant`}>{copy.guru}</Link><a href="https://bingacademy.com">{copy.academy}</a><a href="https://myclaw.one">{copy.claw}</a><a href="https://whatsreal.com">{copy.real}</a></>;
 }
 
 export function SiteHeader({ lang }: { lang: "en" | "zh" }) {
