@@ -5,7 +5,7 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { useSignIn, useSignUp } from "@clerk/nextjs/legacy";
 import { FormEvent, useEffect, useState } from "react";
 
-export function ClerkAuthForm({ lang }: { lang: "en" | "zh" }) {
+export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang: "en" | "zh"; returnTo?: string }) {
   const zh = lang === "zh";
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -26,10 +26,10 @@ export function ClerkAuthForm({ lang }: { lang: "en" | "zh" }) {
     void (async () => {
       const token = await getToken();
       const response = await fetch("/api/auth/clerk-session", { method: "POST", headers: { ...(token ? { authorization: `Bearer ${token}` } : {}), "content-type": "application/json" }, body: JSON.stringify({ email: user?.primaryEmailAddress?.emailAddress, name: user?.fullName || user?.firstName }) });
-      if (response.ok) window.location.replace(`/${lang}/dashboard`);
+      if (response.ok) window.location.replace(returnTo);
       else setError(zh ? "无法建立安全会话。" : "Unable to connect your secure session.");
     })();
-  }, [getToken, isLoaded, lang, user, userId, zh]);
+  }, [getToken, isLoaded, returnTo, user, userId, zh]);
 
   function readableError(issue: unknown) {
     if (isClerkAPIResponseError(issue)) {
