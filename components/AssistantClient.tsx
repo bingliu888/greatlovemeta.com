@@ -1,0 +1,249 @@
+"use client";
+
+import { FormEvent, useEffect, useRef, useState } from "react";
+
+type ChatMessage = { role: "user" | "assistant"; content: string };
+
+function ToolIcon({ name }: { name: "copy" | "listen" | "up" | "down" | "share" }) {
+  const paths = {
+    copy: <><rect x="8" y="8" width="11" height="11" rx="2"/><path d="M16 8V6a2 2 0 0 0-2-2H6a2 2 0 0 0-2 2v8a2 2 0 0 0 2 2h2"/></>,
+    listen: <><path d="M11 5 7 9H4v6h3l4 4z"/><path d="M15 9a5 5 0 0 1 0 6M18 6a9 9 0 0 1 0 12"/></>,
+    up: <path d="M7 10v10M7 10l4-6a2 2 0 0 1 3 2v4h4a2 2 0 0 1 2 2l-1 6a2 2 0 0 1-2 2H7m0-10H4v10h3"/>,
+    down: <path d="M7 14V4M7 14l4 6a2 2 0 0 0 3-2v-4h4a2 2 0 0 0 2-2l-1-6a2 2 0 0 0-2-2H7m0 10H4V4h3"/>,
+    share: <><path d="M12 16V4M8 8l4-4 4 4"/><path d="M5 12v7a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-7"/></>,
+  };
+  return <svg aria-hidden="true" viewBox="0 0 24 24" width="21" height="21" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+}
+
+function PlaybackIcon({ name }: { name: "play" | "pause" | "close" }) {
+  const paths = {
+    play: <path d="m9 7 8 5-8 5z" fill="currentColor" stroke="none"/>,
+    pause: <><path d="M9 7v10M15 7v10"/></>,
+    close: <><path d="m7 7 10 10M17 7 7 17"/></>,
+  };
+  return <svg aria-hidden="true" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">{paths[name]}</svg>;
+}
+
+function formatElapsed(seconds: number) {
+  const minutes = Math.floor(seconds / 60);
+  return `${String(minutes).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
+}
+
+export function AssistantClient({ lang, signedIn }: { lang: "en" | "zh"; signedIn: boolean }) {
+  const zh = lang === "zh";
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [draft, setDraft] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  const [live, setLive] = useState(false);
+  const [liveStatus, setLiveStatus] = useState("");
+  const [faqOpen, setFaqOpen] = useState(false);
+  const [composerFocused, setComposerFocused] = useState(false);
+  const [copiedMessage, setCopiedMessage] = useState<number | null>(null);
+  const [ratedMessage, setRatedMessage] = useState<{ index: number; value: "up" | "down" } | null>(null);
+  const [speechMessage, setSpeechMessage] = useState<number | null>(null);
+  const [speechPaused, setSpeechPaused] = useState(false);
+  const [speechElapsed, setSpeechElapsed] = useState(0);
+  const peer = useRef<RTCPeerConnection | null>(null);
+  const stream = useRef<MediaStream | null>(null);
+  const audio = useRef<HTMLAudioElement | null>(null);
+  const chatLog = useRef<HTMLDivElement | null>(null);
+  const composer = useRef<HTMLTextAreaElement | null>(null);
+  const faqMenu = useRef<HTMLDivElement | null>(null);
+  const liveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const speechTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const speechSession = useRef(0);
+  const [, setRemainingSeconds] = useState<number | null>(null);
+
+  useEffect(() => {
+    const updateViewportHeight = () => {
+      const height = window.visualViewport?.height || window.innerHeight;
+      document.documentElement.style.setProperty("--assistant-viewport-height", `${Math.round(height)}px`);
+    };
+    updateViewportHeight();
+    window.addEventListener("resize", updateViewportHeight);
+    window.visualViewport?.addEventListener("resize", updateViewportHeight);
+    window.visualViewport?.addEventListener("scroll", updateViewportHeight);
+    return () => {
+      window.removeEventListener("resize", updateViewportHeight);
+      window.visualViewport?.removeEventListener("resize", updateViewportHeight);
+      window.visualViewport?.removeEventListener("scroll", updateViewportHeight);
+      document.documentElement.style.removeProperty("--assistant-viewport-height");
+    };
+  }, []);
+
+  useEffect(() => () => {
+    speechSession.current += 1;
+    if (speechTimer.current) window.clearInterval(speechTimer.current);
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+  }, []);
+
+  useEffect(() => {
+    const log = chatLog.current;
+    if (!log) return;
+    log.scrollTo({ top: log.scrollHeight, behavior: "smooth" });
+  }, [messages, busy]);
+
+  useEffect(() => {
+    const field = composer.current;
+    if (!field) return;
+    field.style.height = "auto";
+    const styles = window.getComputedStyle(field);
+    const lineHeight = Number.parseFloat(styles.lineHeight) || 28;
+    const chrome = (Number.parseFloat(styles.paddingTop) || 0) + (Number.parseFloat(styles.paddingBottom) || 0) + 2;
+    const maxHeight = lineHeight * 5 + chrome;
+    field.style.height = `${Math.min(field.scrollHeight, maxHeight)}px`;
+    field.style.overflowY = field.scrollHeight > maxHeight ? "auto" : "hidden";
+  }, [draft]);
+
+  useEffect(() => {
+    if (!faqOpen) return;
+    const close = (event: PointerEvent) => {
+      if (!faqMenu.current?.contains(event.target as Node)) setFaqOpen(false);
+    };
+    window.addEventListener("pointerdown", close);
+    return () => window.removeEventListener("pointerdown", close);
+  }, [faqOpen]);
+
+  function chooseQuestion(question: string) {
+    setDraft(question);
+    setFaqOpen(false);
+    requestAnimationFrame(() => composer.current?.focus());
+  }
+
+  async function copyAnswer(content: string, index: number) {
+    await navigator.clipboard.writeText(content);
+    setCopiedMessage(index);
+    window.setTimeout(() => setCopiedMessage(current => current === index ? null : current), 1600);
+  }
+
+  function stopReading() {
+    speechSession.current += 1;
+    if (speechTimer.current) window.clearInterval(speechTimer.current);
+    speechTimer.current = null;
+    if ("speechSynthesis" in window) window.speechSynthesis.cancel();
+    setSpeechMessage(null);
+    setSpeechPaused(false);
+    setSpeechElapsed(0);
+  }
+
+  function toggleReading() {
+    if (!("speechSynthesis" in window)) return;
+    if (speechPaused) window.speechSynthesis.resume();
+    else window.speechSynthesis.pause();
+    setSpeechPaused(value => !value);
+  }
+
+  function finishReading(session: number) {
+    if (session !== speechSession.current) return;
+    if (speechTimer.current) window.clearInterval(speechTimer.current);
+    speechTimer.current = null;
+    setSpeechMessage(null);
+    setSpeechPaused(false);
+  }
+
+  function readAnswer(content: string, messageIndex: number) {
+    if (!("speechSynthesis" in window)) { setError(zh ? "此浏览器不支持文字朗读。" : "Text-to-speech is not supported in this browser."); return; }
+    stopReading();
+    const synth = window.speechSynthesis;
+    const session = ++speechSession.current;
+    const isChinese = /[\u3400-\u9fff]/.test(content);
+    setError("");
+    setSpeechMessage(messageIndex);
+    setSpeechPaused(false);
+    setSpeechElapsed(0);
+    speechTimer.current = window.setInterval(() => setSpeechElapsed(value => value + 1), 1000);
+    const chunks: string[] = [];
+    for (const paragraph of content.split(/\n+/).map(value => value.trim()).filter(Boolean)) {
+      let remaining = paragraph;
+      while (remaining.length > 180) {
+        const windowText = remaining.slice(0, 180);
+        const punctuation = Math.max(windowText.lastIndexOf("。"), windowText.lastIndexOf("！"), windowText.lastIndexOf("？"), windowText.lastIndexOf("."), windowText.lastIndexOf("!"), windowText.lastIndexOf("?"), windowText.lastIndexOf(" "));
+        const cut = punctuation > 60 ? punctuation + 1 : 180;
+        chunks.push(remaining.slice(0, cut).trim());
+        remaining = remaining.slice(cut).trim();
+      }
+      if (remaining) chunks.push(remaining);
+    }
+    const voices = synth.getVoices();
+    const voice = voices.find(candidate => isChinese ? /^(zh|cmn)/i.test(candidate.lang) : /^en/i.test(candidate.lang)) || null;
+    let index = 0;
+    const speakNext = () => {
+      if (session !== speechSession.current) return;
+      if (index >= chunks.length) { finishReading(session); return; }
+      const utterance = new SpeechSynthesisUtterance(chunks[index++]);
+      utterance.lang = isChinese ? "zh-CN" : "en-US";
+      utterance.rate = isChinese ? 0.92 : 1;
+      utterance.voice = voice;
+      utterance.onend = speakNext;
+      utterance.onerror = event => {
+        if (event.error !== "interrupted" && event.error !== "canceled") {
+          setError(isChinese ? "无法启动中文朗读，请检查设备是否已安装中文语音。" : "Unable to start speech. Please check this device's voice settings.");
+          stopReading();
+        }
+      };
+      synth.speak(utterance);
+      synth.resume();
+    };
+    window.setTimeout(speakNext, 80);
+  }
+
+  async function shareAnswer(content: string) {
+    if (navigator.share) await navigator.share({ text: content });
+    else await navigator.clipboard.writeText(content);
+  }
+
+  async function submit(event: FormEvent) {
+    event.preventDefault();
+    const content = draft.trim();
+    if (!content || busy) return;
+    const next = [...messages, { role: "user" as const, content }].slice(-12);
+    setMessages(next); setDraft(""); setComposerFocused(false); composer.current?.blur(); setBusy(true); setError("");
+    try {
+      const response = await fetch("/api/assistant", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ language: lang, messages: next }) });
+      const data = await response.json() as { reply?: string; error?: string };
+      if (!response.ok || !data.reply) throw new Error(data.error || (zh ? "助手暂时不可用。" : "The assistant is temporarily unavailable."));
+      setMessages(current => [...current, { role: "assistant", content: data.reply! }]);
+    } catch (cause) { setError(cause instanceof Error ? cause.message : String(cause)); }
+    finally { setBusy(false); }
+  }
+
+  function stopLive() {
+    if (liveTimer.current) clearInterval(liveTimer.current); liveTimer.current = null;
+    peer.current?.close(); peer.current = null;
+    stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
+    if (audio.current) audio.current.srcObject = null;
+    setLive(false); setLiveStatus(zh ? "语音对话已结束。" : "Live conversation ended.");
+  }
+
+  async function startLive() {
+    if (live) return stopLive();
+    if (!signedIn) { window.location.href = `/${lang}/auth/login?returnTo=/${lang}/assistant`; return; }
+    setError(""); setLiveStatus(zh ? "正在连接麦克风…" : "Connecting microphone…");
+    try {
+      const allowance = await fetch("/api/assistant/live/usage").then(response => response.json()) as { paid?: boolean; remainingSeconds?: number | null; error?: string };
+      if (allowance.error) throw new Error(allowance.error);
+      if (!allowance.paid && !allowance.remainingSeconds) throw new Error(zh ? "今天的 10 分钟免费语音已用完。升级会员可继续使用。" : "Today's 10-minute free Live allowance has been used. Upgrade to continue.");
+      setRemainingSeconds(allowance.remainingSeconds ?? null);
+      const pc = new RTCPeerConnection(); peer.current = pc;
+      const output = new Audio(); output.autoplay = true; audio.current = output;
+      pc.ontrack = event => { output.srcObject = event.streams[0]; };
+      const microphone = await navigator.mediaDevices.getUserMedia({ audio: true }); stream.current = microphone;
+      microphone.getTracks().forEach(track => pc.addTrack(track, microphone));
+      pc.createDataChannel("oai-events");
+      const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
+      const response = await fetch("/api/assistant/live", { method: "POST", headers: { "content-type": "application/sdp" }, body: offer.sdp || "" });
+      const answer = await response.text();
+      if (!response.ok) { let detail = answer; try { detail = (JSON.parse(answer) as { error?: string }).error || answer; } catch {} throw new Error(detail || "Live connection failed"); }
+      await pc.setRemoteDescription({ type: "answer", sdp: answer });
+      setLive(true); setLiveStatus(zh ? "已连接。直接说话即可，点击“结束”停止。" : "Connected. Speak naturally; click End to stop.");
+      if (!allowance.paid) liveTimer.current = setInterval(async () => { const usage = await fetch("/api/assistant/live/usage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ seconds: 30 }) }).then(response => response.json()).catch(() => null) as { remainingSeconds?: number } | null; if (usage) { setRemainingSeconds(usage.remainingSeconds ?? 0); if ((usage.remainingSeconds ?? 0) <= 0) { stopLive(); setError(zh ? "今天的 10 分钟免费语音已用完。" : "Today's 10-minute free Live allowance is complete."); } } }, 30_000);
+    } catch (cause) { stopLive(); setError(cause instanceof Error ? cause.message : String(cause)); }
+  }
+
+  const questions = zh
+    ? ["如何建立我的数字公民档案？", "数字公民身份和钱包地址有什么区别？", "我可以怎样参与社区项目？", "如何在跨文化社区中保护隐私？"]
+    : ["How do I create my GreatLove member profile?", "How do RWA records differ from wallet ownership?", "How can I join an ecosystem project?", "How do I protect privacy in a cross-cultural community?"];
+
+  return <>{speechMessage !== null && <div className="speech-player" role="region" aria-label={zh ? "朗读控制" : "Read-aloud controls"}><button type="button" onClick={toggleReading} aria-label={speechPaused ? (zh ? "继续朗读" : "Resume reading") : (zh ? "暂停朗读" : "Pause reading")} title={speechPaused ? (zh ? "继续" : "Resume") : (zh ? "暂停" : "Pause")}><PlaybackIcon name={speechPaused ? "play" : "pause"}/></button><time>{formatElapsed(speechElapsed)}</time><span>{zh ? "正在朗读" : "Reading aloud"}</span><button className="speech-player-close" type="button" onClick={stopReading} aria-label={zh ? "停止朗读" : "Stop reading"} title={zh ? "停止并关闭" : "Stop and close"}><PlaybackIcon name="close"/></button></div>}<section className="assistant-main assistant-chat-only"><section className="chat-panel"><div className="chat-log" aria-live="polite" ref={chatLog}>{messages.map((message, index) => <article className={message.role} key={`${message.role}-${index}`}><strong>{message.role === "user" ? (zh ? "您" : "You") : "Guru"}</strong><p>{message.content}</p>{message.role === "assistant" && <div className="answer-tools" aria-label={zh ? "回答工具" : "Answer tools"}><button type="button" onClick={() => copyAnswer(message.content, index)} aria-label={zh ? "复制回答" : "Copy answer"} title={zh ? "复制" : "Copy"}><ToolIcon name="copy"/></button><button type="button" className={speechMessage === index ? "active" : ""} onClick={() => readAnswer(message.content, index)} aria-label={zh ? "朗读回答" : "Read answer aloud"} title={zh ? "朗读" : "Listen"}><ToolIcon name="listen"/></button><button className={ratedMessage?.index === index && ratedMessage.value === "up" ? "active" : ""} type="button" onClick={() => setRatedMessage({ index, value: "up" })} aria-label={zh ? "有帮助" : "Helpful"} title={zh ? "有帮助" : "Helpful"}><ToolIcon name="up"/></button><button className={ratedMessage?.index === index && ratedMessage.value === "down" ? "active" : ""} type="button" onClick={() => setRatedMessage({ index, value: "down" })} aria-label={zh ? "没有帮助" : "Not helpful"} title={zh ? "没有帮助" : "Not helpful"}><ToolIcon name="down"/></button><button type="button" onClick={() => shareAnswer(message.content)} aria-label={zh ? "分享回答" : "Share answer"} title={zh ? "分享" : "Share"}><ToolIcon name="share"/></button><span aria-live="polite">{copiedMessage === index ? (zh ? "已复制" : "Copied") : ""}</span></div>}</article>)}{busy && <article className="assistant"><strong>Guru</strong><p>{zh ? "正在思考…" : "Thinking…"}</p></article>}</div><form className={`chat-compose chat-compose-stacked${composerFocused || draft ? " expanded" : " compact"}`} onSubmit={submit} onFocus={() => setComposerFocused(true)} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setComposerFocused(false); }}><label className="chat-compose-field"><span className="sr-only">{zh ? "输入问题" : "Your question"}</span><textarea ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} rows={1} placeholder={zh ? "给 Guru 发消息…" : "Message Guru…"}/></label><div className="chat-toolbar"><div className="faq-control" ref={faqMenu}><button className="icon-button faq-button" type="button" aria-label={zh ? "常见问题" : "Frequently asked questions"} aria-expanded={faqOpen} onClick={() => setFaqOpen(value => !value)}>?</button>{faqOpen && <div className="faq-popover" role="menu"><strong>{zh ? "常见问题" : "Try asking"}</strong>{questions.map(question => <button type="button" role="menuitem" key={question} onClick={() => chooseQuestion(question)}>{question}</button>)}</div>}</div>{liveStatus && <span className="composer-status" aria-live="polite">{liveStatus}</span>}<div className="toolbar-actions"><button className={`icon-button mic-button${live ? " active" : ""}`} type="button" aria-label={live ? (zh ? "结束语音" : "End live voice") : (zh ? "开始语音" : "Start live voice")} title={live ? (zh ? "结束语音" : "End live") : (zh ? "开始语音" : "Start live")} onClick={startLive}><span aria-hidden="true"/></button><button className="icon-button send-button" aria-label={zh ? "发送消息" : "Send message"} disabled={busy || !draft.trim()}><span aria-hidden="true">↑</span></button></div></div></form></section>{error && <p className="assistant-error" role="alert">{error}</p>}</section></>;
+}
