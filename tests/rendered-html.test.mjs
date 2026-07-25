@@ -18,7 +18,7 @@ test("renders GreatLoveMeta production metadata", async () => {
   const { default: worker } = await import(workerUrl.href);
 
   const response = await worker.fetch(
-    new Request("http://localhost/", {
+    new Request("http://localhost/zh", {
       headers: { accept: "text/html" },
     }),
     testEnv,
@@ -35,6 +35,13 @@ test("renders GreatLoveMeta production metadata", async () => {
   );
   const html = await response.text();
   assert.match(html, /GreatLoveMeta\.com/);
+  assert.match(html, /欢迎光临 RWA/);
+  assert.match(
+    html,
+    /\/docs\/GreatLove-RWA-Whitepaper-EN-2026-07-v9\.pdf/,
+  );
+  assert.match(html, /Android APK 下载/);
+  assert.match(html, /App Store 下载/);
   assert.doesNotMatch(html, /codex-preview/);
 });
 

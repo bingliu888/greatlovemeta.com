@@ -7,12 +7,22 @@ import { SiteFooter } from "../../components/SiteFooter";
 const content = {
   en: {
     metaTitle: "GreatLoveMeta.com — AI, RWA and Community",
-    eyebrow: "Welcome to the GreatLove Metaverse",
+    eyebrow: "Welcome to RWA · GreatLove Metaverse",
     title: <>Real-world value.<br />A community-built future.</>,
     lead: "Explore a bilingual ecosystem where AI agents, blockchain, RWA, NFTs and community applications connect people with practical digital experiences.",
     start: "Join password-free",
     how: "Explore the ecosystem",
     markers: ["AI-powered", "RWA connected", "Community governed"],
+    welcomeKicker: "GreatLove welcome center",
+    welcomeTitle: "Welcome to RWA. Welcome to the GreatLove Metaverse.",
+    welcomeBody: "Read the current GreatLove RWA ecosystem whitepaper here on GreatLoveMeta.com, then continue with the official GreatLove mobile app.",
+    whitepaper: "Download whitepaper",
+    whitepaperMeta: "English · July 2026 · PDF",
+    appTitle: "Download GreatLove App",
+    appBody: "Take the GreatLove ecosystem with you through the official Android or iOS release.",
+    android: "Android APK",
+    ios: "Download on the App Store",
+    wechat: "Using WeChat? Open this page in your default browser before downloading.",
     introKicker: "One connected ecosystem",
     introTitle: "AI, real-world assets and community belong in one clear experience.",
     introBody: "GreatLoveMeta.com brings the GreatLove ecosystem into a modern member hub—with simple email-code access, transparent project information, conversations and intelligent guidance.",
@@ -43,12 +53,22 @@ const content = {
   },
   zh: {
     metaTitle: "GreatLoveMeta.com — AI、RWA 与全球社区",
-    eyebrow: "欢迎来到大爱元宇宙",
+    eyebrow: "欢迎光临 RWA · 大爱元宇宙",
     title: <>现实价值连接，<br />社区共同建设。</>,
     lead: "在中英双语生态中连接 AI 智能体、区块链、RWA、NFT 与社区应用，让数字体验回到真实、清晰和可参与。",
     start: "免密码加入",
     how: "探索大爱生态",
     markers: ["AI 智能驱动", "连接现实资产", "社区共同治理"],
+    welcomeKicker: "大爱欢迎中心",
+    welcomeTitle: "欢迎光临 RWA，欢迎来到大爱元宇宙。",
+    welcomeBody: "在 GreatLoveMeta.com 直接阅读最新大爱 RWA 生态英文白皮书，并安装官方 GreatLove 手机 App。",
+    whitepaper: "下载英文白皮书",
+    whitepaperMeta: "英文 · 2026 年 7 月 · PDF",
+    appTitle: "下载 GreatLove App",
+    appBody: "通过官方 Android 或 iOS 版本，在手机上继续使用大爱生态。",
+    android: "Android APK 下载",
+    ios: "App Store 下载",
+    wechat: "如果正在微信中访问，请先从右上角选择“在默认浏览器打开”。",
     introKicker: "一个相互连接的生态",
     introTitle: "把 AI、现实世界资产与社区放进一个清晰体验。",
     introBody: "GreatLoveMeta.com 以现代会员中心承载大爱生态：邮箱验证码轻松加入、透明了解项目、参与社区交流，并随时获得智能指导。",
@@ -93,10 +113,36 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     <div className="hero-shell">
       <SiteHeader lang={lang}/>
       <section className="hero">
-        <div className="hero-copy"><p className="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p className="hero-lead">{t.lead}</p><div className="hero-actions"><Link className="primary-button" href={`/${lang}/auth/login`}>{t.start}<span>→</span></Link><a className="secondary-button" href="#ecosystem">{t.how}<span>↓</span></a></div><div className="trust-row">{t.markers.map((item, index) => <div key={item}><span>{["AI", "RWA", "DAO"][index]}</span>{item}</div>)}</div></div>
+        <div className="hero-copy"><p className="eyebrow">{t.eyebrow}</p><h1>{t.title}</h1><p className="hero-lead">{t.lead}</p><div className="hero-actions"><Link className="primary-button" href={`/${lang}/auth/login`}>{t.start}<span>→</span></Link><a className="secondary-button" href="#welcome">{t.whitepaper}<span>↓</span></a><a className="text-link glm-explore-link" href="#ecosystem">{t.how}</a></div><div className="trust-row">{t.markers.map((item, index) => <div key={item}><span>{["AI", "RWA", "DAO"][index]}</span>{item}</div>)}</div></div>
         <div className="hero-visual gc-globe glm-orbit" aria-label={lang === "zh" ? "大爱元宇宙生态网络" : "GreatLove Metaverse ecosystem network"}><div className="gc-orbit orbit-a"/><div className="gc-orbit orbit-b"/><div className="gc-world"><span>GL</span><i/><i/><i/><i/></div><div className="gc-signal signal-a">AI AGENT</div><div className="gc-signal signal-b">RWA</div><div className="gc-signal signal-c">COMMUNITY</div></div>
       </section>
     </div>
+
+    <section className="glm-welcome-panel" id="welcome" aria-labelledby="glm-welcome-title">
+      <div className="glm-welcome-card">
+        <div className="glm-welcome-copy">
+          <p className="section-kicker">{t.welcomeKicker}</p>
+          <h2 id="glm-welcome-title">{t.welcomeTitle}</h2>
+          <p>{t.welcomeBody}</p>
+          <a className="glm-whitepaper-link" href="/docs/GreatLove-RWA-Whitepaper-EN-2026-07-v9.pdf" download>
+            <span><small>{t.whitepaperMeta}</small><b>{t.whitepaper}</b></span>
+            <i aria-hidden="true">↓</i>
+          </a>
+        </div>
+        <div className="glm-app-download">
+          <img src="/greatlove-app-preview.png" alt="" aria-hidden="true"/>
+          <div className="glm-app-download-copy">
+            <p className="section-kicker">{t.appTitle}</p>
+            <p>{t.appBody}</p>
+            <div className="glm-app-buttons">
+              <a href="https://files.greatlovedao.com/storage/v1/object/public/apk/greatlove.apk"><span aria-hidden="true">◆</span>{t.android}</a>
+              <a href="https://apps.apple.com/app/greatlove-%E5%A4%A7%E7%88%B1/id6741927371"><span aria-hidden="true">●</span>{t.ios}</a>
+            </div>
+            <small>{t.wechat}</small>
+          </div>
+        </div>
+      </div>
+    </section>
 
     <section className="intro-section" id="ecosystem"><div className="section-heading"><p className="section-kicker">{t.introKicker}</p><h2>{t.introTitle}</h2><p>{t.introBody}</p></div><div className="feature-grid">{t.features.map(([number,title,body]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{body}</p><div className="card-glyph gc-card-glyph" aria-hidden="true">∞</div></article>)}</div></section>
 
