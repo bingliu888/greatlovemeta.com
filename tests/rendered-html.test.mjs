@@ -42,6 +42,9 @@ test("renders GreatLoveMeta production metadata", async () => {
   );
   assert.match(html, /Android APK 下载/);
   assert.match(html, /App Store 下载/);
+  assert.match(html, /加入社区/);
+  assert.match(html, /\/zh\/community/);
+  assert.match(html, /论坛 · Live Chat · 会员交流/);
   assert.doesNotMatch(html, /codex-preview/);
 });
 

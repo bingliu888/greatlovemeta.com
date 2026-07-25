@@ -17,6 +17,9 @@ test("homepage exposes the GreatLove welcome resources", async () => {
     /\/docs\/GreatLove-RWA-Whitepaper-EN-2026-07-v9\.pdf/,
   );
   assert.match(source, /download>/);
+  assert.match(source, /className="glm-community-link"/);
+  assert.match(source, /href=\{`\/\$\{lang\}\/community`\}/);
+  assert.match(source, /Forum · Live Chat · Member discussions/);
   assert.match(
     source,
     /https:\/\/files\.greatlovedao\.com\/storage\/v1\/object\/public\/apk\/greatlove\.apk/,

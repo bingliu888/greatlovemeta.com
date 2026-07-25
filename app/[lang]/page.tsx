@@ -18,6 +18,8 @@ const content = {
     welcomeBody: "Read the current GreatLove RWA ecosystem whitepaper here on GreatLoveMeta.com, then continue with the official GreatLove mobile app.",
     whitepaper: "Download whitepaper",
     whitepaperMeta: "English · July 2026 · PDF",
+    communityLink: "Join Community",
+    communityMeta: "Forum · Live Chat · Member discussions",
     appTitle: "Download GreatLove App",
     appBody: "Take the GreatLove ecosystem with you through the official Android or iOS release.",
     android: "Android APK",
@@ -64,6 +66,8 @@ const content = {
     welcomeBody: "在 GreatLoveMeta.com 直接阅读最新大爱 RWA 生态英文白皮书，并安装官方 GreatLove 手机 App。",
     whitepaper: "下载英文白皮书",
     whitepaperMeta: "英文 · 2026 年 7 月 · PDF",
+    communityLink: "加入社区",
+    communityMeta: "论坛 · Live Chat · 会员交流",
     appTitle: "下载 GreatLove App",
     appBody: "通过官方 Android 或 iOS 版本，在手机上继续使用大爱生态。",
     android: "Android APK 下载",
@@ -128,6 +132,10 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
             <span><small>{t.whitepaperMeta}</small><b>{t.whitepaper}</b></span>
             <i aria-hidden="true">↓</i>
           </a>
+          <Link className="glm-community-link" href={`/${lang}/community`}>
+            <span><small>{t.communityMeta}</small><b>{t.communityLink}</b></span>
+            <i aria-hidden="true">→</i>
+          </Link>
         </div>
         <div className="glm-app-download">
           <img src="/greatlove-app-preview.png" alt="" aria-hidden="true"/>
