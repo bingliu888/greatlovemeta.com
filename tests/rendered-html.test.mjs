@@ -36,26 +36,27 @@ test("renders GreatLoveMeta production metadata", async () => {
   const html = await response.text();
   assert.match(html, /GreatLoveMeta\.com/);
   assert.match(html, /欢迎光临 RWA/);
+  assert.match(html, /大爱 AI Agent 与 RWA 奖励已上线。/);
   assert.match(
     html,
     /\/docs\/GreatLove-RWA-Whitepaper-EN-2026-07-v9\.pdf/,
   );
   assert.match(
     html,
-    /\/docs\/GreatLove-RWA-Whitepaper-CN-v4\.1\.pdf/,
+    /\/docs\/GreatLove-RWA-Whitepaper-CN-2026-07-v9\.pdf/,
   );
   assert.match(html, /Android APK 下载/);
   assert.match(html, /App Store 下载/);
   assert.match(html, /加入社区/);
   assert.match(html, /\/zh\/community/);
   assert.match(html, /论坛 · Live Chat · 会员交流/);
-  assert.match(html, /六大板块简介/);
-  assert.match(html, /链上钱包量/);
-  assert.match(html, /郎世宁八骏图/);
-  assert.match(html, /全球通 ezSwap 现金折扣券 NFT/);
-  assert.match(html, /边玩边赚/);
-  assert.match(html, /大爱 FAQ/);
+  assert.match(html, /共建共赢的大爱社区/);
+  assert.match(html, /链上兑换/);
+  assert.match(html, /郎士宁八骏图 RWA数字藏品NFT/);
+  assert.match(html, /大爱 RWA NFT 收藏/);
+  assert.match(html, /大爱NFT系列专业收藏/);
   assert.match(html, /技术合作伙伴/);
+  assert.doesNotMatch(html, /领取 1 亿大爱社区币|六大板块简介|边玩边赚|大爱 FAQ|GLAC 大爱 RWA 艺术币|全球通 ezSwap/);
   assert.doesNotMatch(html, /codex-preview/);
 });
 
