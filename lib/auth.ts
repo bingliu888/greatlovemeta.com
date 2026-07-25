@@ -123,10 +123,14 @@ export async function getSessionUser(request?: Request): Promise<SessionUser | n
   const token = request ? cookieValue(request, COOKIE_NAME) : (await cookies()).get(COOKIE_NAME)?.value ?? null;
   let user: SessionUser | null = null;
   if (token) {
-    const now = Math.floor(Date.now() / 1000);
-    user = await db().prepare(
-      "SELECT u.id, u.email, u.display_name AS displayName, u.preferred_language AS preferredLanguage FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ? LIMIT 1",
-    ).bind(await sha256(token), now).first<SessionUser>();
+    try {
+      const now = Math.floor(Date.now() / 1000);
+      user = await db().prepare(
+        "SELECT u.id, u.email, u.display_name AS displayName, u.preferred_language AS preferredLanguage FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ? LIMIT 1",
+      ).bind(await sha256(token), now).first<SessionUser>();
+    } catch {
+      // A stale legacy session cookie must not turn a public page into an error page.
+    }
   }
   if (!user) {
     const clerkUser = await currentUser();

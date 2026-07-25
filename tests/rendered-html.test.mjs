@@ -37,3 +37,28 @@ test("renders GreatLoveMeta production metadata", async () => {
   assert.match(html, /GreatLoveMeta\.com/);
   assert.doesNotMatch(html, /codex-preview/);
 });
+
+test("renders Ask Guru when a stale legacy session cookie is present", async () => {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", `assistant-stale-cookie-${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
+
+  const response = await worker.fetch(
+    new Request("http://localhost/en/assistant", {
+      headers: {
+        accept: "text/html",
+        cookie: "glm_session=stale-session-token",
+      },
+    }),
+    testEnv,
+    {
+      waitUntil() {},
+      passThroughOnException() {},
+    },
+  );
+
+  assert.equal(response.status, 200);
+  const html = await response.text();
+  assert.match(html, /Message Guru/);
+  assert.doesNotMatch(html, /Internal Server Error|Application error/i);
+});
