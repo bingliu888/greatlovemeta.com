@@ -40,11 +40,22 @@ test("renders GreatLoveMeta production metadata", async () => {
     html,
     /\/docs\/GreatLove-RWA-Whitepaper-EN-2026-07-v9\.pdf/,
   );
+  assert.match(
+    html,
+    /\/docs\/GreatLove-RWA-Whitepaper-CN-v4\.1\.pdf/,
+  );
   assert.match(html, /Android APK 下载/);
   assert.match(html, /App Store 下载/);
   assert.match(html, /加入社区/);
   assert.match(html, /\/zh\/community/);
   assert.match(html, /论坛 · Live Chat · 会员交流/);
+  assert.match(html, /六大板块简介/);
+  assert.match(html, /链上钱包量/);
+  assert.match(html, /郎世宁八骏图/);
+  assert.match(html, /全球通 ezSwap 现金折扣券 NFT/);
+  assert.match(html, /边玩边赚/);
+  assert.match(html, /大爱 FAQ/);
+  assert.match(html, /技术合作伙伴/);
   assert.doesNotMatch(html, /codex-preview/);
 });
 
