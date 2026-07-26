@@ -46,6 +46,7 @@ html{--site-notification-height:0px}body{padding-top:var(--site-notification-hei
   --gold: #b79558;
   --muted: #647078;
 }
+.floating-assistant{width:62px!important;min-width:62px!important;padding:0!important}
 
 * { box-sizing: border-box; }
 html { scroll-behavior: smooth; }

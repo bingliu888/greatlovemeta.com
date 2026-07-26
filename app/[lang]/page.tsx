@@ -205,7 +205,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     <section className="glm-access-section">
       <div className="section-heading"><p className="section-kicker">{t.accessKicker}</p><h2>{t.accessTitle}</h2><p>{t.accessBody}</p></div>
       <div className="glm-access-grid">
-        <a className="glm-access-card featured" href={`/${lang}/community`}><small>COMMUNITY</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
+        <a className="glm-access-card featured" href={`/${lang}/community`}><small>{lang === "zh" ? "社区" : "COMMUNITY"}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
         <a className="glm-access-card" href={lang === "zh" ? "https://www.greatlovedao.com/index.html" : "https://www.greatlovedao.com/index_en.html"}><small>GREATLOVEDAO</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
       </div>
     </section>
@@ -230,9 +230,9 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
 
     <section className="members-home-section"><div className="members-home-card"><div><p className="section-kicker">{t.membersKicker}</p><h2>{t.membersTitle}</h2><p>{t.membersBody}</p><Link className="primary-button" href={`/${lang}/members`}>{t.membersCta}<span>→</span></Link></div><div className="members-home-visual" aria-hidden="true"><span>AI</span><span>RWA</span><span>GLC</span><span>∞</span></div></div></section>
 
-    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>AI learning →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>AI Agent OS →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>Collective insight →</span></a><a href="https://www.greatlovedao.com"><b>GreatLoveDAO</b><span>RWA ecosystem →</span></a></div></section>
+    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href="https://www.greatlovedao.com"><b>GreatLoveDAO</b><span>{lang === "zh" ? "RWA 生态系统" : "RWA ecosystem"} →</span></a></div></section>
 
-    <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a></div><div className="four-seats gc-network" aria-hidden="true"><span>MEMBERS</span><span>GURU</span><strong>YOU</strong><span>CHAT</span><span>BUILD</span></div></div></section>
+    <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a></div><div className="four-seats gc-network" aria-hidden="true"><span>{lang === "zh" ? "成员" : "MEMBERS"}</span><span>GURU</span><strong>{lang === "zh" ? "您" : "YOU"}</strong><span>{lang === "zh" ? "聊天" : "CHAT"}</span><span>{lang === "zh" ? "共建" : "BUILD"}</span></div></div></section>
     <SiteFooter lang={lang}/>
   </main>;
 }
