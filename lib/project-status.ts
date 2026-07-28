@@ -18,7 +18,7 @@ export type ProjectBuild = {
   commit: string;
 };
 
-export const projectStats = { editionDate: "2026-07-22", today: 5, total: 5 };
+export const projectStats = { editionDate: "2026-07-28", today: 2, total: 18 };
 
 export const projectBuilds: ProjectBuild[] = [
   {
@@ -91,9 +91,33 @@ export const projectBuilds: ProjectBuild[] = [
     },
     commit: "current",
   },
+  {
+    version: 18,
+    date: "2026-07-28",
+    title: { zh: "同步最新站点、GitHub 与项目日报", en: "Synchronize the latest site, GitHub, and Project report" },
+    completed: {
+      zh: ["保留并同步 iPad 发布的最新响应式页眉更新", "把 Project 日历与最新交付日期更新至 2026-07-28", "将同一份已验证代码同步至 GitHub 与 Sites 生产环境"],
+      en: ["Preserved and synchronized the latest responsive-header update published from iPad", "Moved the Project calendar and latest delivery date to 2026-07-28", "Synchronized the same validated source to GitHub and Sites production"],
+    },
+    testable: {
+      zh: ["打开 7 月 28 日项目日期", "查看 v18 构建报告", "检查中英文 Project 页面和生产首页"],
+      en: ["Open the July 28 Project date", "Review the v18 build report", "Check the English and Chinese Project pages and production homepage"],
+    },
+    commit: "release-2026-07-28",
+  },
 ];
 
 export const projectTasks: ProjectTask[] = [
+  {
+    id: "release-sync-2026-07-28",
+    date: "2026-07-28",
+    status: "done",
+    progress: 100,
+    title: { zh: "生产版本与 GitHub 同步", en: "Production build and GitHub synchronization" },
+    summary: { zh: "保留 iPad 新版本，发布今日 Project 报告，并让 GitHub 与 Sites 使用同一代码。", en: "Preserved the new iPad build, published today’s Project report, and aligned GitHub with Sites." },
+    category: { zh: "发布", en: "Release" },
+    owner: { zh: "平台团队", en: "Platform team" },
+  },
   {
     id: "greatlovemeta-foundation",
     date: "2026-07-22",
@@ -162,6 +186,12 @@ export const projectReports = [
     title: { zh: "GreatLoveMeta.com 建站、功能对齐与社区修复", en: "GreatLoveMeta.com launch, feature parity, and Community repair" },
     beta: { zh: "公开检查点", en: "Public checkpoint" },
     completed: 5,
+  },
+  {
+    date: "2026-07-28",
+    title: { zh: "最新代码同步与生产发布", en: "Latest source synchronization and production release" },
+    beta: { zh: "查看今日报告", en: "View today’s report" },
+    completed: 3,
   },
 ];
 
