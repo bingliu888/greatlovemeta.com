@@ -39,8 +39,8 @@ const content = {
     swapTitle: "On-Chain Swap",
     swapBody: "Choose the fixed USDT–GLUSD exchange or use the automatic GLUSD–GLC order market.",
     swaps: [
-      ["USDT → GLUSD", "Stable Swap", "Open the official fixed USDT–GLUSD swap.", "https://www.greatlovedao.com/stableswap_en.html"],
-      ["GLUSD → GLC", "AutoSwap", "Open the official GLUSD–GLC order market.", "https://www.greatlovedao.com/autoswap_en.html"],
+      ["USDT → GLUSD", "Stable Swap", "Open the GreatLoveMeta fixed USDT–GLUSD swap.", "/en/swap/stable"],
+      ["GLUSD → GLC", "AutoSwap", "Open the GreatLoveMeta GLUSD–GLC order market.", "/en/swap/auto"],
     ],
     rwaKicker: "RWA digital collections",
     rwaTitle: "GreatLove RWA and NFT Collections",
@@ -116,8 +116,8 @@ const content = {
     swapTitle: "链上兑换",
     swapBody: "选择固定兑换 USDT - GLUSD，或使用自动挂单市场 GLUSD - GLC。",
     swaps: [
-      ["USDT → GLUSD", "稳定兑换", "打开官方 USDT–GLUSD 固定兑换。", "https://www.greatlovedao.com/stableswap.html"],
-      ["GLUSD → GLC", "AutoSwap", "打开官方 GLUSD–GLC 订单市场。", "https://www.greatlovedao.com/autoswap.html"],
+      ["USDT → GLUSD", "稳定兑换", "打开 GreatLoveMeta 的 USDT–GLUSD 固定兑换。", "/zh/swap/stable"],
+      ["GLUSD → GLC", "AutoSwap", "打开 GreatLoveMeta 的 GLUSD–GLC 订单市场。", "/zh/swap/auto"],
     ],
     rwaKicker: "RWA 数字藏品",
     rwaTitle: "大爱 RWA 与 NFT 收藏",
