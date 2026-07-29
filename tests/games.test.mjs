@@ -103,7 +103,10 @@ test("Play uses full document navigation and the daily multi-user reward test is
   assert.doesNotMatch(home, /<Link className="primary"[^>]*mode=play/);
   assert.match(player, /<a className=\{mode === "play"/);
   assert.match(workflow, /schedule:/);
+  assert.match(workflow, /node scripts\/check-protected-navigation\.mjs/);
   assert.match(workflow, /node --test tests\/daily-game-rewards\.test\.mjs/);
+  assert.match(workflow, /if: failure\(\)/);
+  assert.match(workflow, /gh issue create/);
   assert.match(scheduledTest, /daily-test-user-01/);
   assert.match(scheduledTest, /daily-test-user-02/);
   assert.match(scheduledTest, /daily-test-user-03/);

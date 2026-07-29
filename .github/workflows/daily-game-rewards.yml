@@ -7,6 +7,7 @@ on:
 
 permissions:
   contents: read
+  issues: write
 
 jobs:
   verify-game-rewards:
@@ -20,7 +21,25 @@ jobs:
         with:
           node-version: "22.13.0"
           package-manager-cache: false
+      - name: Check every public login-protected navigation
+        run: node scripts/check-protected-navigation.mjs
       - name: Verify Play navigation
         run: node --test tests/games.test.mjs
       - name: Simulate multiple users playing both games
         run: node --test tests/daily-game-rewards.test.mjs
+      - name: Report a failed daily check
+        if: failure()
+        env:
+          GH_TOKEN: ${{ github.token }}
+          FAILURE_TITLE: Daily protected navigation or game reward check failed
+          FAILURE_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
+        run: |
+          issue_number="$(gh issue list --state open --search "\"${FAILURE_TITLE}\" in:title" --json number --jq '.[0].number // empty')"
+          message="The scheduled protected-navigation or multi-user game reward test failed: ${FAILURE_URL}
+
+          Diagnose and repair the cause, rerun the full tests and production build, then synchronize and publish the same validated commit to GitHub and Sites."
+          if [ -n "${issue_number}" ]; then
+            gh issue comment "${issue_number}" --body "${message}"
+          else
+            gh issue create --title "${FAILURE_TITLE}" --body "${message}"
+          fi
