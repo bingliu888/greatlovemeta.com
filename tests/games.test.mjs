@@ -87,13 +87,12 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(miner, /GreatLoveGameRuntime\.guard\('miner'\)/);
 });
 
-test("mobile header keeps sign-in on one line and game pages use no iframe", async () => {
+test("game pages use no iframe", async () => {
   const [styles, gamePage] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.match(styles, /\.header-cta \{[^}]*white-space: nowrap/);
   assert.doesNotMatch(gamePage, /iframe|GameExperience/);
   assert.doesNotMatch(styles, /\.game-frame-shell iframe/);
   assert.match(gamePage, /redirect\(`\/games\/\$\{game\}\.html\?mode=/);

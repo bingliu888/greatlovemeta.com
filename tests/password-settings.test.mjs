@@ -14,3 +14,18 @@ test("account supports setting and updating a Clerk password", async () => {
   assert.match(account, /<PasswordSettings lang=\{lang\}\/>/);
   assert.match(menu, /Account \| Set password/);
 });
+
+test("header account uses the same icon-only trigger on desktop and mobile", async () => {
+  const menu = await readFile(new URL("../components/HeaderAccount.tsx", import.meta.url), "utf8");
+  const header = await readFile(new URL("../components/SiteHeader.tsx", import.meta.url), "utf8");
+  const anonymousTrigger = menu.match(/return <Link className="user-icon"[\s\S]*?<\/Link>/)?.[0] ?? "";
+
+  assert.match(anonymousTrigger, /href=\{`\/\$\{lang\}\/auth\/login`\}/);
+  assert.match(anonymousTrigger, /aria-label=\{signInLabel\}/);
+  assert.match(anonymousTrigger, /title=\{signInLabel\}/);
+  assert.match(anonymousTrigger, /<span className="avatar-glyph" aria-hidden="true"\/>/);
+  assert.doesNotMatch(anonymousTrigger, />\s*(?:登录|Sign in)\s*</);
+  assert.match(menu, /session\.imageUrl \? <img src=\{session\.imageUrl\} alt=""\/> : <span className="avatar-glyph"/);
+  assert.equal((header.match(/<HeaderAccount/g) ?? []).length, 2);
+  assert.doesNotMatch(header, /variant="text"/);
+});

@@ -40,7 +40,7 @@ export function SiteHeader({ lang }: { lang: "en" | "zh" }) {
         <summary aria-label={lang === "zh" ? "打开菜单" : "Open menu"}><span /><span /><span /></summary>
         <div onClick={event => { if ((event.target as HTMLElement).closest("a")) mobileMenu.current!.open = false; }}>
           <GlobalLinks lang={lang}/>
-          <HeaderAccount lang={lang} variant="text"/>
+          <HeaderAccount lang={lang}/>
         </div>
       </details>
       <LanguageLink lang={lang} compact />
