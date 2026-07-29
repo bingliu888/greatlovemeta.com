@@ -8,7 +8,7 @@ const GAME_LIMITS = {
   monopoly: { minimum: 3, maximum: 36 },
   miner: { minimum: 0, maximum: 36 },
 } as const;
-const DAILY_PLAY_LIMIT = 3;
+const DAILY_PLAY_LIMIT = 1;
 const POINT_VALUE = 10_000;
 
 type GameKey = keyof typeof GAME_LIMITS;
@@ -32,8 +32,11 @@ function utcDate() {
 export async function GET(request: Request) {
   const user = await requestUser();
   if (!user) return Response.json({ error: "Authentication required" }, { status: 401 });
-  const requestedDate = new URL(request.url).searchParams.get("date") || utcDate();
+  const searchParams = new URL(request.url).searchParams;
+  const requestedDate = searchParams.get("date") || utcDate();
+  const requestedGame = searchParams.get("game") || "";
   if (!validDate(requestedDate)) return Response.json({ error: "Invalid date" }, { status: 400 });
+  if (requestedGame && !isGameKey(requestedGame)) return Response.json({ error: "Invalid game" }, { status: 400 });
   const entries = await getDb()
     .select({
       id: gameDailyLogs.id,
@@ -44,7 +47,9 @@ export async function GET(request: Request) {
       playedAt: gameDailyLogs.createdAt,
     })
     .from(gameDailyLogs)
-    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, requestedDate)))
+    .where(requestedGame
+      ? and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, requestedDate), eq(gameDailyLogs.gameKey, requestedGame))
+      : and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, requestedDate)))
     .orderBy(asc(gameDailyLogs.createdAt))
     .limit(100);
   const normalizedEntries = entries.map((entry) => ({
@@ -94,7 +99,7 @@ export async function POST(request: Request) {
     const [usage] = await database
       .select({ value: count() })
       .from(gameDailyLogs)
-      .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+      .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate), eq(gameDailyLogs.gameKey, game)));
     const playsUsed = usage?.value ?? 0;
     return Response.json({
       ok: true,
@@ -110,7 +115,7 @@ export async function POST(request: Request) {
   const [usage] = await database
     .select({ value: count() })
     .from(gameDailyLogs)
-    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate), eq(gameDailyLogs.gameKey, game)));
   const playsUsed = usage?.value ?? 0;
   if (playsUsed >= DAILY_PLAY_LIMIT) {
     return Response.json({
@@ -144,7 +149,9 @@ export async function POST(request: Request) {
       ${entry.score}, ${entry.unit}, ${entry.attemptId}, ${entry.createdAt}
     WHERE (
       SELECT count(*) FROM game_daily_logs
-      WHERE user_id = ${entry.userId} AND play_date = ${entry.playDate}
+      WHERE user_id = ${entry.userId}
+        AND play_date = ${entry.playDate}
+        AND game_key = ${entry.gameKey}
     ) < ${DAILY_PLAY_LIMIT}
     ON CONFLICT(attempt_id) DO NOTHING
   `);
@@ -157,7 +164,7 @@ export async function POST(request: Request) {
     const [latestUsage] = await database
       .select({ value: count() })
       .from(gameDailyLogs)
-      .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+      .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate), eq(gameDailyLogs.gameKey, game)));
     const latestPlays = latestUsage?.value ?? 0;
     if (latestPlays >= DAILY_PLAY_LIMIT) {
       return Response.json({
@@ -174,7 +181,7 @@ export async function POST(request: Request) {
   const [latestUsage] = await database
     .select({ value: count() })
     .from(gameDailyLogs)
-    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate), eq(gameDailyLogs.gameKey, game)));
   const savedPlays = latestUsage?.value ?? playsUsed + 1;
   return Response.json({
     ok: true,

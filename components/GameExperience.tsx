@@ -8,7 +8,7 @@ type GameKey = "monopoly" | "miner";
 type GameMode = "trial" | "play";
 type PlayState = "loading" | "ready" | "limit" | "error";
 
-const DAILY_PLAY_LIMIT = 3;
+const DAILY_PLAY_LIMIT = 1;
 const POINT_VALUE = 10_000;
 
 function localDate() {
@@ -32,7 +32,7 @@ export function GameExperience({ lang, game, mode, autoStart = false }: { lang: 
     let cancelled = false;
     const loadUsage = window.setTimeout(async () => {
       try {
-        const response = await fetch(`/api/game-results?date=${localDate()}`, { cache: "no-store" });
+        const response = await fetch(`/api/game-results?date=${localDate()}&game=${game}`, { cache: "no-store" });
         if (response.status === 401) {
           window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(playReturnTo)}`);
           return;
@@ -93,7 +93,7 @@ export function GameExperience({ lang, game, mode, autoStart = false }: { lang: 
         if (response.status === 429 && result.code === "DAILY_PLAY_LIMIT") {
           setPlaysRemaining(0);
           setPlayState("limit");
-          setStatus(zh ? "今天的 3 次 Play 已完成，请明天再来。" : "You have completed today's 3 Play sessions. Play again tomorrow.");
+          setStatus(zh ? "今天这款游戏的 1 局 Play 已完成，请明天再来。" : "You have completed today's Play session for this game. Play again tomorrow.");
           return;
         }
         if (!response.ok) throw new Error(result.error || "Unable to save");
@@ -101,7 +101,7 @@ export function GameExperience({ lang, game, mode, autoStart = false }: { lang: 
         setPlaysRemaining(remaining);
         if (result.limitReached || remaining === 0) {
           setPlayState("limit");
-          setStatus(zh ? "第 3 局成绩已保存。今天的 Play 已完成，请明天再来。" : "Your third result is saved. Today's Play is complete—play again tomorrow.");
+          setStatus(zh ? "本局成绩已保存。今天这款游戏的 Play 已完成，请明天再来。" : "Your result is saved. Today's Play for this game is complete—play again tomorrow.");
         } else {
           setStatus(result.duplicate ? (zh ? "本局成绩已经记录。" : "This result is already in today's log.") : (zh ? `成绩已保存。今天还可 Play ${remaining} 次。` : `Result saved. ${remaining} Play session${remaining === 1 ? "" : "s"} remaining today.`));
         }
@@ -118,15 +118,15 @@ export function GameExperience({ lang, game, mode, autoStart = false }: { lang: 
   }, [game, lang, mode, playReturnTo, playsRemaining, zh]);
 
   const limitMessage = <div className="game-limit-card" role="status">
-    <span>03 / 03</span>
+    <span>01 / 01</span>
     <h2>{zh ? "今天的 Play 已完成" : "Today's Play is complete"}</h2>
-    <p>{zh ? "您今天的 3 局正式游戏成绩已保存。请明天再来；试玩仍可继续。" : "Your 3 official game results have been saved for today. Play again tomorrow; Test trial remains available."}</p>
+    <p>{zh ? "您今天这款游戏的 1 局正式成绩已保存。请明天再来；试玩仍可继续。" : "Your official result for this game has been saved today. Play again tomorrow; Test trial remains available."}</p>
     <Link href={`/${lang}/games/${game}?mode=trial`}>{zh ? "继续试玩" : "Continue Test trial"}</Link>
   </div>;
 
   return <div className="game-experience">
     <section className="game-player-heading">
-      <div><p className="section-kicker">{mode === "play" ? (zh ? "正式游戏 · 自动记录" : "OFFICIAL PLAY · AUTO-SAVED") : (zh ? "公开试玩 · 不记录" : "PUBLIC TRIAL · NOT SAVED")}</p><h1>{title}</h1><p>{mode === "play" ? (zh ? `每天最多完成 3 局 Play；1 Point = 10,000 GLC。${playState === "ready" ? `今天还可 Play ${playsRemaining} 次。` : ""}` : `Complete up to 3 Play sessions daily; 1 Point = 10,000 GLC. ${playState === "ready" ? `${playsRemaining} remaining today.` : ""}`) : (zh ? "试玩无需登录且不限次数，成绩不会保存。准备好后切换到 Play。" : "Try without signing in or a daily limit. Trial scores are not saved; switch to Play when ready.")}</p></div>
+      <div><p className="section-kicker">{mode === "play" ? (zh ? "正式游戏 · 自动记录" : "OFFICIAL PLAY · AUTO-SAVED") : (zh ? "公开试玩 · 不记录" : "PUBLIC TRIAL · NOT SAVED")}</p><h1>{title}</h1><p>{mode === "play" ? (zh ? `每款游戏每天最多完成 1 局 Play；1 Point = 10,000 GLC。${playState === "ready" ? "今天还可 Play 1 次。" : ""}` : `Complete 1 Play session per game each day; 1 Point = 10,000 GLC. ${playState === "ready" ? "1 remaining today." : ""}`) : (zh ? "试玩无需登录且不限次数，成绩不会保存。准备好后切换到 Play。" : "Try without signing in or a daily limit. Trial scores are not saved; switch to Play when ready.")}</p></div>
       <div className="game-mode-actions">
         {game !== "miner" && <Link className={mode === "trial" ? "active" : ""} href={`/${lang}/games/${game}?mode=trial`}>{zh ? "试玩" : "Test trial"}</Link>}
         {game !== "miner" && <Link className={mode === "play" ? "active" : ""} href={`/${lang}/games/${game}?mode=play`}>{zh ? "开始 Play" : "Play"}</Link>}

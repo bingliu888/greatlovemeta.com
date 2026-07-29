@@ -34,7 +34,7 @@ test("both games report completed sessions to the authenticated wrapper", async 
   }
 });
 
-test("game result writes use the new reward rate and enforce three daily plays", async () => {
+test("game result writes use the new reward rate and enforce one daily play per game", async () => {
   const [route, schema, player] = await Promise.all([
     readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -45,7 +45,9 @@ test("game result writes use the new reward rate and enforce three daily plays",
   assert.match(route, /INSERT INTO game_daily_logs/);
   assert.match(route, /SELECT count\(\*\) FROM game_daily_logs/);
   assert.match(route, /POINT_VALUE = 10_000/);
-  assert.match(route, /DAILY_PLAY_LIMIT = 3/);
+  assert.match(route, /DAILY_PLAY_LIMIT = 1/);
+  assert.match(route, /eq\(gameDailyLogs\.gameKey, game\)/);
+  assert.match(route, /AND game_key = \$\{entry\.gameKey\}/);
   assert.match(route, /code: "DAILY_PLAY_LIMIT"/);
   assert.match(route, /status: 429/);
   assert.match(schema, /game_daily_logs/);

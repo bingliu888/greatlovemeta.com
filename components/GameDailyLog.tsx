@@ -24,7 +24,7 @@ export function GameDailyLog({ lang, compact = false }: { lang: "en" | "zh"; com
   const [entries, setEntries] = useState<Entry[]>([]);
   const [loading, setLoading] = useState(true);
   const [available, setAvailable] = useState(true);
-  const [playLimit, setPlayLimit] = useState(3);
+  const [playLimit, setPlayLimit] = useState(1);
   const date = useMemo(() => localDate(), []);
   const zh = lang === "zh";
 
@@ -39,7 +39,7 @@ export function GameDailyLog({ lang, compact = false }: { lang: "en" | "zh"; com
       if (!response.ok) throw new Error();
       const result = await response.json() as { entries?: Entry[]; limit?: number };
       setEntries(result.entries || []);
-      setPlayLimit(result.limit || 3);
+      setPlayLimit(result.limit || 1);
       setAvailable(true);
     } catch {
       setAvailable(false);
@@ -67,7 +67,7 @@ export function GameDailyLog({ lang, compact = false }: { lang: "en" | "zh"; com
   return <section className={`game-daily-log${compact ? " compact" : ""}`} aria-labelledby={`game-log-title-${compact ? "compact" : "full"}`}>
     <div className="game-log-heading">
       <div><p className="section-kicker">{zh ? "每日游戏记录" : "DAILY GAME LOG"}</p><h2 id={`game-log-title-${compact ? "compact" : "full"}`}>{zh ? "今天的游戏成绩" : "Today's game results"}</h2></div>
-      {available && !loading && <div className="game-log-total"><small>{zh ? `今日 ${entries.length}/${playLimit} 局 · 总成绩` : `${entries.length}/${playLimit} plays · Today's total`}</small><strong>{total.toLocaleString()} GLC</strong></div>}
+      {available && !loading && <div className="game-log-total"><small>{zh ? `今日 ${entries.length} 局 · 每款最多 ${playLimit} 局` : `${entries.length} today · ${playLimit} per game`}</small><strong>{total.toLocaleString()} GLC</strong></div>}
     </div>
     {loading ? <p className="game-log-empty">{zh ? "正在读取游戏记录…" : "Loading game activity…"}</p> :
       !available ? <p className="game-log-empty">{zh ? "登录后即可查看并保存每日游戏记录。" : "Sign in to view and save your daily game log."}</p> :
