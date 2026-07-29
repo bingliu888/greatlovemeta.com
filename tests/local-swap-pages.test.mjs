@@ -50,3 +50,19 @@ test("swap runtime assets are local and language-aware", () => {
     assert.ok(abi.some((entry) => entry.type === "function" && entry.name === name), `${name} must exist in AutoSwapLimitOrderBook ABI`);
   }
 });
+
+test("swap pages use current Polygon RPC providers with failover", () => {
+  for (const configFile of ["autoswap.config.js", "stableswap.config.js"]) {
+    const source = read(`public/swap-assets/${configFile}`);
+    assert.doesNotMatch(source, /polygon-rpc\.com/i);
+    for (const endpoint of ["polygon.drpc.org", "polygon.publicnode.com", "1rpc.io/matic"]) {
+      assert.match(source, new RegExp(endpoint.replaceAll(".", "\\.")));
+    }
+  }
+
+  for (const runtimeFile of ["autoswap.js", "stableswap.js"]) {
+    const source = read(`public/swap-assets/${runtimeFile}`);
+    assert.match(source, /for \(var i = 0; i < rpcUrls\.length; i \+= 1\)/);
+    assert.match(source, /await provider\.getNetwork\(\)/);
+  }
+});

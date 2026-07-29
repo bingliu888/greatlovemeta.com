@@ -27,7 +27,9 @@ window.GREATLOVE_STABLESWAP_CONFIG = {
       decimals: 18
     },
     rpcUrls: [
-      'https://polygon-rpc.com'
+      'https://polygon.drpc.org',
+      'https://polygon.publicnode.com',
+      'https://1rpc.io/matic'
     ],
     blockExplorerUrls: [
       'https://polygonscan.com'

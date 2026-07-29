@@ -603,14 +603,28 @@
       setStatus(t('addressMissing'), 'error');
       return;
     }
-    var rpcUrl = state.market.chain.rpcUrls && state.market.chain.rpcUrls[0];
-    if (!rpcUrl) {
+    var rpcUrls = state.market.chain.rpcUrls || [];
+    if (!rpcUrls.length) {
       setStatus(t('rpcMissing'), 'error');
       return;
     }
-    state.readProvider = new ethersLib.JsonRpcProvider(rpcUrl, state.market.chain.chainId);
-    await initContracts(state.readProvider);
-    await refreshAll();
+    var lastError = null;
+    for (var i = 0; i < rpcUrls.length; i += 1) {
+      try {
+        var provider = new ethersLib.JsonRpcProvider(rpcUrls[i], state.market.chain.chainId);
+        var network = await provider.getNetwork();
+        if (Number(network.chainId) !== Number(state.market.chain.chainId)) {
+          throw new Error('RPC returned the wrong chain.');
+        }
+        state.readProvider = provider;
+        await initContracts(provider);
+        await refreshAll();
+        return;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError || new Error(t('rpcMissing'));
   }
 
   async function connect(method) {

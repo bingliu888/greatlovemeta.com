@@ -256,14 +256,31 @@
     if (!ethersLib) throw new Error(t('ethersMissing'));
     if (!config || !config.contracts) throw new Error(t('configMissing'));
     if (!hasContractAddress()) throw new Error(t('addressMissing'));
-    var rpcUrl = config.chain && config.chain.rpcUrls && config.chain.rpcUrls[0];
-    if (!rpcUrl) throw new Error(t('rpcMissing'));
-    state.readProvider = new ethersLib.JsonRpcProvider(rpcUrl, Number(config.chain.chainId || 137));
-    state.stableSwap = new ethersLib.Contract(config.contracts.stableSwap, STABLESWAP_ABI, state.readProvider);
-    state.usdtToken = new ethersLib.Contract(config.contracts.usdtToken, ERC20_ABI, state.readProvider);
-    state.glusdToken = new ethersLib.Contract(config.contracts.glusdToken, ERC20_ABI, state.readProvider);
-    state.payDecimals = Number(await state.usdtToken.decimals());
-    state.receiveDecimals = Number(await state.glusdToken.decimals());
+    var rpcUrls = (config.chain && config.chain.rpcUrls) || [];
+    if (!rpcUrls.length) throw new Error(t('rpcMissing'));
+    var chainId = Number(config.chain.chainId || 137);
+    var lastError = null;
+    for (var i = 0; i < rpcUrls.length; i += 1) {
+      try {
+        var provider = new ethersLib.JsonRpcProvider(rpcUrls[i], chainId);
+        var network = await provider.getNetwork();
+        if (Number(network.chainId) !== chainId) throw new Error('RPC returned the wrong chain.');
+        var stableSwap = new ethersLib.Contract(config.contracts.stableSwap, STABLESWAP_ABI, provider);
+        var usdtToken = new ethersLib.Contract(config.contracts.usdtToken, ERC20_ABI, provider);
+        var glusdToken = new ethersLib.Contract(config.contracts.glusdToken, ERC20_ABI, provider);
+        var decimals = await Promise.all([usdtToken.decimals(), glusdToken.decimals()]);
+        state.readProvider = provider;
+        state.stableSwap = stableSwap;
+        state.usdtToken = usdtToken;
+        state.glusdToken = glusdToken;
+        state.payDecimals = Number(decimals[0]);
+        state.receiveDecimals = Number(decimals[1]);
+        return;
+      } catch (err) {
+        lastError = err;
+      }
+    }
+    throw lastError || new Error(t('rpcMissing'));
   }
 
   async function refreshStaticData() {
