@@ -26,23 +26,24 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ lang: string; game: string }>;
-  searchParams: Promise<{ mode?: string }>;
+  searchParams: Promise<{ mode?: string; start?: string }>;
 }) {
   const { lang, game } = await params;
   const query = await searchParams;
   if ((lang !== "en" && lang !== "zh") || !(game in games)) notFound();
   const mode = query.mode === "play" ? "play" : "trial";
+  const autoStart = game === "miner" && query.start === "1";
   if (mode === "play") {
     const requestHeaders = await headers();
     const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: requestHeaders.get("cookie") ?? "" } }));
     if (!user) {
-      const returnTo = `/${lang}/games/${game}?mode=play`;
+      const returnTo = `/${lang}/games/${game}?mode=play${autoStart ? "&start=1" : ""}`;
       redirect(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
   }
   return <main className="game-page">
     <SiteHeader lang={lang}/>
-    <GameExperience lang={lang} game={game as GameKey} mode={mode}/>
+    <GameExperience lang={lang} game={game as GameKey} mode={mode} autoStart={autoStart}/>
     <SiteFooter lang={lang}/>
   </main>;
 }

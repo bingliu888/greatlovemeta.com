@@ -40,7 +40,7 @@ const content = {
     gamesBody: "Test either game without an account, or sign in for Play so every completed result is added to your personal daily log.",
     gameCards: [
       { key: "monopoly", tag: "PROPERTY STRATEGY", title: "Monopoly", body: "Roll through a luminous property wheel, build your score across three turns, and see where fortune lands." },
-      { key: "miner", tag: "DEEP SPACE ARCADE", title: "Miner", body: "Take 3 shots per round, earn 10,000–120,000 GLC per shot, and play up to 3 saved rounds daily." },
+      { key: "miner", tag: "DEEP SPACE ARCADE", title: "Miner", body: "Take 3 shots per round, earn 10,000–120,000 GLC per hit (0 for a miss), and play up to 3 saved rounds daily." },
     ],
     testTrial: "Test trial",
     playGame: "Play",
@@ -127,7 +127,7 @@ const content = {
     gamesBody: "无需账户即可试玩；登录后选择 Play，每局完成成绩会自动加入您的个人每日游戏记录。",
     gameCards: [
       { key: "monopoly", tag: "地产策略", title: "大富翁 Monopoly", body: "转动璀璨地产轮盘，在三次机会中累积成绩，看看幸运最终落在哪里。" },
-      { key: "miner", tag: "深空街机", title: "星际矿工 Miner", body: "每局发射 3 次，每次获得 10,000–120,000 GLC，每天最多保存 3 局。" },
+      { key: "miner", tag: "深空街机", title: "星际矿工 Miner", body: "每局发射 3 次，命中获得 10,000–120,000 GLC，未命中为 0，每天最多保存 3 局。" },
     ],
     testTrial: "试玩",
     playGame: "Play",

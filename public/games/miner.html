@@ -269,10 +269,14 @@
                     <p class="text-3xl font-black text-white font-tech">3</p>
                 </div>
             </div>
-            <div class="briefing-btn pt-4">
-                <button id="briefing-accept-btn"
-                    class="btn-neon btn-pulse text-black font-black px-12 py-4 rounded-full text-base tracking-wider">
-                    接受任务
+            <div class="briefing-btn pt-4 grid grid-cols-2 gap-3 w-full">
+                <button id="briefing-trial-btn"
+                    class="glass-panel border border-cyan-400/40 text-cyan-200 font-black px-5 py-4 rounded-2xl text-sm tracking-wider">
+                    试玩 Trial
+                </button>
+                <button id="briefing-play-btn"
+                    class="btn-neon btn-pulse text-black font-black px-5 py-4 rounded-2xl text-sm tracking-wider">
+                    正式 Play
                 </button>
             </div>
         </div>
@@ -430,7 +434,8 @@
         // ========== 缓存 DOM ==========
         const DOM = {
             briefingScreen: document.getElementById('briefing-screen'),
-            briefingAcceptBtn: document.getElementById('briefing-accept-btn'),
+            briefingTrialBtn: document.getElementById('briefing-trial-btn'),
+            briefingPlayBtn: document.getElementById('briefing-play-btn'),
             gameWrapper:   document.getElementById('game-wrapper'),
             header:        document.getElementById('game-header'),
             gameMain:      document.getElementById('game-main'),
@@ -619,7 +624,7 @@
         const BRIEFING_LINES = [
             { id: "briefing-text-1", text: "公元 3047 年，深空第七矿区..." },
             { id: "briefing-text-2", text: "你操控采矿飞船的钩爪系统，精准捕获漂浮矿物。" },
-            { id: "briefing-text-3", text: "任务：瞄准、发射、采集能量晶体。你有 3 次机会。" },
+            { id: "briefing-text-3", text: "任务：每局发射 3 次。命中获得奖励，未命中为 0。" },
         ];
 
         async function playBriefing() {
@@ -654,7 +659,18 @@
             });
         }
 
-        DOM.briefingAcceptBtn.addEventListener('click', () => {
+        const launchParams = new URLSearchParams(window.location.search);
+        const currentMode = launchParams.get('mode') === 'play' ? 'play' : 'trial';
+        const currentLang = launchParams.get('lang') === 'en' ? 'en' : 'zh';
+
+        function startMission(immediate = false) {
+            if (immediate) {
+                DOM.briefingScreen.style.display = 'none';
+                DOM.gameWrapper.style.opacity = '1';
+                DOM.gameWrapper.style.pointerEvents = 'auto';
+                setTimeout(() => startRound(), 100);
+                return;
+            }
             DOM.briefingScreen.style.transition = 'opacity 0.8s ease';
             DOM.briefingScreen.style.opacity = '0';
             setTimeout(() => {
@@ -664,7 +680,18 @@
                 DOM.gameWrapper.style.pointerEvents = 'auto';
                 setTimeout(() => startRound(), 600);
             }, 800);
-        });
+        }
+
+        function chooseMode(selectedMode) {
+            if (selectedMode === currentMode) {
+                startMission();
+                return;
+            }
+            window.top.location.href = `/${currentLang}/games/miner?mode=${selectedMode}&start=1`;
+        }
+
+        DOM.briefingTrialBtn.addEventListener('click', () => chooseMode('trial'));
+        DOM.briefingPlayBtn.addEventListener('click', () => chooseMode('play'));
 
         // ========== Canvas 尺寸 ==========
         function resizeCanvas() {
@@ -959,9 +986,13 @@
                 // 隐藏抓到的矿物
                 caughtMineral.alive = false;
             } else {
-                // 空手 → 随机 common 保底
-                const commons = MINERALS.filter(m => m.rarity === 'common');
-                result = commons[Math.floor(Math.random() * commons.length)];
+                result = {
+                    name: "未命中",
+                    icon: "✕",
+                    points: 0,
+                    msg: "未抓到目标，本次奖励为 0 GLC。",
+                    rarity: "common"
+                };
             }
 
             const rarityColor = RARITY_COLORS[result.rarity];
@@ -983,7 +1014,7 @@
                 <div class="result-banner">
                     <div class="text-4xl mb-1">${result.icon}</div>
                     <div class="text-sm font-black rarity-${result.rarity}">${result.name}</div>
-                    <div class="text-xs text-neutral-400 mt-1">${caughtMineral ? result.msg : '未抓到目标... 获得保底奖励'}</div>
+                    <div class="text-xs text-neutral-400 mt-1">${result.msg}</div>
                     <div class="text-lg font-black text-cyan-400 font-tech mt-1">+${(result.points * 10000).toLocaleString()} GLC</div>
                 </div>
             `;
@@ -1206,7 +1237,11 @@
         window.addEventListener('resize', resizeCanvas);
         drawFrame(); // 开始渲染循环
 
-        playBriefing();
+        if (launchParams.get('start') === '1') {
+            startMission(true);
+        } else {
+            playBriefing();
+        }
     </script>
 </body>
 

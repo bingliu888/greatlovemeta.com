@@ -16,7 +16,7 @@ function localDate() {
   return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}`;
 }
 
-export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: GameKey; mode: GameMode }) {
+export function GameExperience({ lang, game, mode, autoStart = false }: { lang: "en" | "zh"; game: GameKey; mode: GameMode; autoStart?: boolean }) {
   const iframe = useRef<HTMLIFrameElement>(null);
   const recordedAttempts = useRef(new Set<string>());
   const [status, setStatus] = useState("");
@@ -25,6 +25,7 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
   const [playsRemaining, setPlaysRemaining] = useState(mode === "play" ? 0 : DAILY_PLAY_LIMIT);
   const zh = lang === "zh";
   const title = game === "monopoly" ? (zh ? "大富翁" : "Monopoly") : (zh ? "星际矿工" : "Miner");
+  const playReturnTo = `/${lang}/games/${game}?mode=play${game === "miner" ? "&start=1" : ""}`;
 
   useEffect(() => {
     if (mode !== "play") return;
@@ -33,7 +34,7 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
       try {
         const response = await fetch(`/api/game-results?date=${localDate()}`, { cache: "no-store" });
         if (response.status === 401) {
-          window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(`/${lang}/games/${game}?mode=play`)}`);
+          window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(playReturnTo)}`);
           return;
         }
         const result = await response.json().catch(() => ({})) as {
@@ -54,7 +55,7 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
       cancelled = true;
       window.clearTimeout(loadUsage);
     };
-  }, [game, lang, mode]);
+  }, [game, lang, mode, playReturnTo]);
 
   useEffect(() => {
     async function receive(event: MessageEvent) {
@@ -79,7 +80,7 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
           body: JSON.stringify({ game, rawScore, attemptId, playDate: localDate() }),
         });
         if (response.status === 401) {
-          window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(`/${lang}/games/${game}?mode=play`)}`);
+          window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(playReturnTo)}`);
           return;
         }
         const result = await response.json().catch(() => ({})) as {
@@ -114,7 +115,7 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
     }
     window.addEventListener("message", receive);
     return () => window.removeEventListener("message", receive);
-  }, [game, lang, mode, playsRemaining, zh]);
+  }, [game, lang, mode, playReturnTo, playsRemaining, zh]);
 
   const limitMessage = <div className="game-limit-card" role="status">
     <span>03 / 03</span>
@@ -127,8 +128,8 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
     <section className="game-player-heading">
       <div><p className="section-kicker">{mode === "play" ? (zh ? "正式游戏 · 自动记录" : "OFFICIAL PLAY · AUTO-SAVED") : (zh ? "公开试玩 · 不记录" : "PUBLIC TRIAL · NOT SAVED")}</p><h1>{title}</h1><p>{mode === "play" ? (zh ? `每天最多完成 3 局 Play；1 Point = 10,000 GLC。${playState === "ready" ? `今天还可 Play ${playsRemaining} 次。` : ""}` : `Complete up to 3 Play sessions daily; 1 Point = 10,000 GLC. ${playState === "ready" ? `${playsRemaining} remaining today.` : ""}`) : (zh ? "试玩无需登录且不限次数，成绩不会保存。准备好后切换到 Play。" : "Try without signing in or a daily limit. Trial scores are not saved; switch to Play when ready.")}</p></div>
       <div className="game-mode-actions">
-        <Link className={mode === "trial" ? "active" : ""} href={`/${lang}/games/${game}?mode=trial`}>{zh ? "试玩" : "Test trial"}</Link>
-        <Link className={mode === "play" ? "active" : ""} href={`/${lang}/games/${game}?mode=play`}>{zh ? "开始 Play" : "Play"}</Link>
+        {game !== "miner" && <Link className={mode === "trial" ? "active" : ""} href={`/${lang}/games/${game}?mode=trial`}>{zh ? "试玩" : "Test trial"}</Link>}
+        {game !== "miner" && <Link className={mode === "play" ? "active" : ""} href={`/${lang}/games/${game}?mode=play`}>{zh ? "开始 Play" : "Play"}</Link>}
         <Link href={`/${lang}#games`}>{zh ? "返回游戏区" : "All games"}</Link>
       </div>
     </section>
@@ -136,7 +137,7 @@ export function GameExperience({ lang, game, mode }: { lang: "en" | "zh"; game: 
       playState === "loading" ? <div className="game-limit-card loading" role="status"><span>•••</span><h2>{zh ? "正在确认今日次数" : "Checking today's plays"}</h2><p>{zh ? "请稍候，游戏马上开始。" : "One moment—the game will start shortly."}</p></div> :
       playState === "error" ? <div className="game-limit-card error" role="alert"><span>!</span><h2>{zh ? "暂时无法开始 Play" : "Play is temporarily unavailable"}</h2><p>{zh ? "无法确认今天的游戏次数，请刷新页面后重试。" : "We could not verify today's play count. Refresh the page to try again."}</p></div> :
       <div className="game-frame-shell">
-        <iframe ref={iframe} src={`/games/${game}.html?mode=${mode}`} title={`${title} — ${mode}`} allow="autoplay" />
+        <iframe ref={iframe} src={`/games/${game}.html?mode=${mode}&lang=${lang}${autoStart ? "&start=1" : ""}`} title={`${title} — ${mode}`} allow="autoplay" />
       </div>}
     {status && <p className={`game-save-status${saving ? " saving" : ""}`} role="status">{status}</p>}
     {mode === "play" && <GameDailyLog lang={lang}/>}

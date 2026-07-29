@@ -56,15 +56,22 @@ test("game result writes use the new reward rate and enforce three daily plays",
   assert.match(player, /playsRemaining/);
 });
 
-test("Miner uses three shots with rewards from 10,000 to 120,000 GLC", async () => {
-  const [miner, route] = await Promise.all([
+test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit", async () => {
+  const [miner, route, player] = await Promise.all([
     readFile(new URL("../public/games/miner.html", import.meta.url), "utf8"),
     readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(miner, /leftCounts = 3/);
   assert.match(miner, /points: 12/);
   assert.match(miner, /points: 1/);
+  assert.match(miner, /points: 0/);
+  assert.match(miner, /本次奖励为 0 GLC/);
   assert.match(miner, /points \* 10000/);
-  assert.match(route, /miner: \{ minimum: 3, maximum: 36 \}/);
+  assert.match(miner, /briefing-trial-btn/);
+  assert.match(miner, /briefing-play-btn/);
+  assert.match(miner, /startMission\(true\)/);
+  assert.match(route, /miner: \{ minimum: 0, maximum: 36 \}/);
+  assert.match(player, /game !== "miner"/);
 });
