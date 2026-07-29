@@ -49,8 +49,8 @@ const content = {
     swapTitle: "On-Chain Swap",
     swapBody: "Choose the fixed USDT–GLUSD exchange or use the automatic GLUSD–GLC order market.",
     swaps: [
-      ["USDT → GLUSD", "Stable Swap", "Open the GreatLoveMeta fixed USDT–GLUSD swap.", "/en/swap/stable"],
-      ["GLUSD → GLC", "AutoSwap", "Open the GreatLoveMeta GLUSD–GLC order market.", "/en/swap/auto"],
+      ["USDT → GLUSD", "/en/swap/stable"],
+      ["GLUSD → GLC", "/en/swap/auto"],
     ],
     rwaKicker: "RWA digital collections",
     rwaTitle: "GreatLove RWA and NFT Collections",
@@ -136,8 +136,8 @@ const content = {
     swapTitle: "链上兑换",
     swapBody: "选择固定兑换 USDT - GLUSD，或使用自动挂单市场 GLUSD - GLC。",
     swaps: [
-      ["USDT → GLUSD", "稳定兑换", "打开 GreatLoveMeta 的 USDT–GLUSD 固定兑换。", "/zh/swap/stable"],
-      ["GLUSD → GLC", "AutoSwap", "打开 GreatLoveMeta 的 GLUSD–GLC 订单市场。", "/zh/swap/auto"],
+      ["USDT → GLUSD", "/zh/swap/stable"],
+      ["GLUSD → GLC", "/zh/swap/auto"],
     ],
     rwaKicker: "RWA 数字藏品",
     rwaTitle: "大爱 RWA 与 NFT 收藏",
@@ -224,7 +224,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
 
     <section className="glm-access-section">
       <div className="section-heading"><p className="section-kicker">{t.accessKicker}</p><h2>{t.accessTitle}</h2><p>{t.accessBody}</p></div>
-      <div className="glm-access-grid">
+      <div className="glm-access-grid glm-membership-grid">
         <a className="glm-access-card featured" href={`/${lang}/community`}><small>{lang === "zh" ? "社区" : "COMMUNITY"}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
         <a className="glm-access-card" href={lang === "zh" ? "https://www.greatlovedao.com/index.html" : "https://www.greatlovedao.com/index_en.html"}><small>GREATLOVEDAO</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
       </div>
@@ -245,7 +245,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     <section className="glm-access-section glm-swap-section">
       <div className="section-heading"><p className="section-kicker">{t.swapKicker}</p><h2>{t.swapTitle}</h2><p>{t.swapBody}</p></div>
       <div className="glm-access-grid glm-swap-grid">
-        {t.swaps.map(([tag,title,body,href]) => <a className="glm-access-card" href={href} key={tag}><small>{tag}</small><h3>{title}</h3><p>{body}</p><b>{lang === "zh" ? "打开工具" : "Open tool"} →</b></a>)}
+        {t.swaps.map(([label,href]) => <a className="glm-swap-card" href={href} key={label}>{label}</a>)}
       </div>
     </section>
 

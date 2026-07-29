@@ -11,7 +11,20 @@ test("home swap cards route to local bilingual pages", () => {
   for (const route of ["/en/swap/stable", "/en/swap/auto", "/zh/swap/stable", "/zh/swap/auto"]) {
     assert.match(home, new RegExp(route.replaceAll("/", "\\/")));
   }
+  for (const label of ["USDT → GLUSD", "GLUSD → GLC"]) {
+    assert.match(home, new RegExp(label));
+  }
+  assert.match(home, /className="glm-swap-card"/);
+  assert.doesNotMatch(home, /className="glm-access-card" href=\{href\}/);
   assert.doesNotMatch(home, /greatlovedao\.com\/(?:stableswap|autoswap)/i);
+});
+
+test("membership and swap cards stack in narrow windows", () => {
+  const home = read("app/[lang]/page.tsx");
+  const styles = read("app/globals.css");
+  assert.match(home, /className="glm-access-grid glm-membership-grid"/);
+  assert.match(styles, /\.glm-membership-grid\{grid-template-columns:1\.2fr 1fr\}/);
+  assert.match(styles, /@media\(max-width:1100px\)\{[\s\S]*?\.glm-access-grid,\.glm-membership-grid,\.glm-swap-grid\{grid-template-columns:1fr\}/);
 });
 
 test("local swap pages include migrated tool controls", () => {

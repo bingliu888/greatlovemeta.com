@@ -389,9 +389,11 @@ footer .brand { font-size: 22px; } footer p { margin: 0 auto 0 0; color: var(--m
 .glm-sector-grid p{margin:0;color:rgba(245,240,229,.64);font-size:14px;line-height:1.7}
 
 .glm-access-grid{margin-top:60px;display:grid;grid-template-columns:1.2fr 1fr 1fr;gap:15px}
-.glm-access-grid:has(> :nth-child(2):last-child){grid-template-columns:1.2fr 1fr}
+.glm-membership-grid{grid-template-columns:1.2fr 1fr}
 .glm-swap-section{padding-top:20px}
 .glm-swap-grid{grid-template-columns:1fr 1fr}
+.glm-swap-card{min-height:150px;padding:28px;display:grid;place-items:center;border:1px solid rgba(18,32,42,.13);border-radius:15px;background:#fffaf0;color:var(--jade);font:700 clamp(25px,3vw,40px)/1.15 "Iowan Old Style","Noto Serif SC",Georgia,serif;letter-spacing:.02em;text-align:center;white-space:nowrap;transition:transform .2s,box-shadow .2s,background .2s}
+.glm-swap-card:hover{transform:translateY(-4px);background:#fffdf8;box-shadow:0 22px 50px rgba(18,32,42,.09)}
 .glm-access-card{min-height:330px;padding:31px;display:flex;flex-direction:column;border:1px solid rgba(18,32,42,.13);border-radius:15px;background:#fffaf0;transition:transform .2s,box-shadow .2s}
 .glm-access-card:hover{transform:translateY(-4px);box-shadow:0 22px 50px rgba(18,32,42,.09)}
 .glm-access-card.featured{background:var(--jade);color:#fff}
@@ -447,7 +449,7 @@ footer .brand { font-size: 22px; } footer p { margin: 0 auto 0 0; color: var(--m
   .glm-welcome-hero .glm-resource-kicker{text-align:center}
   .glm-dao-actions{grid-template-columns:1fr 1fr}
   .glm-sector-grid{grid-template-columns:1fr 1fr}
-  .glm-access-grid{grid-template-columns:1fr}
+  .glm-access-grid,.glm-membership-grid,.glm-swap-grid{grid-template-columns:1fr}
   .glm-access-card{min-height:260px}
   .glm-rwa-grid{grid-template-columns:1fr 1fr}
   .glm-rwa-grid>a.featured{grid-column:1/-1;grid-row:auto;min-height:650px}
