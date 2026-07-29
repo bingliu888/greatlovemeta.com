@@ -1,6 +1,9 @@
 :root{--dashboard-body:16px;--dashboard-caption:13px;--dashboard-control:14px}
 :root[data-text-size="large"]{--dashboard-body:18px;--dashboard-caption:14px;--dashboard-control:16px}
 :root[data-text-size="extra-large"]{--dashboard-body:20px;--dashboard-caption:16px;--dashboard-control:18px}
+.dashboard-audio-panel{display:flex;align-items:center;justify-content:space-between;gap:28px;margin:0 0 24px;padding:24px 28px;border:1px solid #b9cbbf;border-radius:16px;background:linear-gradient(135deg,#edf5ef,#fffaf0);box-shadow:0 12px 30px rgba(9,31,26,.07)}
+.dashboard-audio-panel h2{margin:5px 0 7px;font:600 25px/1.15 "Iowan Old Style","Noto Serif SC",Georgia,serif}.dashboard-audio-panel p:last-child{margin:0;color:#52615b}.dashboard-audio-button{min-height:50px;padding:12px 18px;border-radius:9px;background:var(--jade);color:#fff;text-decoration:none;font-weight:800;display:flex;align-items:center;justify-content:center;gap:12px;white-space:nowrap}.dashboard-audio-button:hover{background:#095c46}.dashboard-audio-button span{font-size:20px}
+@media(max-width:680px){.dashboard-audio-panel{align-items:stretch;flex-direction:column;padding:21px 18px}.dashboard-audio-button{width:100%;white-space:normal;text-align:center}}
 .dashboard-page :where(p,li,label,input,select,textarea){font-size:var(--dashboard-body)!important;line-height:1.55}
 .dashboard-page :where(small,.section-kicker,.platform-label,.share-card>small,.member-grid article>small,.account-card dt){font-size:var(--dashboard-caption)!important;line-height:1.4!important}
 .dashboard-page button:not(.dashboard-drawer-close):not(.dashboard-referral-fab),.dashboard-page .primary-button{font-size:var(--dashboard-control)!important}

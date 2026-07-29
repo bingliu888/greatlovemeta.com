@@ -3,6 +3,20 @@
 import { FormEvent, useEffect, useRef, useState } from "react";
 
 type ChatMessage = { role: "user" | "assistant"; content: string };
+type RecognitionResult = { isFinal: boolean; 0: { transcript: string } };
+type RecognitionEvent = { resultIndex: number; results: { length: number; [index: number]: RecognitionResult } };
+type RecognitionError = { error: string };
+type Recognition = {
+  lang: string;
+  continuous: boolean;
+  interimResults: boolean;
+  onresult: ((event: RecognitionEvent) => void) | null;
+  onerror: ((event: RecognitionError) => void) | null;
+  onend: (() => void) | null;
+  start(): void;
+  stop(): void;
+};
+type RecognitionConstructor = new () => Recognition;
 
 function ToolIcon({ name }: { name: "copy" | "listen" | "up" | "down" | "share" }) {
   const paths = {
@@ -29,14 +43,22 @@ function formatElapsed(seconds: number) {
   return `${String(minutes).padStart(2, "0")}:${String(seconds % 60).padStart(2, "0")}`;
 }
 
-export function AssistantClient({ lang, signedIn }: { lang: "en" | "zh"; signedIn: boolean }) {
+function recognitionConstructor(): RecognitionConstructor | undefined {
+  const speechWindow = window as typeof window & {
+    SpeechRecognition?: RecognitionConstructor;
+    webkitSpeechRecognition?: RecognitionConstructor;
+  };
+  return speechWindow.SpeechRecognition || speechWindow.webkitSpeechRecognition;
+}
+
+export function AssistantClient({ lang }: { lang: "en" | "zh"; signedIn: boolean }) {
   const zh = lang === "zh";
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
-  const [live, setLive] = useState(false);
-  const [liveStatus, setLiveStatus] = useState("");
+  const [listening, setListening] = useState(false);
+  const [voiceStatus, setVoiceStatus] = useState("");
   const [faqOpen, setFaqOpen] = useState(false);
   const [composerFocused, setComposerFocused] = useState(false);
   const [copiedMessage, setCopiedMessage] = useState<number | null>(null);
@@ -44,16 +66,13 @@ export function AssistantClient({ lang, signedIn }: { lang: "en" | "zh"; signedI
   const [speechMessage, setSpeechMessage] = useState<number | null>(null);
   const [speechPaused, setSpeechPaused] = useState(false);
   const [speechElapsed, setSpeechElapsed] = useState(0);
-  const peer = useRef<RTCPeerConnection | null>(null);
-  const stream = useRef<MediaStream | null>(null);
-  const audio = useRef<HTMLAudioElement | null>(null);
   const chatLog = useRef<HTMLDivElement | null>(null);
   const composer = useRef<HTMLTextAreaElement | null>(null);
   const faqMenu = useRef<HTMLDivElement | null>(null);
-  const liveTimer = useRef<ReturnType<typeof setInterval> | null>(null);
+  const recognition = useRef<Recognition | null>(null);
+  const recognitionBase = useRef("");
   const speechTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const speechSession = useRef(0);
-  const [, setRemainingSeconds] = useState<number | null>(null);
 
   useEffect(() => {
     const updateViewportHeight = () => {
@@ -73,6 +92,7 @@ export function AssistantClient({ lang, signedIn }: { lang: "en" | "zh"; signedI
   }, []);
 
   useEffect(() => () => {
+    recognition.current?.stop();
     speechSession.current += 1;
     if (speechTimer.current) window.clearInterval(speechTimer.current);
     if ("speechSynthesis" in window) window.speechSynthesis.cancel();
@@ -197,6 +217,7 @@ export function AssistantClient({ lang, signedIn }: { lang: "en" | "zh"; signedI
     event.preventDefault();
     const content = draft.trim();
     if (!content || busy) return;
+    if (listening) recognition.current?.stop();
     const next = [...messages, { role: "user" as const, content }].slice(-12);
     setMessages(next); setDraft(""); setComposerFocused(false); composer.current?.blur(); setBusy(true); setError("");
     try {
@@ -208,42 +229,61 @@ export function AssistantClient({ lang, signedIn }: { lang: "en" | "zh"; signedI
     finally { setBusy(false); }
   }
 
-  function stopLive() {
-    if (liveTimer.current) clearInterval(liveTimer.current); liveTimer.current = null;
-    peer.current?.close(); peer.current = null;
-    stream.current?.getTracks().forEach(track => track.stop()); stream.current = null;
-    if (audio.current) audio.current.srcObject = null;
-    setLive(false); setLiveStatus(zh ? "语音对话已结束。" : "Live conversation ended.");
-  }
-
-  async function startLive() {
-    if (live) return stopLive();
-    if (!signedIn) { window.location.href = `/${lang}/auth/login?returnTo=/${lang}/assistant`; return; }
-    setError(""); setLiveStatus(zh ? "正在连接麦克风…" : "Connecting microphone…");
+  function toggleVoiceInput() {
+    if (listening) {
+      recognition.current?.stop();
+      return;
+    }
+    const Constructor = recognitionConstructor();
+    if (!Constructor) {
+      setError(zh ? "此浏览器不支持语音输入。" : "Voice input is not supported in this browser.");
+      return;
+    }
+    const instance = new Constructor();
+    recognitionBase.current = draft.trim() ? `${draft.trim()} ` : "";
+    instance.lang = zh ? "zh-CN" : "en-US";
+    instance.continuous = true;
+    instance.interimResults = true;
+    instance.onresult = event => {
+      let finalText = "";
+      let interimText = "";
+      for (let index = event.resultIndex; index < event.results.length; index += 1) {
+        const result = event.results[index];
+        if (result.isFinal) finalText += `${result[0].transcript.trim()} `;
+        else interimText += result[0].transcript;
+      }
+      recognitionBase.current += finalText;
+      setDraft(`${recognitionBase.current}${interimText}`.trimStart());
+    };
+    instance.onerror = event => {
+      if (!["aborted", "no-speech"].includes(event.error)) {
+        setError(zh ? `麦克风错误：${event.error}。` : `Microphone error: ${event.error}.`);
+      }
+      setListening(false);
+      setVoiceStatus("");
+    };
+    instance.onend = () => {
+      recognition.current = null;
+      setListening(false);
+      setVoiceStatus("");
+    };
     try {
-      const allowance = await fetch("/api/assistant/live/usage").then(response => response.json()) as { paid?: boolean; remainingSeconds?: number | null; error?: string };
-      if (allowance.error) throw new Error(allowance.error);
-      if (!allowance.paid && !allowance.remainingSeconds) throw new Error(zh ? "今天的 10 分钟免费语音已用完。升级会员可继续使用。" : "Today's 10-minute free Live allowance has been used. Upgrade to continue.");
-      setRemainingSeconds(allowance.remainingSeconds ?? null);
-      const pc = new RTCPeerConnection(); peer.current = pc;
-      const output = new Audio(); output.autoplay = true; audio.current = output;
-      pc.ontrack = event => { output.srcObject = event.streams[0]; };
-      const microphone = await navigator.mediaDevices.getUserMedia({ audio: true }); stream.current = microphone;
-      microphone.getTracks().forEach(track => pc.addTrack(track, microphone));
-      pc.createDataChannel("oai-events");
-      const offer = await pc.createOffer(); await pc.setLocalDescription(offer);
-      const response = await fetch("/api/assistant/live", { method: "POST", headers: { "content-type": "application/sdp" }, body: offer.sdp || "" });
-      const answer = await response.text();
-      if (!response.ok) { let detail = answer; try { detail = (JSON.parse(answer) as { error?: string }).error || answer; } catch {} throw new Error(detail || "Live connection failed"); }
-      await pc.setRemoteDescription({ type: "answer", sdp: answer });
-      setLive(true); setLiveStatus(zh ? "已连接。直接说话即可，点击“结束”停止。" : "Connected. Speak naturally; click End to stop.");
-      if (!allowance.paid) liveTimer.current = setInterval(async () => { const usage = await fetch("/api/assistant/live/usage", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ seconds: 30 }) }).then(response => response.json()).catch(() => null) as { remainingSeconds?: number } | null; if (usage) { setRemainingSeconds(usage.remainingSeconds ?? 0); if ((usage.remainingSeconds ?? 0) <= 0) { stopLive(); setError(zh ? "今天的 10 分钟免费语音已用完。" : "Today's 10-minute free Live allowance is complete."); } } }, 30_000);
-    } catch (cause) { stopLive(); setError(cause instanceof Error ? cause.message : String(cause)); }
+      recognition.current = instance;
+      instance.start();
+      setError("");
+      setListening(true);
+      setVoiceStatus(zh ? "正在聆听…" : "Listening…");
+      composer.current?.focus();
+    } catch {
+      recognition.current = null;
+      setListening(false);
+      setError(zh ? "无法启动麦克风。" : "Unable to start the microphone.");
+    }
   }
 
   const questions = zh
     ? ["如何建立我的数字公民档案？", "数字公民身份和钱包地址有什么区别？", "我可以怎样参与社区项目？", "如何在跨文化社区中保护隐私？"]
     : ["How do I create my GreatLove member profile?", "How do RWA records differ from wallet ownership?", "How can I join an ecosystem project?", "How do I protect privacy in a cross-cultural community?"];
 
-  return <>{speechMessage !== null && <div className="speech-player" role="region" aria-label={zh ? "朗读控制" : "Read-aloud controls"}><button type="button" onClick={toggleReading} aria-label={speechPaused ? (zh ? "继续朗读" : "Resume reading") : (zh ? "暂停朗读" : "Pause reading")} title={speechPaused ? (zh ? "继续" : "Resume") : (zh ? "暂停" : "Pause")}><PlaybackIcon name={speechPaused ? "play" : "pause"}/></button><time>{formatElapsed(speechElapsed)}</time><span>{zh ? "正在朗读" : "Reading aloud"}</span><button className="speech-player-close" type="button" onClick={stopReading} aria-label={zh ? "停止朗读" : "Stop reading"} title={zh ? "停止并关闭" : "Stop and close"}><PlaybackIcon name="close"/></button></div>}<section className="assistant-main assistant-chat-only"><section className="chat-panel"><div className="chat-log" aria-live="polite" ref={chatLog}>{messages.map((message, index) => <article className={message.role} key={`${message.role}-${index}`}><strong>{message.role === "user" ? (zh ? "您" : "You") : "Guru"}</strong><p>{message.content}</p>{message.role === "assistant" && <div className="answer-tools" aria-label={zh ? "回答工具" : "Answer tools"}><button type="button" onClick={() => copyAnswer(message.content, index)} aria-label={zh ? "复制回答" : "Copy answer"} title={zh ? "复制" : "Copy"}><ToolIcon name="copy"/></button><button type="button" className={speechMessage === index ? "active" : ""} onClick={() => readAnswer(message.content, index)} aria-label={zh ? "朗读回答" : "Read answer aloud"} title={zh ? "朗读" : "Listen"}><ToolIcon name="listen"/></button><button className={ratedMessage?.index === index && ratedMessage.value === "up" ? "active" : ""} type="button" onClick={() => setRatedMessage({ index, value: "up" })} aria-label={zh ? "有帮助" : "Helpful"} title={zh ? "有帮助" : "Helpful"}><ToolIcon name="up"/></button><button className={ratedMessage?.index === index && ratedMessage.value === "down" ? "active" : ""} type="button" onClick={() => setRatedMessage({ index, value: "down" })} aria-label={zh ? "没有帮助" : "Not helpful"} title={zh ? "没有帮助" : "Not helpful"}><ToolIcon name="down"/></button><button type="button" onClick={() => shareAnswer(message.content)} aria-label={zh ? "分享回答" : "Share answer"} title={zh ? "分享" : "Share"}><ToolIcon name="share"/></button><span aria-live="polite">{copiedMessage === index ? (zh ? "已复制" : "Copied") : ""}</span></div>}</article>)}{busy && <article className="assistant"><strong>Guru</strong><p>{zh ? "正在思考…" : "Thinking…"}</p></article>}</div><form className={`chat-compose chat-compose-stacked${composerFocused || draft ? " expanded" : " compact"}`} onSubmit={submit} onFocus={() => setComposerFocused(true)} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setComposerFocused(false); }}><label className="chat-compose-field"><span className="sr-only">{zh ? "输入问题" : "Your question"}</span><textarea ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} rows={1} placeholder={zh ? "给 Guru 发消息…" : "Message Guru…"}/></label><div className="chat-toolbar"><div className="faq-control" ref={faqMenu}><button className="icon-button faq-button" type="button" aria-label={zh ? "常见问题" : "Frequently asked questions"} aria-expanded={faqOpen} onClick={() => setFaqOpen(value => !value)}>?</button>{faqOpen && <div className="faq-popover" role="menu"><strong>{zh ? "常见问题" : "Try asking"}</strong>{questions.map(question => <button type="button" role="menuitem" key={question} onClick={() => chooseQuestion(question)}>{question}</button>)}</div>}</div>{liveStatus && <span className="composer-status" aria-live="polite">{liveStatus}</span>}<div className="toolbar-actions"><button className={`icon-button mic-button${live ? " active" : ""}`} type="button" aria-label={live ? (zh ? "结束语音" : "End live voice") : (zh ? "开始语音" : "Start live voice")} title={live ? (zh ? "结束语音" : "End live") : (zh ? "开始语音" : "Start live")} onClick={startLive}><span aria-hidden="true"/></button><button className="icon-button send-button" aria-label={zh ? "发送消息" : "Send message"} disabled={busy || !draft.trim()}><span aria-hidden="true">↑</span></button></div></div></form></section>{error && <p className="assistant-error" role="alert">{error}</p>}</section></>;
+  return <>{speechMessage !== null && <div className="speech-player" role="region" aria-label={zh ? "朗读控制" : "Read-aloud controls"}><button type="button" onClick={toggleReading} aria-label={speechPaused ? (zh ? "继续朗读" : "Resume reading") : (zh ? "暂停朗读" : "Pause reading")} title={speechPaused ? (zh ? "继续" : "Resume") : (zh ? "暂停" : "Pause")}><PlaybackIcon name={speechPaused ? "play" : "pause"}/></button><time>{formatElapsed(speechElapsed)}</time><span>{zh ? "正在朗读" : "Reading aloud"}</span><button className="speech-player-close" type="button" onClick={stopReading} aria-label={zh ? "停止朗读" : "Stop reading"} title={zh ? "停止并关闭" : "Stop and close"}><PlaybackIcon name="close"/></button></div>}<section className="assistant-main assistant-chat-only"><section className="chat-panel"><div className="chat-log" aria-live="polite" ref={chatLog}>{messages.map((message, index) => <article className={message.role} key={`${message.role}-${index}`}><strong>{message.role === "user" ? (zh ? "您" : "You") : "Guru"}</strong><p>{message.content}</p>{message.role === "assistant" && <div className="answer-tools" aria-label={zh ? "回答工具" : "Answer tools"}><button type="button" onClick={() => copyAnswer(message.content, index)} aria-label={zh ? "复制回答" : "Copy answer"} title={zh ? "复制" : "Copy"}><ToolIcon name="copy"/></button><button type="button" className={speechMessage === index ? "active" : ""} onClick={() => readAnswer(message.content, index)} aria-label={zh ? "朗读回答" : "Read answer aloud"} title={zh ? "朗读" : "Listen"}><ToolIcon name="listen"/></button><button className={ratedMessage?.index === index && ratedMessage.value === "up" ? "active" : ""} type="button" onClick={() => setRatedMessage({ index, value: "up" })} aria-label={zh ? "有帮助" : "Helpful"} title={zh ? "有帮助" : "Helpful"}><ToolIcon name="up"/></button><button className={ratedMessage?.index === index && ratedMessage.value === "down" ? "active" : ""} type="button" onClick={() => setRatedMessage({ index, value: "down" })} aria-label={zh ? "没有帮助" : "Not helpful"} title={zh ? "没有帮助" : "Not helpful"}><ToolIcon name="down"/></button><button type="button" onClick={() => shareAnswer(message.content)} aria-label={zh ? "分享回答" : "Share answer"} title={zh ? "分享" : "Share"}><ToolIcon name="share"/></button><span aria-live="polite">{copiedMessage === index ? (zh ? "已复制" : "Copied") : ""}</span></div>}</article>)}{busy && <article className="assistant"><strong>Guru</strong><p>{zh ? "正在思考…" : "Thinking…"}</p></article>}</div><form className={`chat-compose chat-compose-stacked${composerFocused || draft ? " expanded" : " compact"}`} onSubmit={submit} onFocus={() => setComposerFocused(true)} onBlur={event => { if (!event.currentTarget.contains(event.relatedTarget as Node | null)) setComposerFocused(false); }}><label className="chat-compose-field"><span className="sr-only">{zh ? "输入问题" : "Your question"}</span><textarea ref={composer} value={draft} onChange={event => setDraft(event.target.value)} maxLength={2000} rows={1} placeholder={zh ? "给 Guru 发消息…" : "Message Guru…"}/></label><div className="chat-toolbar"><div className="faq-control" ref={faqMenu}><button className="icon-button faq-button" type="button" aria-label={zh ? "常见问题" : "Frequently asked questions"} aria-expanded={faqOpen} onClick={() => setFaqOpen(value => !value)}>?</button>{faqOpen && <div className="faq-popover" role="menu"><strong>{zh ? "常见问题" : "Try asking"}</strong>{questions.map(question => <button type="button" role="menuitem" key={question} onClick={() => chooseQuestion(question)}>{question}</button>)}</div>}</div>{voiceStatus && <span className="composer-status" aria-live="polite">{voiceStatus}</span>}<div className="toolbar-actions"><button className={`icon-button mic-button${listening ? " active" : ""}`} type="button" aria-label={listening ? (zh ? "停止语音输入" : "Stop voice input") : (zh ? "开始语音输入" : "Start voice input")} title={listening ? (zh ? "停止语音输入" : "Stop voice input") : (zh ? "开始语音输入" : "Start voice input")} onClick={toggleVoiceInput}><span aria-hidden="true"/></button><button className="icon-button send-button" aria-label={zh ? "发送消息" : "Send message"} disabled={busy || !draft.trim()}><span aria-hidden="true">↑</span></button></div></div></form></section>{error && <p className="assistant-error" role="alert">{error}</p>}</section></>;
 }

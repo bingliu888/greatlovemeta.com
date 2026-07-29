@@ -1,4 +1,5 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect, notFound } from "next/navigation";
 import { LogoutButton } from "../../../components/LogoutButton";
 import { GameDailyLog } from "../../../components/GameDailyLog";
@@ -25,6 +26,8 @@ const copy = {
     signOut: "Sign out",
     coming: "Citizen credentials are coming next",
     comingBody: "Your account is ready for Community, messages, Live Chat, referrals, Ask Guru, and transparent citizen projects.",
+    audioTitle: "Live Audio AI Chat",
+    audioBody: "Open Ask Guru, tap the microphone, and speak to turn your question into text before sending.",
   },
   zh: {
     welcome: "欢迎进入您的数字公民面板",
@@ -39,6 +42,8 @@ const copy = {
     signOut: "退出登录",
     coming: "数字公民凭证即将推出",
     comingBody: "您的账号已经可以使用社区、消息、Live Chat、推荐、Ask Guru 与透明共建项目。",
+    audioTitle: "实时语音 AI 对话",
+    audioBody: "打开 Ask Guru，点击麦克风并直接说话，确认转换后的文字再发送。",
   },
 };
 
@@ -54,6 +59,10 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
       <SiteHeader lang={lang} />
       <div className="dashboard-wrap">
         <div className="dashboard-title"><p className="section-kicker">{t.level}</p><h1>{t.welcome}, {user.displayName}.</h1><p>{t.subtitle}</p></div>
+        <section className="dashboard-audio-panel" aria-labelledby="dashboard-audio-title">
+          <div><p className="section-kicker">{lang === "zh" ? "语音快捷入口" : "VOICE SHORTCUT"}</p><h2 id="dashboard-audio-title">{t.audioTitle}</h2><p>{t.audioBody}</p></div>
+          <Link className="dashboard-audio-button" href={`/${lang}/assistant`}>{t.audioTitle}<span aria-hidden="true">→</span></Link>
+        </section>
         <MembershipPanel lang={lang} />
         <GameDailyLog lang={lang} compact />
         <div className="dashboard-grid">
