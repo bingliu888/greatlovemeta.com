@@ -56,7 +56,7 @@ window.GREATLOVE_AUTOSWAP_CONFIG = {
         fromBlock: 0,
         maxEvents: 25,
         scanBlocks: 5000000,
-        chunkSize: 50000
+        chunkSize: 10000
       },
       orderBook: {
         priceLevelsPerSide: 12,

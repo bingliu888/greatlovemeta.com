@@ -852,8 +852,8 @@
       } catch (err) {
         console.warn('History log query failed', err);
         if (chunkSize > 5000) {
-          toBlock += chunkSize;
           chunkSize = Math.max(5000, Math.floor(chunkSize / 2));
+          toBlock += chunkSize;
           continue;
         }
       }

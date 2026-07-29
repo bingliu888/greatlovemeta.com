@@ -58,6 +58,7 @@ test("swap pages use current Polygon RPC providers with failover", () => {
     for (const endpoint of ["polygon.drpc.org", "polygon.publicnode.com", "1rpc.io/matic"]) {
       assert.match(source, new RegExp(endpoint.replaceAll(".", "\\.")));
     }
+    assert.match(source, /chunkSize:\s*10000/);
   }
 
   for (const runtimeFile of ["autoswap.js", "stableswap.js"]) {
@@ -65,4 +66,7 @@ test("swap pages use current Polygon RPC providers with failover", () => {
     assert.match(source, /for \(var i = 0; i < rpcUrls\.length; i \+= 1\)/);
     assert.match(source, /await provider\.getNetwork\(\)/);
   }
+
+  const autoRuntime = read("public/swap-assets/autoswap.js");
+  assert.match(autoRuntime, /chunkSize = Math\.max\(5000, Math\.floor\(chunkSize \/ 2\)\);\s*toBlock \+= chunkSize;/);
 });
