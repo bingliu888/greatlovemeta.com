@@ -47,7 +47,7 @@ window.GREATLOVE_STABLESWAP_CONFIG = {
   },
   history: {
     maxEvents: 20,
-    scanBlocks: 5000000,
-    chunkSize: 10000
+    scanBlocks: 500000,
+    chunkSize: 5000
   }
 };
