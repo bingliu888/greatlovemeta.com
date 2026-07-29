@@ -3,8 +3,8 @@
 import { FormEvent, useState } from "react";
 
 const copy = {
-  en: { email: "Email address", code: "One-time code", send: "Send login code", verify: "Verify & login", working: "Please wait…", sent: "Code sent. Check your email.", change: "Use another email", loading: "Login is still loading. Please try again.", incorrect: "The code is incorrect. Please try again.", expired: "The code expired. Please request a new one." },
-  zh: { email: "电子邮箱", code: "一次性验证码", send: "发送登录验证码", verify: "验证并登录", working: "请稍候…", sent: "验证码已发送，请查看邮箱。", change: "更换邮箱", loading: "登录功能仍在加载，请重试。", incorrect: "验证码不正确，请重试。", expired: "验证码已过期，请重新发送。" },
+  en: { email: "Email address", code: "One-time code", send: "Send secure code", verify: "Verify & continue", working: "Please wait…", sent: "Code sent to", change: "Use another email", loading: "Login is still loading. Please try again.", incorrect: "The code is incorrect. Please try again.", expired: "The code expired. Please request a new one." },
+  zh: { email: "电子邮箱", code: "一次性验证码", send: "发送安全验证码", verify: "验证并继续", working: "请稍候…", sent: "验证码已发送至", change: "更换邮箱", loading: "登录功能仍在加载，请重试。", incorrect: "验证码不正确，请重试。", expired: "验证码已过期，请重新发送。" },
 };
 
 export function AuthForm({ lang }: { lang: "en" | "zh" }) {
@@ -27,7 +27,7 @@ export function AuthForm({ lang }: { lang: "en" | "zh" }) {
         const result = await response.json() as { error?: string };
         if (!response.ok) throw new Error(result.error || "Unable to send the code.");
         setStep("code");
-        setSuccess(t.sent);
+        setSuccess(`${t.sent} ${normalizedEmail}`);
       } else {
         const response = await fetch("/api/auth/verify-code", { method: "POST", headers: { "content-type": "application/json" }, body: JSON.stringify({ email: normalizedEmail, code, lang }) });
         const result = await response.json() as { error?: string; redirect?: string };

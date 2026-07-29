@@ -14,12 +14,17 @@
     }
 
     function trialRoute(game) {
-        return `/games/${game}.html?mode=trial&lang=${lang}`;
+        return `/${lang}/games/${game}?mode=trial`;
+    }
+
+    function navigate(path) {
+        const target = window.top && window.top !== window ? window.top : window;
+        target.location.assign(path);
     }
 
     function goToLogin(game) {
         const returnTo = `/api/game-launch?game=${encodeURIComponent(game)}&lang=${encodeURIComponent(lang)}`;
-        window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
+        navigate(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 
     function gameLogRoute() {
@@ -27,7 +32,7 @@
     }
 
     function goToGameLog() {
-        window.setTimeout(() => window.location.assign(gameLogRoute()), 1200);
+        window.setTimeout(() => navigate(gameLogRoute()), 1200);
     }
 
     function statusElement() {
@@ -114,7 +119,7 @@
             : isError
                 ? (lang === 'zh' ? '无法确认今天的游戏次数，请刷新页面后重试。' : "We couldn't verify today's play count. Refresh and try again.")
                 : (lang === 'zh' ? '请稍候，游戏马上开始。' : 'One moment—the game will start shortly.');
-        element.innerHTML = `<div style="max-width:620px"><div style="width:82px;height:82px;margin:0 auto 26px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.28);border-radius:50%;color:#f4c666;font-weight:900">${isLimit ? '01 / 01' : isError ? '!' : '•••'}</div><h1 style="margin:0 0 14px;font:700 clamp(34px,7vw,62px)/1.05 Georgia,serif">${title}</h1><p style="margin:0;color:rgba(255,255,255,.72);font-size:16px;line-height:1.7">${message}</p>${isLimit ? `<a href="${trialRoute(game)}" style="margin-top:28px;min-height:46px;padding:0 22px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.36);border-radius:999px;color:#fff;text-decoration:none;font-weight:850">${lang === 'zh' ? '继续试玩' : 'Continue Test trial'}</a>` : ''}</div>`;
+        element.innerHTML = `<div style="max-width:620px"><div style="width:82px;height:82px;margin:0 auto 26px;display:grid;place-items:center;border:1px solid rgba(255,255,255,.28);border-radius:50%;color:#f4c666;font-weight:900">${isLimit ? '01 / 01' : isError ? '!' : '•••'}</div><h1 style="margin:0 0 14px;font:700 clamp(34px,7vw,62px)/1.05 Georgia,serif">${title}</h1><p style="margin:0;color:rgba(255,255,255,.72);font-size:16px;line-height:1.7">${message}</p>${isLimit ? `<a href="${trialRoute(game)}" target="_top" style="margin-top:28px;min-height:46px;padding:0 22px;display:inline-flex;align-items:center;border:1px solid rgba(255,255,255,.36);border-radius:999px;color:#fff;text-decoration:none;font-weight:850">${lang === 'zh' ? '继续试玩' : 'Continue Test trial'}</a>` : ''}</div>`;
     }
 
     function disableRetry() {

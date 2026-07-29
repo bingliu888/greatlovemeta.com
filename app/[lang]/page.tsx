@@ -237,7 +237,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
           <div className="glm-game-art" aria-hidden="true">
             {game.key === "monopoly" ? <><span>12</span><i>◆</i><b>GLC</b></> : <><span>✦</span><i>⛏</i><b>3047</b></>}
           </div>
-          <div className="glm-game-copy"><small>{String(index + 1).padStart(2, "0")} · {game.tag}</small><h3>{game.title}</h3><p>{game.body}</p><div className="glm-game-actions"><a href={`/games/${game.key}.html?mode=trial&lang=${lang}`}>{t.testTrial}</a><a className="primary" href={`/api/game-launch?game=${game.key}&lang=${lang}`}>{t.playGame} →</a></div><em>{t.playNote}</em></div>
+          <div className="glm-game-copy"><small>{String(index + 1).padStart(2, "0")} · {game.tag}</small><h3>{game.title}</h3><p>{game.body}</p><div className="glm-game-actions"><a href={`/${lang}/games/${game.key}?mode=trial`}>{t.testTrial}</a><a className="primary" href={`/api/game-launch?game=${game.key}&lang=${lang}`}>{t.playGame} →</a></div><em>{t.playNote}</em></div>
         </article>)}
       </div>
     </section>

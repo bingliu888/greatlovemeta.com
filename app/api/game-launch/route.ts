@@ -18,5 +18,5 @@ export async function GET(request: Request) {
     return Response.redirect(new URL(loginPath, request.url), 303);
   }
 
-  return Response.redirect(new URL(`/games/${game}.html?mode=play&lang=${lang}`, request.url), 303);
+  return Response.redirect(new URL(`/${lang}/games/${game}?mode=play`, request.url), 303);
 }

@@ -61,7 +61,7 @@ export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang:
           await attempt.prepareEmailAddressVerification({ strategy: "email_code" });
           setFlow("sign-up");
         }
-        setStep("code"); setMessage(zh ? "验证码已发送，请查看邮箱。" : "Code sent. Check your email.");
+        setStep("code"); setMessage(zh ? `验证码已发送至 ${identifier}` : `Code sent to ${identifier}`);
       } else if (step === "credentials") {
         try {
           const result = await signIn.create({ identifier, password });
@@ -72,7 +72,7 @@ export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang:
           if (!missing) throw issue;
           const attempt = await signUp.create({ emailAddress: identifier, password });
           await attempt.prepareEmailAddressVerification({ strategy: "email_code" });
-          setFlow("sign-up"); setStep("code"); setMessage(zh ? "请验证邮箱以完成注册。" : "Verify your email to finish creating your account.");
+          setFlow("sign-up"); setStep("code"); setMessage(zh ? `验证码已发送至 ${identifier}` : `Code sent to ${identifier}`);
         }
       } else if (flow === "sign-in") {
         const result = await signIn.attemptFirstFactor({ strategy: "email_code", code });

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
+import { SiteHeader } from "../../../../components/SiteHeader";
 import { getSessionUser } from "../../../../lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -35,5 +36,20 @@ export default async function GamePage({
       redirect(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
   }
-  redirect(`/games/${game}.html?mode=${mode}&lang=${lang}`);
+
+  const gameTitle = games[game as GameKey][lang];
+  const frameTitle = lang === "zh"
+    ? `${gameTitle}${mode === "play" ? "正式游戏" : "试玩"}`
+    : `${gameTitle} ${mode === "play" ? "game" : "trial"}`;
+  const frameSrc = `/games/${game}.html?mode=${mode}&lang=${lang}`;
+
+  return <>
+    <SiteHeader lang={lang}/>
+    <main className="game-frame-page">
+      <h1 className="sr-only">{frameTitle}</h1>
+      <div className="game-frame-shell">
+        <iframe src={frameSrc} title={frameTitle}/>
+      </div>
+    </main>
+  </>;
 }

@@ -37,7 +37,7 @@ test("both full-page games report completed sessions directly through the shared
   assert.match(runtime, /fetch\(`\/api\/game-results\?date=/);
   assert.match(runtime, /disableRetry\(\)/);
   assert.match(runtime, /showTrialResult\(/);
-  assert.match(runtime, /window\.location\.assign\(gameLogRoute\(\)\)/);
+  assert.match(runtime, /navigate\(gameLogRoute\(\)\)/);
 });
 
 test("game result writes use the new reward rate and enforce one daily play per game", async () => {
@@ -87,15 +87,20 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(miner, /GreatLoveGameRuntime\.guard\('miner'\)/);
 });
 
-test("game pages use no iframe", async () => {
+test("game pages keep the shared header around a titled same-origin iframe", async () => {
   const [styles, gamePage] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
   ]);
 
-  assert.doesNotMatch(gamePage, /iframe|GameExperience/);
-  assert.doesNotMatch(styles, /\.game-frame-shell iframe/);
-  assert.match(gamePage, /redirect\(`\/games\/\$\{game\}\.html\?mode=/);
+  assert.equal((gamePage.match(/<SiteHeader\b/g) || []).length, 1);
+  assert.match(gamePage, /const frameSrc = `\/games\/\$\{game\}\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
+  assert.match(gamePage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
+  assert.doesNotMatch(gamePage, /redirect\(`\/games\/\$\{game\}\.html/);
+  assert.match(styles, /\.game-frame-shell iframe\{/);
+  assert.match(styles, /\.game-frame-page\{min-height:calc\(100dvh - 88px\)/);
+  assert.match(styles, /@media\(max-width:1100px\)\{\s*\.game-frame-page,\.game-frame-shell\{min-height:calc\(100dvh - 78px\)\}\s*\.game-frame-shell\{height:calc\(100dvh - 78px\)\}/);
+  assert.match(styles, /@media\(max-width:820px\)\{\s*\.game-frame-page,\.game-frame-shell\{min-height:calc\(100dvh - 74px\)\}\s*\.game-frame-shell\{height:calc\(100dvh - 74px\)\}/);
 });
 
 test("Play uses a server-side login launch check, returns to the game, and opens the saved log", async () => {
@@ -110,16 +115,19 @@ test("Play uses a server-side login launch check, returns to the game, and opens
   ]);
 
   assert.match(home, /<a className="primary" href=\{`\/api\/game-launch\?game=\$\{game\.key\}&lang=\$\{lang\}`\}/);
-  assert.match(home, /<a href=\{`\/games\/\$\{game\.key\}\.html\?mode=trial&lang=\$\{lang\}`\}/);
+  assert.match(home, /<a href=\{`\/\$\{lang\}\/games\/\$\{game\.key\}\?mode=trial`\}/);
   assert.doesNotMatch(home, /<Link className="primary"[^>]*mode=play/);
   assert.match(launchRoute, /getSessionUser\(request\)/);
   assert.match(launchRoute, /auth\/login\?returnTo=/);
-  assert.match(launchRoute, /\/games\/\$\{game\}\.html\?mode=play&lang=/);
-  assert.match(gamePage, /redirect\(`\/games\//);
+  assert.match(launchRoute, /\/\$\{lang\}\/games\/\$\{game\}\?mode=play/);
   assert.match(gamePage, /const user = await getSessionUser\(\)/);
+  assert.match(gamePage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(runtime, /\/api\/game-launch\?game=/);
+  assert.match(runtime, /\/\$\{lang\}\/games\/\$\{game\}\?mode=trial/);
   assert.match(runtime, /\/\$\{lang\}\/dashboard#game-log/);
-  assert.match(runtime, /window\.location\.assign/);
+  assert.match(runtime, /const target = window\.top && window\.top !== window \? window\.top : window/);
+  assert.match(runtime, /target\.location\.assign\(path\)/);
+  assert.match(runtime, /target="_top"/);
   assert.match(gameLog, /<section id="game-log"/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /node scripts\/check-protected-navigation\.mjs/);
