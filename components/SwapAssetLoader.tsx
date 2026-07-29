@@ -4,7 +4,7 @@ import { useEffect } from "react";
 
 type SwapTool = "stable" | "auto";
 
-const swapAssetVersion = "20260728-rpc-history";
+const swapAssetVersion = "20260728-rpc-history-v2";
 
 const sharedAssets = [
   { id: "greatlove-ethers", src: "/swap-assets/ethers.umd.min.js" },

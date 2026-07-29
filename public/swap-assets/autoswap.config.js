@@ -32,9 +32,9 @@ window.GREATLOVE_AUTOSWAP_CONFIG = {
           decimals: 18
         },
         rpcUrls: [
+          'https://tenderly.rpc.polygon.community',
+          'https://rpc-mainnet.matic.quiknode.pro',
           'https://polygon.drpc.org',
-          'https://polygon.publicnode.com',
-          'https://1rpc.io/matic'
         ],
         blockExplorerUrls: [
           'https://polygonscan.com'

@@ -55,9 +55,10 @@ test("swap pages use current Polygon RPC providers with failover", () => {
   for (const configFile of ["autoswap.config.js", "stableswap.config.js"]) {
     const source = read(`public/swap-assets/${configFile}`);
     assert.doesNotMatch(source, /polygon-rpc\.com/i);
-    for (const endpoint of ["polygon.drpc.org", "polygon.publicnode.com", "1rpc.io/matic"]) {
+    for (const endpoint of ["tenderly.rpc.polygon.community", "rpc-mainnet.matic.quiknode.pro", "polygon.drpc.org"]) {
       assert.match(source, new RegExp(endpoint.replaceAll(".", "\\.")));
     }
+    assert.doesNotMatch(source, /polygon\.publicnode\.com|1rpc\.io\/matic/i);
     assert.match(source, /scanBlocks:\s*500000/);
     assert.match(source, /chunkSize:\s*5000/);
   }
@@ -72,12 +73,12 @@ test("swap pages use current Polygon RPC providers with failover", () => {
   assert.match(autoRuntime, /chunkSize = Math\.max\(5000, Math\.floor\(chunkSize \/ 2\)\);\s*toBlock \+= chunkSize;/);
 
   const loader = read("components/SwapAssetLoader.tsx");
-  assert.match(loader, /swapAssetVersion = "20260728-rpc-history"/);
+  assert.match(loader, /swapAssetVersion = "20260728-rpc-history-v2"/);
 });
 
 test("swap runtime assets are cache-busted when RPC configuration changes", () => {
   const source = read("components/SwapAssetLoader.tsx");
-  assert.match(source, /swapAssetVersion = "20260728-rpc-history"/);
+  assert.match(source, /swapAssetVersion = "20260728-rpc-history-v2"/);
   for (const asset of ["autoswap.config.js", "autoswap.js", "stableswap.config.js", "stableswap.js"]) {
     assert.ok(source.includes(`${asset}?v=\${swapAssetVersion}`), `${asset} must include the swap asset version`);
   }
