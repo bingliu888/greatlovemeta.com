@@ -10,5 +10,5 @@ export function FloatingAssistant() {
   const topLevelPages = ["/", "/news", "/events", "/project"];
   if (!topLevelPages.includes(route)) return null;
   const label = lang === "zh" ? "打开 AI 助手" : "Open AI assistant";
-  return <Link className="floating-assistant" href={`/${lang}/assistant`} aria-label={label} title={label}><span aria-hidden="true"/></Link>;
+  return <div className="floating-assistant-layer"><Link className="floating-assistant" href={`/${lang}/assistant`} aria-label={label} title={label}><span aria-hidden="true"/></Link></div>;
 }
