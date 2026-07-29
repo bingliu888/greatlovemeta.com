@@ -75,10 +75,10 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .desktop-nav a { position: relative; }
 .desktop-nav a::after { content: ""; position: absolute; height: 2px; background: var(--vermillion); left: 0; right: 100%; bottom: -8px; transition: right .2s ease; }
 .desktop-nav a:hover::after { right: 0; }
-.header-actions { display: flex; align-items: center; gap: 25px; }
+.header-actions { display: flex; flex: 0 0 auto; align-items: center; gap: 25px; }
 .language-link { color: var(--jade); display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
 .language-link span { font-size: 17px; }
-.header-cta { padding: 11px 17px; border: 1px solid rgba(18,32,42,.5); border-radius: 7px; font-size: 15px; font-weight: 700; transition: background .2s, color .2s; }
+.header-cta { flex: 0 0 auto; padding: 11px 17px; border: 1px solid rgba(18,32,42,.5); border-radius: 7px; font-size: 15px; font-weight: 700; white-space: nowrap; transition: background .2s, color .2s; }
 .header-cta:hover { background: var(--ink); color: var(--ivory); }
 .mobile-menu { display: none; margin-left: auto; position: relative; }
 .mobile-menu summary { list-style: none; width: 42px; height: 42px; display: grid; place-content: center; gap: 4px; border: 0; border-radius: 9px; background: transparent; cursor: pointer; transition: background .2s; }
@@ -587,7 +587,6 @@ footer .brand { font-size: 22px; } footer p { margin: 0 auto 0 0; color: var(--m
   .game-player-heading{padding:0 6px}
   .game-mode-actions{display:grid;grid-template-columns:1fr 1fr;width:100%}
   .game-mode-actions a{justify-content:center}
-  .game-mode-actions a:last-child{grid-column:1/-1}
   .game-frame-shell{padding:5px;border-radius:16px}
   .game-frame-shell iframe{min-height:650px;border-radius:12px}
   .game-daily-log{padding:24px 18px}

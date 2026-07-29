@@ -77,3 +77,14 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(route, /miner: \{ minimum: 0, maximum: 36 \}/);
   assert.match(player, /game !== "miner"/);
 });
+
+test("mobile header keeps sign-in on one line and game pages omit the back-to-games button", async () => {
+  const [styles, player] = await Promise.all([
+    readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
+    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(styles, /\.header-cta \{[^}]*white-space: nowrap/);
+  assert.doesNotMatch(player, /返回游戏区|All games/);
+  assert.doesNotMatch(player, /#games/);
+});
