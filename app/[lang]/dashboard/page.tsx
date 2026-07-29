@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import { redirect, notFound } from "next/navigation";
 import { LogoutButton } from "../../../components/LogoutButton";
+import { GameDailyLog } from "../../../components/GameDailyLog";
 import { MembershipPanel } from "../../../components/MembershipPanel";
 import { TextSizeControl } from "../../../components/TextSizeControl";
 import { getSessionUser } from "../../../lib/auth";
@@ -54,6 +55,7 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
       <div className="dashboard-wrap">
         <div className="dashboard-title"><p className="section-kicker">{t.level}</p><h1>{t.welcome}, {user.displayName}.</h1><p>{t.subtitle}</p></div>
         <MembershipPanel lang={lang} />
+        <GameDailyLog lang={lang} compact />
         <div className="dashboard-grid">
           <section className="progress-card"><div className="card-top"><span>{t.progress}</span><strong>20%</strong></div><div className="progress-track"><i style={{ width: "20%" }} /></div><div className="lesson-preview"><span>ID</span><div><h2>{t.next}</h2><p>{t.nextBody}</p><a className="primary-button" href={`/${lang}/account`}>{t.action} <span>→</span></a></div></div></section>
           <aside className="account-card" id="account"><h2>{t.account}</h2><dl><div><dt>{lang === "zh" ? "邮箱" : "Email"}</dt><dd>{user.email}</dd></div><div><dt>{t.language}</dt><dd>{lang === "zh" ? "中文" : "English"}</dd></div></dl><TextSizeControl lang={lang} /><LogoutButton lang={lang} label={t.signOut} /></aside>

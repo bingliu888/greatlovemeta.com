@@ -35,6 +35,16 @@ const content = {
     officialCommunityTitle: "GreatLove Membership Community",
     officialCommunityBody: "Continue to the membership experience shown on the GreatLoveDAO homepage.",
     officialCommunityCta: "Join Now",
+    gamesKicker: "GreatLove Games",
+    gamesTitle: "Play, explore and keep a daily game log.",
+    gamesBody: "Test either game without an account, or sign in for Play so every completed result is added to your personal daily log.",
+    gameCards: [
+      { key: "monopoly", tag: "PROPERTY STRATEGY", title: "Monopoly", body: "Roll through a luminous property wheel, build your score across three turns, and see where fortune lands." },
+      { key: "miner", tag: "DEEP SPACE ARCADE", title: "Miner", body: "Aim the mining claw, collect rare space minerals, and complete a three-round energy expedition." },
+    ],
+    testTrial: "Test trial",
+    playGame: "Play",
+    playNote: "Play requires sign-in · Results save automatically",
     swapKicker: "GreatLove exchange",
     swapTitle: "On-Chain Swap",
     swapBody: "Choose the fixed USDT–GLUSD exchange or use the automatic GLUSD–GLC order market.",
@@ -112,6 +122,16 @@ const content = {
     officialCommunityTitle: "大爱会员社区",
     officialCommunityBody: "继续进入 GreatLoveDAO 首页展示的会员社区体验。",
     officialCommunityCta: "立即加入",
+    gamesKicker: "大爱游戏",
+    gamesTitle: "轻松体验，记录每天的游戏成绩。",
+    gamesBody: "无需账户即可试玩；登录后选择 Play，每局完成成绩会自动加入您的个人每日游戏记录。",
+    gameCards: [
+      { key: "monopoly", tag: "地产策略", title: "大富翁 Monopoly", body: "转动璀璨地产轮盘，在三次机会中累积成绩，看看幸运最终落在哪里。" },
+      { key: "miner", tag: "深空街机", title: "星际矿工 Miner", body: "瞄准采矿钩爪，收集稀有太空矿物，完成三回合能量探索。" },
+    ],
+    testTrial: "试玩",
+    playGame: "Play",
+    playNote: "Play 需要登录 · 成绩自动保存",
     swapKicker: "大爱兑换",
     swapTitle: "链上兑换",
     swapBody: "选择固定兑换 USDT - GLUSD，或使用自动挂单市场 GLUSD - GLC。",
@@ -207,6 +227,18 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
       <div className="glm-access-grid">
         <a className="glm-access-card featured" href={`/${lang}/community`}><small>{lang === "zh" ? "社区" : "COMMUNITY"}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
         <a className="glm-access-card" href={lang === "zh" ? "https://www.greatlovedao.com/index.html" : "https://www.greatlovedao.com/index_en.html"}><small>GREATLOVEDAO</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
+      </div>
+    </section>
+
+    <section className="glm-games-section" id="games">
+      <div className="section-heading"><p className="section-kicker">{t.gamesKicker}</p><h2>{t.gamesTitle}</h2><p>{t.gamesBody}</p></div>
+      <div className="glm-game-grid">
+        {t.gameCards.map((game, index) => <article className={`glm-game-card ${game.key}`} key={game.key}>
+          <div className="glm-game-art" aria-hidden="true">
+            {game.key === "monopoly" ? <><span>12</span><i>◆</i><b>GLC</b></> : <><span>✦</span><i>⛏</i><b>3047</b></>}
+          </div>
+          <div className="glm-game-copy"><small>{String(index + 1).padStart(2, "0")} · {game.tag}</small><h3>{game.title}</h3><p>{game.body}</p><div className="glm-game-actions"><Link href={`/${lang}/games/${game.key}?mode=trial`}>{t.testTrial}</Link><Link className="primary" href={`/${lang}/games/${game.key}?mode=play`}>{t.playGame} →</Link></div><em>{t.playNote}</em></div>
+        </article>)}
       </div>
     </section>
 

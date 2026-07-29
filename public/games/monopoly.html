@@ -1,0 +1,1013 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';">
+
+    <title>GLC 大富翁 - 环球地产大亨</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans SC', sans-serif;
+            margin: 0;
+            overflow-x: hidden;
+            background: #0c0a1a;
+        }
+
+        /* 赌场深色背景 + 聚光灯效果 */
+        .bg-casino {
+            background:
+                radial-gradient(ellipse 80% 50% at 50% 20%, rgba(120, 0, 255, 0.15) 0%, transparent 60%),
+                radial-gradient(ellipse 60% 40% at 30% 80%, rgba(255, 0, 80, 0.08) 0%, transparent 50%),
+                radial-gradient(ellipse 60% 40% at 70% 80%, rgba(255, 180, 0, 0.06) 0%, transparent 50%),
+                linear-gradient(180deg, #0c0a1a 0%, #1a0e2e 40%, #0f0a1e 100%);
+        }
+
+        /* 扑克花色纹理 */
+        .poker-texture::before {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-image:
+                url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='60' height='60'%3E%3Ctext x='10' y='30' font-size='14' fill='rgba(255,215,0,0.03)' font-family='serif'%3E%E2%99%A0%3C/text%3E%3Ctext x='35' y='55' font-size='14' fill='rgba(255,50,50,0.03)' font-family='serif'%3E%E2%99%A5%3C/text%3E%3Ctext x='35' y='15' font-size='14' fill='rgba(255,215,0,0.03)' font-family='serif'%3E%E2%99%A6%3C/text%3E%3Ctext x='10' y='55' font-size='14' fill='rgba(255,50,50,0.03)' font-family='serif'%3E%E2%99%A3%3C/text%3E%3C/svg%3E");
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* 金色霓虹文字光晕 */
+        .text-glow {
+            text-shadow:
+                0 0 10px rgba(255, 215, 0, 0.9),
+                0 0 30px rgba(255, 215, 0, 0.5),
+                0 0 60px rgba(255, 180, 0, 0.3),
+                0 0 100px rgba(255, 150, 0, 0.15);
+        }
+
+        /* 霓虹边框呼吸 */
+        @keyframes neon-pulse {
+            0%, 100% {
+                box-shadow:
+                    0 0 4px rgba(255, 215, 0, 0.2),
+                    0 0 12px rgba(255, 215, 0, 0.08),
+                    inset 0 0 6px rgba(255, 215, 0, 0.03);
+            }
+            50% {
+                box-shadow:
+                    0 0 8px rgba(255, 215, 0, 0.35),
+                    0 0 20px rgba(255, 215, 0, 0.12),
+                    inset 0 0 10px rgba(255, 215, 0, 0.05);
+            }
+        }
+
+        .neon-border {
+            animation: neon-pulse 4s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        .animate-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .perspective-1000 {
+            perspective: 1000px;
+        }
+
+        .wheel-segment {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .wheel-content {
+            position: absolute;
+            top: 10%;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            user-select: none;
+        }
+
+        @media (min-width: 640px) {
+            .wheel-content {
+                top: 12%;
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .spinner {
+            border: 3px solid rgba(255, 215, 0, 0.3);
+            border-radius: 50%;
+            border-top: 3px solid #FFD700;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .reward-unit {
+            font-size: 0.38em;
+            margin-left: 4px;
+            opacity: 0.85;
+            font-weight: 700;
+            vertical-align: baseline;
+            white-space: nowrap;
+            letter-spacing: -0.02em;
+        }
+
+        /* 骰子弹跳 */
+        @keyframes dice-bounce {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            25% { transform: translateY(-8px) rotate(5deg); }
+            75% { transform: translateY(-4px) rotate(-3deg); }
+        }
+
+        .dice-bounce {
+            animation: dice-bounce 0.6s ease-in-out;
+        }
+
+        /* 轮盘外圈光晕 */
+        @keyframes wheel-outer-glow {
+            0%, 100% {
+                box-shadow: 0 0 30px rgba(255,215,0,0.15), 0 0 60px rgba(255,215,0,0.08);
+            }
+            50% {
+                box-shadow: 0 0 45px rgba(255,215,0,0.25), 0 0 90px rgba(255,215,0,0.12);
+            }
+        }
+
+        .wheel-lights {
+            border-radius: 50%;
+            animation: wheel-outer-glow 3s ease-in-out infinite;
+        }
+
+        /* 中央按钮光环 */
+        @keyframes btn-glow {
+            0%, 100% {
+                box-shadow:
+                    0 0 12px rgba(255, 215, 0, 0.4),
+                    0 0 30px rgba(255, 215, 0, 0.15),
+                    inset 0 2px 6px rgba(255, 255, 255, 0.2);
+            }
+            50% {
+                box-shadow:
+                    0 0 20px rgba(255, 215, 0, 0.6),
+                    0 0 45px rgba(255, 215, 0, 0.25),
+                    inset 0 2px 6px rgba(255, 255, 255, 0.25);
+            }
+        }
+
+        .btn-casino-glow {
+            animation: btn-glow 3s ease-in-out infinite;
+        }
+
+        /* 柔和呼吸光 */
+        @keyframes soft-breathe {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.85; }
+        }
+
+        .neon-flicker {
+            animation: soft-breathe 4s ease-in-out infinite;
+        }
+
+        /* 筹码轻晃 */
+        @keyframes chip-sway {
+            0%, 100% { transform: rotate(-5deg) scale(1); }
+            50% { transform: rotate(5deg) scale(1.05); }
+        }
+
+        .chip-sway {
+            animation: chip-sway 5s ease-in-out infinite;
+        }
+
+        /* 转盘内圈光晕 */
+        .wheel-inner-glow {
+            background:
+                radial-gradient(circle at center, #1a0e2e 0%, #120a22 50%, #0c0718 100%);
+        }
+
+        /* 转盘分割线 */
+        .segment-line {
+            background: linear-gradient(to bottom, rgba(255,215,0,0.5) 0%, rgba(255,215,0,0.1) 50%, transparent 100%);
+        }
+
+        /* 卡牌底纹效果 */
+        .card-panel {
+            background:
+                linear-gradient(135deg, rgba(30, 15, 60, 0.95) 0%, rgba(15, 8, 35, 0.98) 100%);
+            border: 1px solid rgba(255, 215, 0, 0.25);
+            box-shadow:
+                0 8px 32px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 215, 0, 0.1);
+        }
+
+        /* 移动端顶部装饰条 */
+        .casino-strip {
+            background: repeating-linear-gradient(
+                90deg,
+                transparent 0px,
+                transparent 8px,
+                rgba(255,215,0,0.15) 8px,
+                rgba(255,215,0,0.15) 10px
+            );
+            height: 3px;
+        }
+
+        /* 花色装饰字 */
+        .suit-deco {
+            position: fixed;
+            font-size: 120px;
+            opacity: 0.02;
+            pointer-events: none;
+            font-family: serif;
+            z-index: 0;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen bg-casino poker-texture flex flex-col items-center px-4 py-6 md:py-12 relative">
+    <!-- 顶部霓虹条 -->
+    <div class="casino-strip w-full fixed top-0 left-0 z-50"></div>
+
+    <!-- 大花色背景装饰 -->
+    <div class="suit-deco" style="top: 5%; left: -2%; color: #FFD700;">♠</div>
+    <div class="suit-deco" style="top: 30%; right: -3%; color: #ff3344;">♥</div>
+    <div class="suit-deco" style="bottom: 15%; left: 5%; color: #ff3344;">♦</div>
+    <div class="suit-deco" style="bottom: 5%; right: 2%; color: #FFD700;">♣</div>
+
+    <!-- 浮动装饰元素 -->
+    <div class="fixed top-6 left-4 text-2xl md:text-4xl opacity-30 animate-float pointer-events-none neon-flicker z-10" style="text-shadow: 0 0 10px rgba(255,215,0,0.5);">🎰</div>
+    <div class="fixed top-6 right-4 text-2xl md:text-4xl opacity-30 animate-float pointer-events-none z-10" style="animation-delay: 1.5s; text-shadow: 0 0 10px rgba(255,50,50,0.5);">♠️</div>
+    <div class="fixed bottom-12 left-6 text-2xl opacity-20 animate-pulse pointer-events-none z-10" style="text-shadow: 0 0 10px rgba(255,215,0,0.5);">🎲</div>
+    <div class="fixed bottom-24 right-6 text-2xl opacity-20 pointer-events-none chip-sway z-10">🪙</div>
+
+    <!-- Header -->
+    <header class="text-center mb-6 md:mb-10 z-10 w-full max-w-4xl px-2">
+        <div class="flex items-center justify-center gap-3 mb-3">
+            <span class="text-xl md:text-3xl opacity-60" style="color: #ff3344;">♦</span>
+            <span class="text-xl md:text-3xl opacity-60" style="color: #FFD700;">♠</span>
+        </div>
+        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[#FFD700] text-glow tracking-tighter mb-2 italic transform -skew-x-6 neon-flicker">
+            GLC 大富翁
+        </h1>
+        <div class="flex items-center justify-center gap-2 mb-4">
+            <div class="h-[1px] w-6 md:w-12 bg-gradient-to-r from-transparent to-[#FFD700]/50"></div>
+            <p class="text-[#FFD700]/90 font-bold text-xs sm:text-sm md:text-lg uppercase tracking-[0.15em] md:tracking-[0.4em]"
+                style="text-shadow: 0 0 8px rgba(255,215,0,0.3);">
+                by GreatLoveDAO
+            </p>
+            <div class="h-[1px] w-6 md:w-12 bg-gradient-to-l from-transparent to-[#FFD700]/50"></div>
+        </div>
+        <p class="text-white/70 text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mx-auto leading-relaxed font-medium">
+            转动轮盘赢取地产，每块地产对应 GLC 空投奖励。<br class="hidden sm:block" />
+            每人可转动 3 次，输入钱包地址即可领取。
+        </p>
+    </header>
+
+    <!-- Main Game Section -->
+    <main class="w-full flex flex-col items-center z-10 max-w-2xl flex-grow">
+        <!-- Score Board -->
+        <div class="flex justify-between w-full max-w-[300px] sm:max-w-sm mb-8 px-6 py-4 card-panel backdrop-blur-md rounded-2xl neon-border">
+            <div class="text-center flex-1">
+                <p class="text-[9px] md:text-[10px] text-[#FFD700]/70 uppercase font-black tracking-widest mb-1">Total Rewards 总奖励</p>
+                <p id="totalScore" class="text-2xl md:text-3xl font-black text-[#FFD700] drop-shadow-sm flex items-baseline justify-center">
+                    0<span class="reward-unit">GLC</span></p>
+            </div>
+            <div class="w-[1px] bg-[#FFD700]/20 mx-3"></div>
+            <div class="text-center flex-1">
+                <p class="text-[9px] md:text-[10px] text-[#FFD700]/70 uppercase font-black tracking-widest mb-1">剩余次数</p>
+                <p id="spinsLeft" class="text-2xl md:text-3xl font-black text-[#FFD700] drop-shadow-sm">3</p>
+            </div>
+        </div>
+
+        <!-- Wheel Container -->
+        <div class="relative w-64 h-64 sm:w-72 sm:h-72 md:w-96 md:h-96 lg:w-[450px] lg:h-[450px] mx-auto perspective-1000 mb-6 md:mb-10 transition-all duration-500">
+            <!-- 外圈走马灯灯带 -->
+            <div class="absolute -inset-3 md:-inset-4 rounded-full wheel-lights opacity-60 pointer-events-none z-0"></div>
+            <!-- 金色外圈 -->
+            <div class="absolute inset-0 rounded-full border-[8px] md:border-[12px] border-[#FFD700] z-10 pointer-events-none"
+                style="box-shadow: 0 0 20px rgba(255,215,0,0.4), 0 0 60px rgba(255,215,0,0.15), inset 0 0 20px rgba(255,215,0,0.1);"></div>
+            <!-- 指针 -->
+            <div class="absolute -top-3 md:-top-5 left-1/2 -translate-x-1/2 z-30 text-3xl md:text-4xl drop-shadow-lg pointer-events-none"
+                style="filter: drop-shadow(0 0 8px rgba(255,50,50,0.6));">🔻</div>
+            <!-- 轮盘 -->
+            <div id="wheel" class="w-full h-full rounded-full relative overflow-hidden shadow-2xl transition-transform duration-[4000ms] ease-[cubic-bezier(0.15,0,0.15,1)] wheel-inner-glow">
+            </div>
+            <!-- 中央按钮 -->
+            <div class="absolute inset-0 flex items-center justify-center z-40">
+                <button id="spinBtn"
+                    class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full flex flex-col items-center justify-center transition-all duration-300 transform border-4 border-[#1a0e2e] btn-casino-glow"
+                    style="background: linear-gradient(145deg, #FFD700 0%, #e6ac00 50%, #cc9900 100%); cursor: pointer;">
+                    <span id="spinBtnText" class="font-black text-center leading-tight text-[#1a0e2e] text-sm sm:text-base md:text-lg lg:text-2xl">掷骰<br />开转</span>
+                    <span id="spinSubText" class="text-[10px] md:text-xs font-bold text-[#1a0e2e]/60 mt-1">ROLL</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Win Result -->
+        <div id="winDisplay" class="h-16 flex items-center justify-center mb-6 invisible">
+            <div class="animate-bounce px-6 py-2 rounded-full font-black flex items-center gap-2 text-sm sm:text-base border border-[#FFD700]/40"
+                style="background: linear-gradient(135deg, rgba(255,215,0,0.2) 0%, rgba(255,180,0,0.1) 100%); color: #FFD700; box-shadow: 0 0 20px rgba(255,215,0,0.2);">
+                <span id="winEmoji" class="text-2xl"></span>
+                <span id="winText"></span>
+            </div>
+        </div>
+
+        <!-- Claim Form Section -->
+        <div id="airdropSection" class="w-full max-w-md hidden px-2 mb-10 fade-in">
+            <div id="formContainer" class="card-panel backdrop-blur-md p-6 sm:p-8 rounded-[2rem] relative overflow-hidden neon-border">
+
+                <!-- 总分展示区 -->
+                <div id="scoreSummary" class="text-center mb-6">
+                    <div id="summaryEmoji" class="text-5xl mb-3"></div>
+                    <p class="text-[#FFD700]/60 text-xs font-bold uppercase tracking-widest mb-1">本次总收益</p>
+                    <p id="summaryScore" class="text-4xl sm:text-5xl font-black text-[#FFD700] mb-1" style="text-shadow: 0 0 20px rgba(255,215,0,0.4);"></p>
+                    <p class="text-[#FFD700]/40 text-[10px] font-bold mt-1">1 Point = 100,000 GLC</p>
+                    <p id="summaryMsg" class="text-white/70 text-sm leading-relaxed mt-3 px-2"></p>
+                </div>
+
+                <!-- 低分重玩按钮 -->
+                <button id="retryBtn"
+                    class="w-full font-black py-3 rounded-2xl text-base mb-4 hidden transition-all duration-300 hover:brightness-110 border-2 border-[#FFD700]/40"
+                    style="background: transparent; color: #FFD700;"
+                    onclick="retryGame()">
+                    再来一局，冲击高分!
+                </button>
+
+                <!-- 低分时的分隔线 -->
+                <div id="retryDivider" class="hidden flex items-center gap-3 mb-5">
+                    <div class="flex-1 h-[1px] bg-[#FFD700]/15"></div>
+                    <span class="text-[#FFD700]/40 text-[10px] font-bold">或直接领取</span>
+                    <div class="flex-1 h-[1px] bg-[#FFD700]/15"></div>
+                </div>
+
+                <h3 id="claimTitle" class="text-xl sm:text-2xl font-black text-[#FFD700] mb-6 text-center" style="text-shadow: 0 0 15px rgba(255,215,0,0.4);">
+                    领取你的地产收益
+                </h3>
+                <div class="space-y-5">
+                    <div class="relative">
+                        <label class="block text-[10px] md:text-xs font-bold text-[#FFD700]/80 mb-2 ml-1 uppercase tracking-widest">
+                            EVM 钱包地址 (以 0x 开头)
+                        </label>
+                        <input id="walletInput" type="text" placeholder="0x71C...3a52"
+                            class="w-full border-2 border-[#FFD700]/20 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-[#FFD700] text-sm font-mono transition-all duration-300"
+                            style="background: rgba(10, 5, 25, 0.6);">
+                        <p id="errorMsg" class="text-red-400 text-[10px] mt-2 ml-1 font-bold hidden"></p>
+                    </div>
+
+                    <button id="submitBtn"
+                        class="w-full font-black py-4 rounded-2xl text-lg shadow-lg flex items-center justify-center gap-3 transition-all duration-300 hover:brightness-110"
+                        style="background: linear-gradient(145deg, #FFD700 0%, #e6ac00 50%, #cc9900 100%); color: #1a0e2e;">
+                        <span id="submitBtnText">确定领取并加入</span>
+                        <div id="submitSpinner" class="spinner hidden"></div>
+                    </button>
+
+                    <div class="pt-6 border-t border-[#FFD700]/15 text-center">
+                        <p class="text-[#FFD700]/70 text-xs font-bold mb-4 italic">没有钱包？下载 GreatLove App 免费获取地址</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="https://apps.apple.com/app/greatlove-%E5%A4%A7%E7%88%B1/id6741927371"
+                                target="_blank"
+                                class="hover:bg-white/10 text-white/80 text-[10px] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-[#FFD700]/15"
+                                style="background: rgba(10, 5, 25, 0.5);">
+                                <span>🍎</span> App Store
+                            </a>
+                            <a href="https://files.greatlovedao.com/storage/v1/object/public/apk/greatlove.apk"
+                                target="_blank"
+                                class="hover:bg-white/10 text-white/80 text-[10px] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-[#FFD700]/15"
+                                style="background: rgba(10, 5, 25, 0.5);">
+                                <span>🤖</span> Android APK
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Landing Success Section -->
+        <div id="landingSection" class="w-full max-w-md hidden px-2 mb-10 fade-in">
+            <div class="card-panel p-6 sm:p-8 rounded-[2rem] text-center neon-border mb-8">
+                <div class="text-5xl mb-4">🏆</div>
+                <h3 class="text-2xl sm:text-3xl font-black text-[#FFD700] mb-2 text-glow">领取成功!</h3>
+                <p id="landingMsg" class="text-white/80 text-sm mb-6 leading-relaxed"></p>
+                <button id="replayBtn"
+                    class="w-full font-black py-4 rounded-2xl text-lg shadow-lg hover:brightness-110 transition-all duration-300"
+                    style="background: linear-gradient(145deg, #FFD700 0%, #e6ac00 50%, #cc9900 100%); color: #1a0e2e;">
+                    换个钱包继续玩
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <footer class="w-full mt-auto pt-10 pb-6 text-center z-10">
+        <div class="flex items-center justify-center gap-2 mb-3">
+            <span class="text-xs opacity-30" style="color: #ff3344;">♥</span>
+            <div class="h-[1px] w-16 bg-gradient-to-r from-transparent via-[#FFD700]/20 to-transparent"></div>
+            <span class="text-xs opacity-30" style="color: #FFD700;">♠</span>
+            <div class="h-[1px] w-16 bg-gradient-to-r from-transparent via-[#FFD700]/20 to-transparent"></div>
+            <span class="text-xs opacity-30" style="color: #ff3344;">♦</span>
+        </div>
+        <p class="opacity-35 text-[10px] md:text-xs text-[#FFD700]/80 uppercase tracking-tighter">
+            © 2026 GLC Monopoly • <a href="https://www.greatlovedao.com/" class="hover:text-[#FFD700] transition-colors">大爱社区</a> • 一掷千金
+        </p>
+    </footer>
+
+    <!-- Canvas 粒子背景 -->
+    <canvas id="particleBg" class="fixed inset-0 pointer-events-none z-0"></canvas>
+
+    <script>
+        // ===== Bokeh 光斑背景 =====
+        (function () {
+            const canvas = document.getElementById('particleBg');
+            const ctx = canvas.getContext('2d');
+            let W, H;
+
+            function resize() {
+                W = canvas.width = window.innerWidth;
+                H = canvas.height = window.innerHeight;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+
+            // Bokeh 大光斑 — 缓慢上升漂浮
+            const bokehCount = 12;
+            const bokehs = [];
+            for (let i = 0; i < bokehCount; i++) {
+                const palette = [
+                    [255, 215, 0],   // gold
+                    [255, 180, 50],  // warm gold
+                    [200, 140, 255], // soft purple
+                    [255, 80, 120],  // rose
+                    [100, 180, 255], // ice blue
+                ];
+                const c = palette[Math.floor(Math.random() * palette.length)];
+                bokehs.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 60 + 30,
+                    vy: -(Math.random() * 0.15 + 0.05),
+                    vx: (Math.random() - 0.5) * 0.1,
+                    color: c,
+                    baseAlpha: Math.random() * 0.06 + 0.02,
+                    phase: Math.random() * Math.PI * 2,
+                    pulseSpeed: Math.random() * 0.005 + 0.003
+                });
+            }
+
+            // 金色 sparkle 微粒 — 闪烁
+            const sparkleCount = 50;
+            const sparkles = [];
+            for (let i = 0; i < sparkleCount; i++) {
+                sparkles.push({
+                    x: Math.random() * W,
+                    y: Math.random() * H,
+                    r: Math.random() * 1.2 + 0.3,
+                    phase: Math.random() * Math.PI * 2,
+                    speed: Math.random() * 0.02 + 0.01,
+                    maxAlpha: Math.random() * 0.5 + 0.2
+                });
+            }
+
+            let t = 0;
+            function draw() {
+                ctx.clearRect(0, 0, W, H);
+                t++;
+
+                // 画 bokeh
+                bokehs.forEach(b => {
+                    b.x += b.vx;
+                    b.y += b.vy;
+                    // 从底部重生
+                    if (b.y + b.r < 0) { b.y = H + b.r; b.x = Math.random() * W; }
+                    if (b.x < -b.r) b.x = W + b.r;
+                    if (b.x > W + b.r) b.x = -b.r;
+
+                    const pulse = Math.sin(b.phase + t * b.pulseSpeed) * 0.5 + 0.5;
+                    const alpha = b.baseAlpha * (0.6 + pulse * 0.4);
+
+                    const grad = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, b.r);
+                    grad.addColorStop(0, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},${alpha})`);
+                    grad.addColorStop(0.5, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},${alpha * 0.3})`);
+                    grad.addColorStop(1, `rgba(${b.color[0]},${b.color[1]},${b.color[2]},0)`);
+
+                    ctx.beginPath();
+                    ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+                    ctx.fillStyle = grad;
+                    ctx.fill();
+                });
+
+                // 画 sparkle
+                sparkles.forEach(s => {
+                    const twinkle = Math.sin(s.phase + t * s.speed);
+                    // 只在正半周期显示，产生闪烁效果
+                    if (twinkle > 0) {
+                        const alpha = twinkle * s.maxAlpha;
+                        ctx.beginPath();
+                        // 十字星形
+                        const len = s.r * 2.5;
+                        ctx.moveTo(s.x - len, s.y);
+                        ctx.lineTo(s.x, s.y - s.r * 0.4);
+                        ctx.lineTo(s.x + len, s.y);
+                        ctx.lineTo(s.x, s.y + s.r * 0.4);
+                        ctx.closePath();
+                        ctx.fillStyle = `rgba(255,225,150,${alpha})`;
+                        ctx.fill();
+
+                        ctx.beginPath();
+                        ctx.moveTo(s.x, s.y - len);
+                        ctx.lineTo(s.x - s.r * 0.4, s.y);
+                        ctx.lineTo(s.x, s.y + len);
+                        ctx.lineTo(s.x + s.r * 0.4, s.y);
+                        ctx.closePath();
+                        ctx.fillStyle = `rgba(255,225,150,${alpha * 0.6})`;
+                        ctx.fill();
+                    }
+                });
+
+                requestAnimationFrame(draw);
+            }
+            draw();
+        })();
+
+        // ===== 游戏逻辑 =====
+        const PROXY_ENDPOINT = "https://partners.greatlovedao.com/partner/glc/register-wallet";
+        const DUPLICATE_CHECK_ENDPOINT = "https://partners.greatlovedao.com/claim/is-claimed-already";
+        const VENDOR_SLUG = "glc";
+
+        const PROPERTY_DATA = [
+            { emoji: '💎', name: '钻石大道', points: 12 },
+            { emoji: '🏰', name: '皇家城堡', points: 10 },
+            { emoji: '🌟', name: '星光大道', points: 10 },
+            { emoji: '🏦', name: '中央银行', points: 8 },
+            { emoji: '🏗️', name: '摩天大楼', points: 8 },
+            { emoji: '🎡', name: '欢乐乐园', points: 6 },
+            { emoji: '🌴', name: '天堂海岛', points: 6 },
+            { emoji: '🚂', name: '环球铁路', points: 4 },
+            { emoji: '🎰', name: '幸运赌场', points: 4 },
+            { emoji: '🏠', name: '温馨小屋', points: 2 },
+            { emoji: '🏪', name: '街角商店', points: 2 },
+            { emoji: '🅿️', name: '免费停车', points: 1 },
+        ];
+
+        let rotation = 0;
+        let spinsLeft = 3;
+        let totalScore = 0;
+        let isSpinning = false;
+        let greatLoveResultReported = false;
+
+        function beginGreatLoveAttempt() {
+            greatLoveResultReported = false;
+        }
+
+        function reportGreatLoveResult() {
+            if (greatLoveResultReported || window.parent === window) return;
+            greatLoveResultReported = true;
+            const attemptId = typeof crypto.randomUUID === 'function'
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(36).slice(2)}-monopoly`;
+            window.parent.postMessage({
+                type: 'greatlove:game-result',
+                game: 'monopoly',
+                rawScore: totalScore,
+                attemptId
+            }, window.location.origin);
+        }
+
+        const LS_PREFIX = 'glc_monopoly_';
+        const claimedWallets = new Set(
+            JSON.parse(localStorage.getItem(LS_PREFIX + 'claimed_wallets') || '[]').map(w => w.toLowerCase())
+        );
+
+        const wheelEl = document.getElementById('wheel');
+        const spinBtn = document.getElementById('spinBtn');
+        const spinBtnText = document.getElementById('spinBtnText');
+        const spinSubText = document.getElementById('spinSubText');
+        const scoreEl = document.getElementById('totalScore');
+        const spinsLeftEl = document.getElementById('spinsLeft');
+        const winDisplay = document.getElementById('winDisplay');
+        const winEmoji = document.getElementById('winEmoji');
+        const winText = document.getElementById('winText');
+        const airdropSection = document.getElementById('airdropSection');
+        const landingSection = document.getElementById('landingSection');
+        const walletInput = document.getElementById('walletInput');
+        const submitBtn = document.getElementById('submitBtn');
+        const submitBtnText = document.getElementById('submitBtnText');
+        const submitSpinner = document.getElementById('submitSpinner');
+        const errorMsg = document.getElementById('errorMsg');
+
+        function addClaimedWallet(wallet) {
+            claimedWallets.add(wallet.toLowerCase());
+            const list = JSON.parse(localStorage.getItem(LS_PREFIX + 'claimed_wallets') || '[]');
+            if (!list.some(w => w.toLowerCase() === wallet.toLowerCase())) {
+                list.push(wallet);
+                localStorage.setItem(LS_PREFIX + 'claimed_wallets', JSON.stringify(list));
+            }
+            localStorage.setItem(LS_PREFIX + 'claimed_wallet', wallet);
+            localStorage.setItem(LS_PREFIX + 'claimed_score', totalScore);
+        }
+
+        function checkClaimStatus() {
+            const savedWallet = localStorage.getItem(LS_PREFIX + 'claimed_wallet');
+            const savedScore = localStorage.getItem(LS_PREFIX + 'claimed_score');
+            if (savedWallet) {
+                if (airdropSection) airdropSection.classList.add('hidden');
+                if (wheelEl) wheelEl.parentElement.classList.add('hidden');
+                const scoreboard = document.querySelector('.flex.justify-between.w-full.max-w-\\[300px\\]');
+                if (scoreboard) scoreboard.classList.add('hidden');
+                if (winDisplay) winDisplay.classList.add('hidden');
+
+                if (landingSection) {
+                    landingSection.classList.remove('hidden');
+                    const landingTitle = landingSection.querySelector('h3');
+                    if (landingTitle) landingTitle.innerText = "您已领取过奖励";
+                    const landingMsg = document.getElementById('landingMsg');
+                    if (landingMsg) {
+                        landingMsg.innerHTML = `钱包 <span class="text-[#FFD700] font-mono">${savedWallet}</span> 已成功领取 ${((savedScore || 0) * 100000).toLocaleString()} GLC。`;
+                    }
+                }
+            }
+        }
+
+        function resetForNewWallet() {
+            localStorage.removeItem(LS_PREFIX + 'claimed_wallet');
+            localStorage.removeItem(LS_PREFIX + 'claimed_score');
+            beginGreatLoveAttempt();
+
+            rotation = 0;
+            spinsLeft = 3;
+            totalScore = 0;
+            isSpinning = false;
+
+            scoreEl.innerHTML = formatReward(0);
+            spinsLeftEl.innerText = '3';
+            wheelEl.style.transition = 'none';
+            wheelEl.style.transform = 'rotate(0deg)';
+            setTimeout(() => { wheelEl.style.transition = ''; }, 50);
+
+            spinBtnText.innerHTML = '掷骰<br/>开转';
+            spinSubText.classList.remove('hidden');
+            spinBtn.classList.remove('grayscale', 'opacity-50');
+            spinBtn.classList.add('btn-casino-glow');
+
+            winDisplay.classList.add('invisible');
+            winDisplay.classList.remove('hidden');
+            airdropSection.classList.add('hidden');
+            landingSection.classList.add('hidden');
+
+            wheelEl.parentElement.classList.remove('hidden');
+            const scoreboard = document.querySelector('.flex.justify-between.w-full.max-w-\\[300px\\]');
+            if (scoreboard) scoreboard.classList.remove('hidden');
+
+            walletInput.value = '';
+            errorMsg.classList.add('hidden');
+        }
+
+        // 为每格配色 — 交替深紫/暗红营造赌场感
+        const SEGMENT_COLORS = [
+            '#2d1b69', '#6b1a3a', '#1e3a6b', '#6b3a1a',
+            '#3a1e6b', '#6b1a2d', '#1a4d6b', '#6b4d1a',
+            '#4d1a6b', '#6b1a4d', '#1a6b4d', '#4d3a1a'
+        ];
+
+        function initWheel() {
+            if (!wheelEl) return;
+            PROPERTY_DATA.forEach((item, i) => {
+                const segment = document.createElement('div');
+                segment.className = 'wheel-segment';
+                segment.style.transform = `rotate(${i * 30}deg)`;
+
+                // 绘制扇形色块
+                const startAngle = -15;
+                const endAngle = 15;
+                segment.innerHTML = `
+                    <div class="absolute top-0 left-1/2 w-[1px] h-1/2 -translate-x-1/2 origin-bottom segment-line"></div>
+                    <div class="wheel-content">
+                        <span class="text-2xl sm:text-3xl md:text-4xl lg:text-5xl" style="filter: drop-shadow(0 0 6px rgba(255,215,0,0.4));">${item.emoji}</span>
+                        <div class="text-[8px] md:text-[10px] text-[#FFD700] font-black mt-0 md:mt-1" style="text-shadow: 0 0 6px rgba(255,215,0,0.5);">${item.points}</div>
+                    </div>
+                `;
+                wheelEl.appendChild(segment);
+            });
+        }
+
+        const SCORE_LOW = 10;   // 低于此值提示重玩
+        const SCORE_HIGH = 20;  // 高于此值给鼓励（最高32）
+
+        function formatReward(num) {
+            return `${(num * 100000).toLocaleString()}<span class="reward-unit">GLC</span>`;
+        }
+
+        function showScoreSummary() {
+            const summaryEmoji = document.getElementById('summaryEmoji');
+            const summaryScore = document.getElementById('summaryScore');
+            const summaryMsg = document.getElementById('summaryMsg');
+            const retryBtn = document.getElementById('retryBtn');
+            const retryDivider = document.getElementById('retryDivider');
+            const claimTitle = document.getElementById('claimTitle');
+
+            summaryScore.innerHTML = formatReward(totalScore);
+
+            if (totalScore >= SCORE_HIGH) {
+                // 高分鼓励
+                const pct = Math.min(95, Math.round(60 + (totalScore - SCORE_HIGH) / (32 - SCORE_HIGH) * 35));
+                summaryEmoji.textContent = '🎉';
+                summaryMsg.innerHTML = `手气爆棚！你超越了 <span class="text-[#FFD700] font-black">${pct}%</span> 的玩家，<br/>堪称地产大亨！`;
+                claimTitle.textContent = '立即领取你的丰厚收益';
+                retryBtn.classList.add('hidden');
+                retryDivider.classList.add('hidden');
+            } else if (totalScore < SCORE_LOW) {
+                // 低分提示重玩
+                summaryEmoji.textContent = '😅';
+                summaryMsg.innerHTML = '这次运气差了点，分数不太够哦...<br/>要不再来一局试试手气？';
+                claimTitle.textContent = '领取你的地产收益';
+                retryBtn.classList.remove('hidden');
+                retryDivider.classList.remove('hidden');
+            } else {
+                // 中等分数
+                summaryEmoji.textContent = '✨';
+                summaryMsg.innerHTML = '收益不错，恭喜你成功投资了一波地产！';
+                claimTitle.textContent = '领取你的地产收益';
+                retryBtn.classList.add('hidden');
+                retryDivider.classList.add('hidden');
+            }
+        }
+
+        function retryGame() {
+            // 重玩但不清除已领取钱包记录
+            beginGreatLoveAttempt();
+            rotation = 0;
+            spinsLeft = 3;
+            totalScore = 0;
+            isSpinning = false;
+
+            scoreEl.innerHTML = formatReward(0);
+            spinsLeftEl.innerText = '3';
+            wheelEl.style.transition = 'none';
+            wheelEl.style.transform = 'rotate(0deg)';
+            setTimeout(() => { wheelEl.style.transition = ''; }, 50);
+
+            spinBtnText.innerHTML = '掷骰<br/>开转';
+            spinSubText.classList.remove('hidden');
+            spinBtn.classList.remove('grayscale', 'opacity-50');
+            spinBtn.classList.add('btn-casino-glow');
+
+            winDisplay.classList.add('invisible');
+            airdropSection.classList.add('hidden');
+
+            wheelEl.parentElement.classList.remove('hidden');
+            const scoreboard = document.querySelector('.flex.justify-between.w-full.max-w-\\[300px\\]');
+            if (scoreboard) scoreboard.classList.remove('hidden');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function isEvm(addr) {
+            return /^0x[a-fA-F0-9]{40}$/.test(addr);
+        }
+
+        function handleSpin() {
+            if (isSpinning || spinsLeft <= 0) return;
+
+            isSpinning = true;
+            winDisplay.classList.add('invisible');
+            spinBtn.classList.remove('btn-casino-glow');
+            spinBtnText.innerHTML = '🎲';
+            spinBtnText.classList.add('dice-bounce');
+            spinSubText.classList.add('hidden');
+
+            const targetIndex = Math.floor(Math.random() * PROPERTY_DATA.length);
+            const extraSpins = 6 + Math.floor(Math.random() * 4);
+            const targetModulo = (360 - (targetIndex * 30)) % 360;
+            const currentModulo = rotation % 360;
+            let delta = targetModulo - currentModulo;
+            if (delta <= 0) delta += 360;
+
+            rotation += (extraSpins * 360) + delta;
+            wheelEl.style.transform = `rotate(${rotation}deg)`;
+
+            setTimeout(() => {
+                isSpinning = false;
+                spinsLeft--;
+                const win = PROPERTY_DATA[targetIndex];
+                totalScore += win.points;
+
+                scoreEl.innerHTML = formatReward(totalScore);
+                spinsLeftEl.innerText = spinsLeft.toString();
+                winEmoji.innerText = win.emoji;
+                winText.innerHTML = `恭喜购入「${win.name}」获得 ${formatReward(win.points)}!`;
+                winDisplay.classList.remove('invisible');
+                spinBtnText.classList.remove('dice-bounce');
+
+                if (spinsLeft > 0) {
+                    spinBtnText.innerHTML = '再转<br/>一次';
+                    spinSubText.classList.remove('hidden');
+                    spinSubText.textContent = 'ROLL';
+                    spinBtn.classList.add('btn-casino-glow');
+                } else {
+                    spinBtnText.innerHTML = '已完成';
+                    spinBtn.classList.add('grayscale', 'opacity-50');
+                    showScoreSummary();
+                    reportGreatLoveResult();
+                    airdropSection.classList.remove('hidden');
+                    setTimeout(() => airdropSection.scrollIntoView({ behavior: 'smooth' }), 500);
+                }
+            }, 4100);
+        }
+
+        function addDebugLog(emoji, message, data = null) {
+            console.log(`${emoji} [DEBUG]`, message, data || '');
+        }
+
+        function showAlreadyClaimedUI(wallet) {
+            airdropSection.classList.add('hidden');
+            landingSection.classList.remove('hidden');
+            const landingTitle = landingSection.querySelector('h3');
+            if (landingTitle) landingTitle.innerText = "该钱包已领取过奖励";
+            const landingMsg = document.getElementById('landingMsg');
+            if (landingMsg) {
+                landingMsg.innerHTML = `钱包 <span class="text-[#FFD700] font-mono">${wallet}</span> 已参与过活动，每个钱包仅可领取一次。<br/>请使用其他钱包地址参与。`;
+            }
+            landingSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        async function handleSubmit() {
+            const wallet = walletInput.value.trim();
+
+            if (!isEvm(wallet)) {
+                errorMsg.innerText = "请输入有效的EVM钱包地址 (0x 开头)";
+                errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (claimedWallets.has(wallet.toLowerCase())) {
+                addDebugLog("⚠️", "内存中已存在该钱包", { wallet });
+                showAlreadyClaimedUI(wallet);
+                return;
+            }
+
+            errorMsg.classList.add('hidden');
+            submitBtn.disabled = true;
+            submitBtnText.innerText = "正在验证钱包...";
+            submitSpinner.classList.remove('hidden');
+
+            // Step 1: Check wallet duplicate
+            try {
+                const checkController = new AbortController();
+                const checkTimeout = setTimeout(() => checkController.abort(), 10000);
+
+                addDebugLog("🔍", "开始检查钱包", { wallet, vendor_slug: VENDOR_SLUG });
+
+                const checkResponse = await fetch(DUPLICATE_CHECK_ENDPOINT, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ vendor_slug: VENDOR_SLUG, wallet }),
+                    signal: checkController.signal
+                });
+
+                clearTimeout(checkTimeout);
+                addDebugLog("📡", "重复检查API响应状态", { status: checkResponse.status });
+
+                const rawText = await checkResponse.text();
+                let duplicateData;
+                try { duplicateData = JSON.parse(rawText); } catch { duplicateData = rawText; }
+
+                addDebugLog("📡", "重复检查API返回数据", { data: duplicateData });
+
+                const normalized = typeof duplicateData === "string"
+                    ? duplicateData.trim().toUpperCase() : "";
+
+                const isDuplicate =
+                    normalized === "YES" ||
+                    duplicateData === true ||
+                    String(duplicateData?.claimed || "").trim().toUpperCase() === "YES" ||
+                    String(duplicateData?.is_claimed || "").trim().toUpperCase() === "YES" ||
+                    String(duplicateData?.duplicate || "").trim().toUpperCase() === "YES" ||
+                    String(duplicateData?.result || "").trim().toUpperCase() === "YES" ||
+                    duplicateData?.claimed === true ||
+                    duplicateData?.is_claimed === true ||
+                    duplicateData?.duplicate === true;
+
+                if (checkResponse.ok && isDuplicate) {
+                    addDebugLog("🚫", "API判定为重复领取", { wallet });
+                    addClaimedWallet(wallet);
+                    submitBtn.disabled = false;
+                    submitBtnText.innerText = "确定领取并加入";
+                    submitSpinner.classList.add('hidden');
+                    showAlreadyClaimedUI(wallet);
+                    return;
+                }
+
+                if (!checkResponse.ok) {
+                    addDebugLog("⚠️", "重复检查API失败", { status: checkResponse.status });
+                    errorMsg.innerText = "服务器繁忙，请稍后再试。";
+                    errorMsg.classList.remove('hidden');
+                    submitBtn.disabled = false;
+                    submitBtnText.innerText = "确定领取并加入";
+                    submitSpinner.classList.add('hidden');
+                    return;
+                }
+
+                addDebugLog("✅", "重复检查通过");
+            } catch (err) {
+                addDebugLog("❌", "重复检查API异常", { message: err.message });
+                errorMsg.innerText = "服务器繁忙，请稍后再试。";
+                errorMsg.classList.remove('hidden');
+                submitBtn.disabled = false;
+                submitBtnText.innerText = "确定领取并加入";
+                submitSpinner.classList.add('hidden');
+                return;
+            }
+
+            // Step 2: Register wallet
+            submitBtnText.innerText = "正在提交...";
+
+            const payload = {
+                wallet,
+                refURL: `https://www.greatlovedao.com?score=${totalScore}`,
+                score1: totalScore
+            };
+
+            addDebugLog("📤", "开始提交到register-wallet", payload);
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                const response = await fetch(PROXY_ENDPOINT, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                addDebugLog("📤", "register-wallet响应状态", { status: response.status });
+
+                if (response.ok) {
+                    addDebugLog("✅", "注册成功");
+
+                    airdropSection.classList.add('hidden');
+                    landingSection.classList.remove('hidden');
+                    const landingTitle = landingSection.querySelector('h3');
+                    if (landingTitle) landingTitle.innerText = "领取成功!";
+                    const landingMsg = document.getElementById('landingMsg');
+                    if (landingMsg) {
+                        landingMsg.innerHTML = `钱包 <span class="text-[#FFD700] font-mono">${wallet}</span> 已成功领取 ${(totalScore * 100000).toLocaleString()} GLC 地产收益。`;
+                    }
+                    landingSection.scrollIntoView({ behavior: 'smooth' });
+                    addClaimedWallet(wallet);
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    addDebugLog("❌", "register-wallet返回错误", { status: response.status });
+
+                    if (response.status === 409 || data?.code === 'WALLET_EXISTS') {
+                        addClaimedWallet(wallet);
+                        showAlreadyClaimedUI(wallet);
+                    } else {
+                        errorMsg.innerText = "提交失败，请稍后重试。";
+                        errorMsg.classList.remove('hidden');
+                    }
+                }
+            } catch (err) {
+                addDebugLog("❌", "提交异常", { message: err.message });
+                errorMsg.innerText = "网络连接失败，请稍后再试。";
+                errorMsg.classList.remove('hidden');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtnText.innerText = "确定领取并加入";
+                submitSpinner.classList.add('hidden');
+            }
+        }
+
+        if (spinBtn) spinBtn.onclick = handleSpin;
+        if (submitBtn) submitBtn.onclick = handleSubmit;
+        document.getElementById('replayBtn').onclick = resetForNewWallet;
+
+        initWheel();
+        checkClaimStatus();
+    </script>
+</body>
+
+</html>

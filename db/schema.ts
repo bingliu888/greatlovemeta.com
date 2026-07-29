@@ -174,3 +174,18 @@ export const userPresence = sqliteTable("user_presence", {
   userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
   lastSeenAt: integer("last_seen_at").notNull(),
 });
+
+export const gameDailyLogs = sqliteTable("game_daily_logs", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  gameKey: text("game_key").notNull(),
+  playDate: text("play_date").notNull(),
+  rawScore: integer("raw_score").notNull(),
+  score: integer("score").notNull(),
+  unit: text("unit").notNull().default("GLC"),
+  attemptId: text("attempt_id").notNull().unique(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [
+  index("greatlovemeta_game_log_user_date_idx").on(table.userId, table.playDate),
+  index("greatlovemeta_game_log_user_created_idx").on(table.userId, table.createdAt),
+]);

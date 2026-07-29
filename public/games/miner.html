@@ -1,0 +1,1529 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Security-Policy"
+        content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';">
+    <title>星际矿工：能量采集计划</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Noto+Sans+SC:wght@400;700;900&display=swap"
+        rel="stylesheet">
+    <style>
+        body {
+            background: #070b16;
+            font-family: 'Noto Sans SC', 'Orbitron', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            user-select: none;
+            -webkit-user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .font-tech {
+            font-family: 'Orbitron', monospace;
+        }
+
+        #star-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+        }
+
+        /* ===== 开场简报 ===== */
+        #briefing-screen {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+        }
+
+        .briefing-line {
+            opacity: 0;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
+        }
+
+        .briefing-line.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        .typewriter {
+            overflow: hidden;
+            border-right: 2px solid rgba(0, 242, 255, 0.8);
+            white-space: nowrap;
+            animation: blink-caret 0.75s step-end infinite;
+        }
+
+        @keyframes blink-caret {
+            0%, 100% { border-color: rgba(0, 242, 255, 0.8); }
+            50% { border-color: transparent; }
+        }
+
+        .briefing-btn {
+            opacity: 0;
+            transform: translateY(20px) scale(0.9);
+            transition: opacity 0.8s ease, transform 0.8s ease;
+        }
+
+        .briefing-btn.visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+        }
+
+        /* ===== 玻璃面板 ===== */
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.04);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        /* ===== 按钮 ===== */
+        .btn-neon {
+            background: linear-gradient(135deg, #00f2ff 0%, #007cf0 100%);
+            box-shadow: 0 0 20px rgba(0, 242, 255, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+
+        .btn-neon:hover:not(:disabled) {
+            box-shadow: 0 0 40px rgba(0, 242, 255, 0.7), inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            transform: scale(1.05);
+        }
+
+        .btn-neon:active:not(:disabled) { transform: scale(0.97); }
+
+        .btn-neon:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            background: linear-gradient(135deg, #555 0%, #333 100%);
+            box-shadow: none;
+        }
+
+        /* ===== 结果弹出 ===== */
+        @keyframes result-pop {
+            0% { transform: scale(0.3); opacity: 0; }
+            60% { transform: scale(1.2); opacity: 1; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .result-pop {
+            animation: result-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* ===== 得分飞出 ===== */
+        @keyframes score-fly {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-60px) scale(1.5); }
+        }
+
+        .score-fly {
+            animation: score-fly 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        /* ===== 稀有度颜色 ===== */
+        .rarity-legendary { color: #ffaa00; text-shadow: 0 0 10px rgba(255, 170, 0, 0.5); }
+        .rarity-epic { color: #bf5fff; text-shadow: 0 0 10px rgba(191, 95, 255, 0.5); }
+        .rarity-rare { color: #00b4ff; text-shadow: 0 0 8px rgba(0, 180, 255, 0.4); }
+        .rarity-common { color: #8899aa; }
+
+        /* ===== 面板动画 ===== */
+        @keyframes panel-in {
+            from { opacity: 0; transform: translateY(30px) scale(0.95); }
+            to { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .panel-in { animation: panel-in 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+
+        /* ===== 日志条目 ===== */
+        .log-entry { transition: all 0.3s ease; }
+
+        .log-entry:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 242, 255, 0.3);
+        }
+
+        /* ===== 淡入 ===== */
+        .fade-in {
+            animation: fadeIn 0.8s ease-out forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ===== 提交 spinner ===== */
+        .submit-spinner {
+            border: 3px solid rgba(0, 242, 255, 0.2);
+            border-radius: 50%;
+            border-top: 3px solid #00f2ff;
+            width: 20px;
+            height: 20px;
+            animation: spin-loader 1s linear infinite;
+        }
+
+        @keyframes spin-loader {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== 脉冲按钮 ===== */
+        @keyframes btn-pulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(0, 242, 255, 0.4); }
+            50% { box-shadow: 0 0 40px rgba(0, 242, 255, 0.8), 0 0 60px rgba(0, 242, 255, 0.3); }
+        }
+
+        .btn-pulse {
+            animation: btn-pulse 2s ease-in-out infinite;
+        }
+
+        /* ===== 爆裂闪白 ===== */
+        #screen-flash {
+            position: fixed;
+            inset: 0;
+            z-index: 60;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.1s;
+        }
+
+        /* ===== 游戏Canvas容器 ===== */
+        #game-canvas-wrap {
+            position: relative;
+            width: 100%;
+            max-width: 480px;
+            border-radius: 1.5rem;
+            overflow: hidden;
+            border: 1px solid rgba(0, 242, 255, 0.15);
+            box-shadow: 0 0 30px rgba(0, 242, 255, 0.08), inset 0 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        #game-canvas {
+            display: block;
+            width: 100%;
+            background: radial-gradient(ellipse at 50% 20%, rgba(0,242,255,0.03) 0%, transparent 60%),
+                        linear-gradient(180deg, rgba(7,11,22,0.95) 0%, rgba(10,15,30,0.98) 100%);
+            cursor: crosshair;
+        }
+
+        /* 结果横幅 */
+        #round-result {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            z-index: 20;
+            text-align: center;
+        }
+
+        .result-banner {
+            animation: result-pop 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+
+        /* 闪烁提示 */
+        @keyframes hint-blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.4; }
+        }
+
+        .hint-blink {
+            animation: hint-blink 1s ease-in-out infinite;
+        }
+    </style>
+</head>
+
+<body class="min-h-screen flex flex-col items-center py-8 px-4 relative">
+    <canvas id="star-canvas"></canvas>
+    <div id="screen-flash"></div>
+
+    <!-- ==================== 开场简报 ==================== -->
+    <div id="briefing-screen">
+        <div class="max-w-sm w-full text-center space-y-5">
+            <div class="briefing-line text-cyan-500/60 text-xs font-tech tracking-[0.3em] uppercase">
+                Interstellar Mining Corp.
+            </div>
+            <div class="briefing-line">
+                <p id="briefing-text-1" class="text-cyan-300 text-sm leading-relaxed"></p>
+            </div>
+            <div class="briefing-line">
+                <p id="briefing-text-2" class="text-white text-base font-bold leading-relaxed"></p>
+            </div>
+            <div class="briefing-line">
+                <p id="briefing-text-3" class="text-cyan-400 text-sm leading-relaxed"></p>
+            </div>
+            <div class="briefing-line">
+                <div class="glass-panel rounded-2xl p-4 mt-4 inline-block">
+                    <p class="text-neutral-400 text-xs mb-1">可用抓取次数</p>
+                    <p class="text-3xl font-black text-white font-tech">3</p>
+                </div>
+            </div>
+            <div class="briefing-btn pt-4">
+                <button id="briefing-accept-btn"
+                    class="btn-neon btn-pulse text-black font-black px-12 py-4 rounded-full text-base tracking-wider">
+                    接受任务
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ==================== 游戏主界面（初始隐藏） ==================== -->
+    <div id="game-wrapper" class="w-full flex flex-col items-center" style="opacity: 0; pointer-events: none;">
+
+        <!-- 顶部状态栏 -->
+        <header id="game-header"
+            class="relative z-10 w-full max-w-md glass-panel rounded-2xl p-5 mb-6">
+            <div class="flex justify-between items-center">
+                <div>
+                    <p class="text-[10px] text-cyan-400 uppercase tracking-[0.2em] mb-1">矿工编号</p>
+                    <p id="wallet-id" class="text-xs font-bold text-neutral-300 font-tech">连接中...</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-purple-400 uppercase tracking-[0.2em] mb-1">Total Rewards 总奖励</p>
+                    <div class="relative">
+                        <p id="score-display" class="text-2xl font-black text-white font-tech tabular-nums">0</p>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- 主游戏区域 -->
+        <main id="game-main" class="relative z-10 flex flex-col items-center justify-center flex-1 w-full max-w-lg">
+            <!-- 剩余次数 -->
+            <div class="flex items-center gap-2 mb-3">
+                <div class="w-1.5 h-1.5 bg-red-500 rounded-full animate-pulse"></div>
+                <span class="text-[10px] text-neutral-400">剩余抓取次数</span>
+                <span id="count-display" class="text-sm font-black text-white font-tech">3</span>
+            </div>
+
+            <!-- Canvas 游戏区域 -->
+            <div id="game-canvas-wrap">
+                <canvas id="game-canvas"></canvas>
+                <div id="round-result" class="hidden"></div>
+            </div>
+
+            <!-- 提示文字 -->
+            <p id="msg-box"
+                class="mt-4 text-cyan-200/80 text-xs h-5 transition-all duration-300 text-center max-w-xs hint-blink">
+                点击画面发射钩爪！瞄准矿物！
+            </p>
+
+            <!-- 开始/继续按钮 -->
+            <button id="action-btn"
+                class="btn-neon btn-pulse text-black font-black px-14 py-4 rounded-full text-base tracking-wider active:scale-95 mt-4 hidden">
+                开始采矿
+            </button>
+        </main>
+
+        <!-- 采集记录 -->
+        <section id="game-log" class="relative z-10 w-full max-w-md mt-10 mb-8">
+            <h3 class="text-[10px] text-neutral-500 uppercase mb-3 tracking-[0.2em] text-center">采集记录</h3>
+            <div id="log-container" class="space-y-2"></div>
+        </section>
+
+        <!-- ===== 钱包提交表单 ===== -->
+        <div id="airdrop-section" class="relative z-10 w-full max-w-md hidden px-2 mb-10 fade-in">
+            <div class="glass-panel p-6 sm:p-8 rounded-3xl shadow-2xl relative overflow-hidden">
+
+                <!-- 得分总结区 -->
+                <div class="text-center mb-6">
+                    <p id="airdrop-emoji" class="text-5xl mb-3"></p>
+                    <h3 class="text-lg font-black text-cyan-400 mb-1 tracking-wider">采集任务完成</h3>
+                    <p id="airdrop-encourage" class="text-neutral-300 text-xs mb-4 leading-relaxed"></p>
+                    <div class="glass-panel rounded-2xl p-4 mb-2 inline-block min-w-[180px]">
+                        <p class="text-[10px] text-cyan-400 uppercase tracking-widest mb-1">本次采集总量</p>
+                        <p id="airdrop-score" class="text-3xl font-black text-white font-tech">0</p>
+                        <p class="text-[10px] text-neutral-500 mt-0.5">GLC</p>
+                    </div>
+                    <p id="airdrop-rank" class="text-[10px] text-neutral-500 mt-2 hidden"></p>
+                </div>
+
+                <!-- 分数太低时：重玩按钮 -->
+                <div id="retry-section" class="hidden mb-5">
+                    <div class="glass-panel rounded-2xl p-4 text-center border-yellow-500/20 mb-3">
+                        <p class="text-yellow-400 text-xs font-bold mb-1">能量偏低，要再试一次吗？</p>
+                        <p class="text-neutral-500 text-[10px]">瞄准稀有矿物可以获得更多能量</p>
+                    </div>
+                    <button id="retry-btn"
+                        class="w-full bg-yellow-500 text-black font-black py-3.5 rounded-2xl text-sm tracking-wider mb-3 transition-all hover:bg-yellow-400 active:scale-97">
+                        再来一次
+                    </button>
+                    <div class="flex items-center gap-3 mb-1">
+                        <div class="h-[1px] flex-1 bg-white/10"></div>
+                        <span class="text-neutral-600 text-[10px]">或直接领取</span>
+                        <div class="h-[1px] flex-1 bg-white/10"></div>
+                    </div>
+                </div>
+
+                <!-- 钱包提交区 -->
+                <div id="claim-form" class="space-y-5">
+                    <div class="relative">
+                        <label class="block text-[10px] font-bold text-cyan-400/80 mb-2 ml-1 uppercase tracking-widest">
+                            EVM 钱包地址 (0x 开头)
+                        </label>
+                        <input id="wallet-input" type="text" placeholder="0x71C...3a52"
+                            class="w-full bg-black/40 border-2 border-cyan-500/20 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-cyan-400 text-sm font-mono transition-colors">
+                        <p id="error-msg" class="text-red-400 text-[10px] mt-2 ml-1 font-bold hidden"></p>
+                    </div>
+
+                    <button id="submit-btn"
+                        class="w-full btn-neon text-black font-black py-4 rounded-2xl text-base tracking-wider flex items-center justify-center gap-3">
+                        <span id="submit-btn-text">确定领取</span>
+                        <div id="submit-spinner" class="submit-spinner hidden"></div>
+                    </button>
+
+                    <div class="pt-5 border-t border-white/10 text-center">
+                        <p class="text-neutral-500 text-[10px] font-bold mb-4">没有钱包？下载 GreatLove App 免费获取地址</p>
+                        <div class="grid grid-cols-2 gap-3">
+                            <a href="https://apps.apple.com/app/greatlove-%E5%A4%A7%E7%88%B1/id6741927371"
+                                target="_blank"
+                                class="glass-panel hover:bg-white/10 text-white/80 text-[10px] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
+                                <span>🍎</span> App Store
+                            </a>
+                            <a href="https://files.greatlovedao.com/storage/v1/object/public/apk/greatlove.apk"
+                                target="_blank"
+                                class="glass-panel hover:bg-white/10 text-white/80 text-[10px] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all">
+                                <span>🤖</span> Android APK
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== 领取成功 / 已领取 ===== -->
+        <div id="landing-section" class="relative z-10 w-full max-w-md hidden px-2 mb-10 fade-in">
+            <div class="glass-panel border-cyan-500/30 p-6 sm:p-8 rounded-3xl text-center shadow-2xl">
+                <div class="text-5xl mb-4">🏆</div>
+                <h3 id="landing-title" class="text-xl font-black text-cyan-400 mb-2 tracking-wider">领取成功!</h3>
+                <p id="landing-msg" class="text-neutral-300 text-sm mb-6 leading-relaxed"></p>
+                <div class="glass-panel rounded-2xl p-5 mb-6">
+                    <p class="text-[10px] text-cyan-400 uppercase tracking-widest mb-1">总能量</p>
+                    <p id="landing-score" class="text-4xl font-black text-white font-tech">0</p>
+                    <p class="text-[10px] text-neutral-500 mt-1">GLC</p>
+                </div>
+                <button id="replay-btn"
+                    class="w-full btn-neon text-black font-black py-4 rounded-2xl text-base tracking-wider">
+                    换个钱包继续玩
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ========== API 配置 ==========
+        const PROXY_ENDPOINT = "https://partners.greatlovedao.com/partner/glc/register-wallet";
+        const DUPLICATE_CHECK_ENDPOINT = "https://partners.greatlovedao.com/claim/is-claimed-already";
+        const VENDOR_SLUG = "glc";
+
+        // ========== 星空粒子背景 ==========
+        const starCanvas = document.getElementById('star-canvas');
+        const starCtx = starCanvas.getContext('2d');
+        let stars = [];
+
+        function resizeStars() {
+            starCanvas.width = window.innerWidth;
+            starCanvas.height = window.innerHeight;
+        }
+
+        function createStars(count) {
+            stars = [];
+            for (let i = 0; i < count; i++) {
+                stars.push({
+                    x: Math.random() * starCanvas.width,
+                    y: Math.random() * starCanvas.height,
+                    r: Math.random() * 1.5 + 0.3,
+                    alpha: Math.random(),
+                    delta: (Math.random() - 0.5) * 0.01,
+                });
+            }
+        }
+
+        function drawStars() {
+            starCtx.clearRect(0, 0, starCanvas.width, starCanvas.height);
+            for (const s of stars) {
+                s.alpha += s.delta;
+                if (s.alpha <= 0.1 || s.alpha >= 1) s.delta *= -1;
+                starCtx.beginPath();
+                starCtx.arc(s.x, s.y, s.r, 0, Math.PI * 2);
+                starCtx.fillStyle = `rgba(200, 220, 255, ${s.alpha})`;
+                starCtx.fill();
+            }
+            requestAnimationFrame(drawStars);
+        }
+
+        resizeStars();
+        createStars(160);
+        drawStars();
+        window.addEventListener('resize', () => { resizeStars(); createStars(160); });
+
+        // ========== 游戏数据 ==========
+        const MINERALS = [
+            { name: "脉冲星晶体", icon: "💎", points: 15, msg: "发现极高能量反应！",   rarity: "legendary", weight: 5  },
+            { name: "暗物质核心", icon: "🕳️", points: 12, msg: "捕获稀有暗物质！",     rarity: "epic",      weight: 10 },
+            { name: "钛金碎片",   icon: "🛡️", points: 8,  msg: "坚固的金属资源。",     rarity: "rare",      weight: 25 },
+            { name: "星际尘埃",   icon: "🌫️", points: 5,  msg: "基础能量粒子。",       rarity: "common",    weight: 35 },
+            { name: "宇宙废铁",   icon: "⚙️", points: 2,  msg: "聊胜于无的发现。",     rarity: "common",    weight: 25 },
+        ];
+
+        const RARITY_LABELS = { legendary: "传说", epic: "史诗", rare: "稀有", common: "普通" };
+        const RARITY_COLORS = {
+            legendary: { bg: "rgba(255,170,0,0.8)", glow: "rgba(255,170,0,0.5)" },
+            epic:      { bg: "rgba(191,95,255,0.8)", glow: "rgba(191,95,255,0.5)" },
+            rare:      { bg: "rgba(0,180,255,0.8)", glow: "rgba(0,180,255,0.5)" },
+            common:    { bg: "rgba(180,190,200,0.6)", glow: "rgba(180,190,200,0.3)" },
+        };
+
+        // 矿物在Canvas中的显示配置（缩小，增加精准度挑战）
+        const MINERAL_DISPLAY = {
+            legendary: { radius: 12, glowColor: 'rgba(255,170,0,', fontSize: 16 },
+            epic:      { radius: 15, glowColor: 'rgba(191,95,255,', fontSize: 19 },
+            rare:      { radius: 18, glowColor: 'rgba(0,180,255,', fontSize: 22 },
+            common:    { radius: 22, glowColor: 'rgba(180,190,200,', fontSize: 26 },
+        };
+
+        // ========== 缓存 DOM ==========
+        const DOM = {
+            briefingScreen: document.getElementById('briefing-screen'),
+            briefingAcceptBtn: document.getElementById('briefing-accept-btn'),
+            gameWrapper:   document.getElementById('game-wrapper'),
+            header:        document.getElementById('game-header'),
+            gameMain:      document.getElementById('game-main'),
+            gameLog:       document.getElementById('game-log'),
+            btn:           document.getElementById('action-btn'),
+            msgBox:        document.getElementById('msg-box'),
+            countDisp:     document.getElementById('count-display'),
+            scoreDisp:     document.getElementById('score-display'),
+            logContainer:  document.getElementById('log-container'),
+            screenFlash:   document.getElementById('screen-flash'),
+            canvasWrap:    document.getElementById('game-canvas-wrap'),
+            canvas:        document.getElementById('game-canvas'),
+            roundResult:   document.getElementById('round-result'),
+            airdropSection: document.getElementById('airdrop-section'),
+            landingSection: document.getElementById('landing-section'),
+            walletInput:   document.getElementById('wallet-input'),
+            submitBtn:     document.getElementById('submit-btn'),
+            submitBtnText: document.getElementById('submit-btn-text'),
+            submitSpinner: document.getElementById('submit-spinner'),
+            errorMsg:      document.getElementById('error-msg'),
+            replayBtn:     document.getElementById('replay-btn'),
+            landingTitle:  document.getElementById('landing-title'),
+            landingMsg:    document.getElementById('landing-msg'),
+            landingScore:  document.getElementById('landing-score'),
+            airdropEmoji:  document.getElementById('airdrop-emoji'),
+            airdropEncourage: document.getElementById('airdrop-encourage'),
+            airdropScore:  document.getElementById('airdrop-score'),
+            airdropRank:   document.getElementById('airdrop-rank'),
+            retrySection:  document.getElementById('retry-section'),
+            retryBtn:      document.getElementById('retry-btn'),
+        };
+
+        const ctx = DOM.canvas.getContext('2d');
+
+        // ========== 游戏状态 ==========
+        let totalScore = 0;
+        let leftCounts = 3;
+        let gamePhase = 'WAITING'; // WAITING, IDLE, SHOOTING, REELING, RESULT
+        let greatLoveResultReported = false;
+        let pendulumAngle = 0;
+        let pendulumDir = 1;
+        let hookX = 0, hookY = 0;
+        let hookDX = 0, hookDY = 0;
+        let hookLength = 0;
+        let maxHookLength = 0;
+        let caughtMineral = null;
+        let currentMinerals = [];
+        let shipX = 0, shipY = 40;
+        let animFrameId = null;
+        let CW = 0, CH = 0; // canvas width/height
+
+        function beginGreatLoveAttempt() {
+            greatLoveResultReported = false;
+        }
+
+        function reportGreatLoveResult() {
+            if (greatLoveResultReported || window.parent === window) return;
+            greatLoveResultReported = true;
+            const attemptId = typeof crypto.randomUUID === 'function'
+                ? crypto.randomUUID()
+                : `${Date.now()}-${Math.random().toString(36).slice(2)}-miner`;
+            window.parent.postMessage({
+                type: 'greatlove:game-result',
+                game: 'miner',
+                rawScore: totalScore,
+                attemptId
+            }, window.location.origin);
+        }
+
+        // ========== Web Audio 声效 ==========
+        let audioCtx = null;
+        function getAudio() {
+            if (!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            return audioCtx;
+        }
+
+        function playSound(type) {
+            try {
+                const ac = getAudio();
+                const osc = ac.createOscillator();
+                const gain = ac.createGain();
+                osc.connect(gain);
+                gain.connect(ac.destination);
+                const t = ac.currentTime;
+
+                if (type === 'shoot') {
+                    // 发射：短促下降音
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(800, t);
+                    osc.frequency.exponentialRampToValueAtTime(200, t + 0.15);
+                    gain.gain.setValueAtTime(0.12, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.2);
+                    osc.start(t);
+                    osc.stop(t + 0.2);
+                } else if (type === 'catch') {
+                    // 抓到：上升叮咚
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(400, t);
+                    osc.frequency.exponentialRampToValueAtTime(1200, t + 0.1);
+                    gain.gain.setValueAtTime(0.15, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.3);
+                    osc.start(t);
+                    osc.stop(t + 0.3);
+                    // 第二音
+                    const osc2 = ac.createOscillator();
+                    const gain2 = ac.createGain();
+                    osc2.connect(gain2);
+                    gain2.connect(ac.destination);
+                    osc2.type = 'sine';
+                    osc2.frequency.setValueAtTime(600, t + 0.08);
+                    osc2.frequency.exponentialRampToValueAtTime(1600, t + 0.18);
+                    gain2.gain.setValueAtTime(0.1, t + 0.08);
+                    gain2.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+                    osc2.start(t + 0.08);
+                    osc2.stop(t + 0.35);
+                } else if (type === 'miss') {
+                    // 未抓到：低沉回弹
+                    osc.type = 'triangle';
+                    osc.frequency.setValueAtTime(300, t);
+                    osc.frequency.exponentialRampToValueAtTime(100, t + 0.2);
+                    gain.gain.setValueAtTime(0.08, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.25);
+                    osc.start(t);
+                    osc.stop(t + 0.25);
+                } else if (type === 'reel') {
+                    // 回拉：滴答节奏
+                    osc.type = 'square';
+                    osc.frequency.setValueAtTime(150, t);
+                    gain.gain.setValueAtTime(0.03, t);
+                    gain.gain.exponentialRampToValueAtTime(0.001, t + 0.05);
+                    osc.start(t);
+                    osc.stop(t + 0.05);
+                } else if (type === 'legendary') {
+                    // 传说级：华丽琶音
+                    [523, 659, 784, 1047].forEach((freq, i) => {
+                        const o = ac.createOscillator();
+                        const g = ac.createGain();
+                        o.connect(g);
+                        g.connect(ac.destination);
+                        o.type = 'sine';
+                        o.frequency.value = freq;
+                        const start = t + i * 0.08;
+                        g.gain.setValueAtTime(0.12, start);
+                        g.gain.exponentialRampToValueAtTime(0.001, start + 0.4);
+                        o.start(start);
+                        o.stop(start + 0.4);
+                    });
+                }
+            } catch (e) { /* audio not supported */ }
+        }
+
+        // ========== 画面震动 ==========
+        let shakeIntensity = 0;
+        let shakeDecay = 0;
+
+        function triggerShake(intensity) {
+            shakeIntensity = intensity;
+            shakeDecay = 0.9;
+        }
+
+        function applyShake() {
+            if (shakeIntensity < 0.5) {
+                DOM.canvasWrap.style.transform = '';
+                return;
+            }
+            const dx = (Math.random() - 0.5) * shakeIntensity;
+            const dy = (Math.random() - 0.5) * shakeIntensity;
+            DOM.canvasWrap.style.transform = `translate(${dx}px, ${dy}px)`;
+            shakeIntensity *= shakeDecay;
+        }
+
+        // ========== 已领取钱包记录 ==========
+        const claimedWallets = new Set(
+            JSON.parse(localStorage.getItem('glc_miner_claimed_wallets') || '[]').map(w => w.toLowerCase())
+        );
+
+        const minerDisplayId = "MINER-" + crypto.getRandomValues(new Uint8Array(3))
+            .reduce((s, b) => s + b.toString(16).padStart(2, '0'), '').toUpperCase();
+        document.getElementById('wallet-id').textContent = minerDisplayId;
+
+        // ========== 工具函数 ==========
+        function isEvm(addr) { return /^0x[a-fA-F0-9]{40}$/.test(addr); }
+
+        function addClaimedWallet(wallet) {
+            claimedWallets.add(wallet.toLowerCase());
+            const list = JSON.parse(localStorage.getItem('glc_miner_claimed_wallets') || '[]');
+            if (!list.some(w => w.toLowerCase() === wallet.toLowerCase())) {
+                list.push(wallet);
+                localStorage.setItem('glc_miner_claimed_wallets', JSON.stringify(list));
+            }
+            localStorage.setItem('glc_miner_claimed_wallet', wallet);
+            localStorage.setItem('glc_miner_claimed_score', totalScore);
+        }
+
+        function addDebugLog(emoji, message, data = null) {
+            console.log(`${emoji} [DEBUG]`, message, data || '');
+        }
+
+        function weightedRandom(items, speedMultiplier = 1) {
+            const adjusted = items.map(m => ({
+                ...m,
+                adjWeight: (m.rarity === 'legendary' || m.rarity === 'epic')
+                    ? m.weight * speedMultiplier
+                    : m.weight
+            }));
+            const totalWeight = adjusted.reduce((sum, m) => sum + m.adjWeight, 0);
+            let rand = Math.random() * totalWeight;
+            for (const item of adjusted) {
+                rand -= item.adjWeight;
+                if (rand <= 0) return item;
+            }
+            return items[items.length - 1];
+        }
+
+        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
+
+        // ========== 开场简报 ==========
+        const BRIEFING_LINES = [
+            { id: "briefing-text-1", text: "公元 3047 年，深空第七矿区..." },
+            { id: "briefing-text-2", text: "你操控采矿飞船的钩爪系统，精准捕获漂浮矿物。" },
+            { id: "briefing-text-3", text: "任务：瞄准、发射、采集能量晶体。你有 3 次机会。" },
+        ];
+
+        async function playBriefing() {
+            const lines = DOM.briefingScreen.querySelectorAll('.briefing-line');
+            for (let i = 0; i < lines.length; i++) {
+                await sleep(600);
+                lines[i].classList.add('visible');
+                if (i > 0 && i <= BRIEFING_LINES.length) {
+                    const cfg = BRIEFING_LINES[i - 1];
+                    const el = document.getElementById(cfg.id);
+                    if (el) await typeText(el, cfg.text, 40);
+                }
+            }
+            await sleep(400);
+            DOM.briefingScreen.querySelector('.briefing-btn').classList.add('visible');
+        }
+
+        function typeText(el, text, speed) {
+            return new Promise(resolve => {
+                el.textContent = '';
+                el.classList.add('typewriter');
+                let i = 0;
+                const timer = setInterval(() => {
+                    el.textContent += text[i];
+                    i++;
+                    if (i >= text.length) {
+                        clearInterval(timer);
+                        el.classList.remove('typewriter');
+                        resolve();
+                    }
+                }, speed);
+            });
+        }
+
+        DOM.briefingAcceptBtn.addEventListener('click', () => {
+            DOM.briefingScreen.style.transition = 'opacity 0.8s ease';
+            DOM.briefingScreen.style.opacity = '0';
+            setTimeout(() => {
+                DOM.briefingScreen.style.display = 'none';
+                DOM.gameWrapper.style.transition = 'opacity 0.8s ease';
+                DOM.gameWrapper.style.opacity = '1';
+                DOM.gameWrapper.style.pointerEvents = 'auto';
+                setTimeout(() => startRound(), 600);
+            }, 800);
+        });
+
+        // ========== Canvas 尺寸 ==========
+        function resizeCanvas() {
+            const wrap = DOM.canvasWrap;
+            const w = wrap.clientWidth;
+            const h = Math.round(w * 1.4); // 宽高比 1:1.4 更深的采矿区
+            const dpr = window.devicePixelRatio || 1;
+            DOM.canvas.width = w * dpr;
+            DOM.canvas.height = h * dpr;
+            DOM.canvas.style.height = h + 'px';
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            CW = w;
+            CH = h;
+            shipX = CW / 2;
+            shipY = 35;
+            maxHookLength = CH - shipY - 20;
+        }
+
+        // ========== 矿物生成 ==========
+        function generateMinerals() {
+            currentMinerals = [];
+            const padding = 40;
+            const minY = shipY + 80; // 不要太靠近飞船
+
+            // 分层布局
+            const layers = [
+                { rarity: 'common', count: 4, yMin: minY, yMax: minY + (CH - minY) * 0.35 },
+                { rarity: 'rare', count: 2, yMin: minY + (CH - minY) * 0.3, yMax: minY + (CH - minY) * 0.6 },
+                { rarity: 'epic', count: 1, yMin: minY + (CH - minY) * 0.55, yMax: minY + (CH - minY) * 0.8 },
+                { rarity: 'legendary', count: 1, yMin: minY + (CH - minY) * 0.75, yMax: CH - padding },
+            ];
+
+            for (const layer of layers) {
+                const pool = MINERALS.filter(m => m.rarity === layer.rarity);
+                for (let i = 0; i < layer.count; i++) {
+                    const mineral = pool[i % pool.length];
+                    const display = MINERAL_DISPLAY[mineral.rarity];
+                    let x, y, attempts = 0, ok = false;
+
+                    while (attempts < 50) {
+                        x = padding + display.radius + Math.random() * (CW - 2 * padding - 2 * display.radius);
+                        y = layer.yMin + Math.random() * (layer.yMax - layer.yMin);
+                        // 检查不重叠
+                        ok = currentMinerals.every(m => {
+                            const dist = Math.hypot(x - m.x, y - m.y);
+                            return dist > m.display.radius + display.radius + 10;
+                        });
+                        if (ok) break;
+                        attempts++;
+                    }
+
+                    currentMinerals.push({
+                        ...mineral,
+                        x: x || CW / 2,
+                        y: y || (layer.yMin + layer.yMax) / 2,
+                        display,
+                        alive: true,
+                        bobPhase: Math.random() * Math.PI * 2,
+                    });
+                }
+            }
+        }
+
+        // ========== Canvas 渲染 ==========
+        function drawFrame() {
+            ctx.clearRect(0, 0, CW, CH);
+
+            // 深空网格背景
+            ctx.strokeStyle = 'rgba(0, 242, 255, 0.03)';
+            ctx.lineWidth = 0.5;
+            for (let x = 0; x < CW; x += 30) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, CH);
+                ctx.stroke();
+            }
+            for (let y = 0; y < CH; y += 30) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(CW, y);
+                ctx.stroke();
+            }
+
+            // 画矿物
+            const now = performance.now() / 1000;
+            for (const m of currentMinerals) {
+                if (!m.alive) continue;
+                const bobY = Math.sin(now * 1.5 + m.bobPhase) * 3;
+                const mx = m.x;
+                const my = m.y + bobY;
+
+                // 光晕
+                const grad = ctx.createRadialGradient(mx, my, 0, mx, my, m.display.radius * 1.5);
+                grad.addColorStop(0, m.display.glowColor + '0.2)');
+                grad.addColorStop(1, m.display.glowColor + '0)');
+                ctx.beginPath();
+                ctx.arc(mx, my, m.display.radius * 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = grad;
+                ctx.fill();
+
+                // 底圆
+                ctx.beginPath();
+                ctx.arc(mx, my, m.display.radius, 0, Math.PI * 2);
+                ctx.fillStyle = 'rgba(20, 25, 40, 0.6)';
+                ctx.fill();
+                ctx.strokeStyle = m.display.glowColor + '0.4)';
+                ctx.lineWidth = 1.5;
+                ctx.stroke();
+
+                // emoji
+                ctx.font = `${m.display.fontSize}px serif`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(m.icon, mx, my);
+
+                // 稀有度小标签
+                ctx.font = 'bold 8px "Noto Sans SC", sans-serif';
+                ctx.fillStyle = m.display.glowColor + '0.7)';
+                ctx.fillText(RARITY_LABELS[m.rarity], mx, my + m.display.radius + 10);
+            }
+
+            // 画飞船
+            ctx.font = '32px serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🛸', shipX, shipY);
+
+            // 计算钩爪位置
+            let endX, endY;
+            if (gamePhase === 'IDLE') {
+                // 摆动
+                pendulumAngle += pendulumDir * 0.025;
+                if (pendulumAngle > 1.1 || pendulumAngle < -1.1) pendulumDir *= -1;
+
+                const ropeLen = 50;
+                endX = shipX + Math.sin(pendulumAngle) * ropeLen;
+                endY = shipY + Math.cos(pendulumAngle) * ropeLen;
+            } else if (gamePhase === 'SHOOTING') {
+                hookLength += 6;
+                hookX = shipX + hookDX * hookLength;
+                hookY = shipY + hookDY * hookLength;
+
+                // 碰撞检测
+                const hit = checkCollision(hookX, hookY);
+                if (hit) {
+                    caughtMineral = hit;
+                    hit.alive = false;
+                    gamePhase = 'REELING';
+                    playSound('catch');
+                    triggerShake(8);
+                    if (hit.rarity === 'legendary') playSound('legendary');
+                } else if (hookY >= CH - 10 || hookX < 5 || hookX > CW - 5) {
+                    // 到底/出边界，空手返回
+                    caughtMineral = null;
+                    gamePhase = 'REELING';
+                    playSound('miss');
+                }
+
+                endX = hookX;
+                endY = hookY;
+            } else if (gamePhase === 'REELING') {
+                hookLength -= (caughtMineral ? 3.5 : 7); // 抓到东西回得慢
+                // 回拉时偶尔播放滴答声
+                if (caughtMineral && Math.random() < 0.08) playSound('reel');
+                if (hookLength <= 0) {
+                    hookLength = 0;
+                    resolveRound();
+                }
+                hookX = shipX + hookDX * hookLength;
+                hookY = shipY + hookDY * hookLength;
+                endX = hookX;
+                endY = hookY;
+
+                // 被抓矿物跟着钩爪
+                if (caughtMineral) {
+                    caughtMineral.x = hookX;
+                    caughtMineral.y = hookY;
+                    caughtMineral.alive = true; // 临时恢复以绘制
+                }
+            } else {
+                // WAITING / RESULT
+                endX = shipX;
+                endY = shipY + 20;
+            }
+
+            // 画绳索
+            if (gamePhase === 'IDLE' || gamePhase === 'SHOOTING' || gamePhase === 'REELING') {
+                // 绳索发光（抓到矿物时更亮，回拉时抖动）
+                const ropeGlow = (gamePhase === 'REELING' && caughtMineral) ? 1 : 0.7;
+                const ropeWidth = (gamePhase === 'REELING' && caughtMineral) ? 3 : 2;
+
+                // 抓取回拉时绳索微颤
+                let ropeMidX = (shipX + endX) / 2;
+                let ropeMidY = (shipY + 12 + endY) / 2;
+                if (gamePhase === 'REELING' && caughtMineral) {
+                    ropeMidX += (Math.random() - 0.5) * 3;
+                    ropeMidY += (Math.random() - 0.5) * 2;
+                }
+
+                ctx.beginPath();
+                ctx.moveTo(shipX, shipY + 12);
+                ctx.quadraticCurveTo(ropeMidX, ropeMidY, endX, endY);
+                ctx.strokeStyle = `rgba(0, 242, 255, ${ropeGlow})`;
+                ctx.lineWidth = ropeWidth;
+                ctx.stroke();
+
+                // 绳索外发光
+                if (gamePhase === 'REELING' && caughtMineral) {
+                    ctx.beginPath();
+                    ctx.moveTo(shipX, shipY + 12);
+                    ctx.quadraticCurveTo(ropeMidX, ropeMidY, endX, endY);
+                    ctx.strokeStyle = 'rgba(0, 242, 255, 0.15)';
+                    ctx.lineWidth = 6;
+                    ctx.stroke();
+                }
+
+                // 钩爪头
+                ctx.beginPath();
+                ctx.arc(endX, endY, 5, 0, Math.PI * 2);
+                ctx.fillStyle = '#00f2ff';
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(endX, endY, 8, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)';
+                ctx.lineWidth = 1;
+                ctx.stroke();
+
+                // 钩爪尖齿
+                const tipAngle = Math.atan2(endY - shipY, endX - shipX);
+                const tipLen = 8;
+                ctx.beginPath();
+                ctx.moveTo(endX + Math.cos(tipAngle + 0.5) * tipLen, endY + Math.sin(tipAngle + 0.5) * tipLen);
+                ctx.lineTo(endX, endY);
+                ctx.lineTo(endX + Math.cos(tipAngle - 0.5) * tipLen, endY + Math.sin(tipAngle - 0.5) * tipLen);
+                ctx.strokeStyle = '#00f2ff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+            }
+
+            // 摆动角度指示线（微弱）
+            if (gamePhase === 'IDLE') {
+                const guideLen = maxHookLength;
+                const gx = shipX + Math.sin(pendulumAngle) * guideLen;
+                const gy = shipY + Math.cos(pendulumAngle) * guideLen;
+                ctx.beginPath();
+                ctx.moveTo(endX, endY);
+                ctx.lineTo(gx, gy);
+                ctx.strokeStyle = 'rgba(0, 242, 255, 0.06)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([4, 6]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+
+            // 画面震动
+            applyShake();
+
+            animFrameId = requestAnimationFrame(drawFrame);
+        }
+
+        // ========== 碰撞检测 ==========
+        function checkCollision(hx, hy) {
+            for (const m of currentMinerals) {
+                if (!m.alive) continue;
+                const bobY = Math.sin(performance.now() / 1000 * 1.5 + m.bobPhase) * 3;
+                const dist = Math.hypot(hx - m.x, hy - (m.y + bobY));
+                if (dist < m.display.radius + 8) return m;
+            }
+            return null;
+        }
+
+        // ========== 发射钩爪 ==========
+        function shootHook() {
+            if (gamePhase !== 'IDLE') return;
+
+            gamePhase = 'SHOOTING';
+            hookLength = 0;
+            // 射出方向 = 当前摆动角度
+            hookDX = Math.sin(pendulumAngle);
+            hookDY = Math.cos(pendulumAngle);
+            caughtMineral = null;
+            playSound('shoot');
+        }
+
+        // ========== 回合结算 ==========
+        function resolveRound() {
+            gamePhase = 'RESULT';
+
+            let result;
+            if (caughtMineral) {
+                result = caughtMineral;
+                // 隐藏抓到的矿物
+                caughtMineral.alive = false;
+            } else {
+                // 空手 → 随机 common 保底
+                const commons = MINERALS.filter(m => m.rarity === 'common');
+                result = commons[Math.floor(Math.random() * commons.length)];
+            }
+
+            const rarityColor = RARITY_COLORS[result.rarity];
+
+            // 屏幕闪光
+            screenFlash(rarityColor.bg);
+            // 粒子爆炸
+            burstParticlesAt(shipX, shipY, rarityColor.bg);
+
+            // 更新分数
+            totalScore += result.points;
+            DOM.scoreDisp.textContent = (totalScore * 100000).toLocaleString();
+            showScoreFly(result.points);
+            addLog(result, caughtMineral ? true : false);
+
+            // 显示结果横幅
+            DOM.roundResult.classList.remove('hidden');
+            DOM.roundResult.innerHTML = `
+                <div class="result-banner">
+                    <div class="text-4xl mb-1">${result.icon}</div>
+                    <div class="text-sm font-black rarity-${result.rarity}">${result.name}</div>
+                    <div class="text-xs text-neutral-400 mt-1">${caughtMineral ? result.msg : '未抓到目标... 获得保底奖励'}</div>
+                    <div class="text-lg font-black text-cyan-400 font-tech mt-1">+${(result.points * 100000).toLocaleString()} GLC</div>
+                </div>
+            `;
+
+            DOM.msgBox.textContent = result.msg;
+            DOM.msgBox.classList.remove('hint-blink');
+
+            // 1.5s 后进入下一轮
+            setTimeout(() => {
+                DOM.roundResult.classList.add('hidden');
+                caughtMineral = null;
+
+                if (leftCounts > 0) {
+                    startRound();
+                } else {
+                    gamePhase = 'WAITING';
+                    DOM.btn.textContent = '任务完成';
+                    DOM.btn.classList.remove('btn-pulse', 'btn-neon', 'hidden');
+                    DOM.btn.classList.add('bg-neutral-700', 'text-neutral-400');
+                    DOM.btn.disabled = true;
+                    DOM.btn.classList.remove('hidden');
+                    finishGame();
+                }
+            }, 1800);
+        }
+
+        // ========== 开始一轮 ==========
+        function startRound() {
+            leftCounts--;
+            DOM.countDisp.textContent = leftCounts;
+            DOM.btn.classList.add('hidden');
+
+            generateMinerals();
+            pendulumAngle = 0;
+            pendulumDir = 1;
+            hookLength = 0;
+            caughtMineral = null;
+            gamePhase = 'IDLE';
+
+            DOM.msgBox.textContent = '点击画面发射钩爪！瞄准矿物！';
+            DOM.msgBox.classList.add('hint-blink');
+        }
+
+        // ========== Canvas 点击事件 ==========
+        DOM.canvas.addEventListener('click', () => {
+            if (gamePhase === 'IDLE') {
+                shootHook();
+            }
+        });
+
+        DOM.canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            if (gamePhase === 'IDLE') {
+                shootHook();
+            }
+        }, { passive: false });
+
+        // ========== 开始采矿按钮 ==========
+        DOM.btn.addEventListener('click', () => {
+            if (gamePhase !== 'WAITING' || leftCounts <= 0) return;
+            startRound();
+        });
+
+        // ========== 粒子爆炸效果 ==========
+        function burstParticlesAt(cx, cy, color) {
+            // 转换 canvas 坐标到页面坐标
+            const rect = DOM.canvas.getBoundingClientRect();
+            const scaleX = rect.width / CW;
+            const scaleY = rect.height / CH;
+            const pageCx = rect.left + cx * scaleX;
+            const pageCy = rect.top + cy * scaleY;
+
+            const count = 14;
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                const angle = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.5;
+                const dist = 60 + Math.random() * 50;
+                const size = 4 + Math.random() * 6;
+
+                particle.style.cssText = `
+                    position: fixed;
+                    left: ${pageCx}px; top: ${pageCy}px;
+                    width: ${size}px; height: ${size}px;
+                    border-radius: 50%;
+                    background: ${color};
+                    pointer-events: none;
+                    z-index: 70;
+                    transition: all 0.7s cubic-bezier(0.25, 0, 0.25, 1);
+                    opacity: 1;
+                    box-shadow: 0 0 8px ${color};
+                `;
+                document.body.appendChild(particle);
+
+                requestAnimationFrame(() => {
+                    particle.style.transform = `translate(${Math.cos(angle) * dist}px, ${Math.sin(angle) * dist}px)`;
+                    particle.style.opacity = '0';
+                });
+
+                setTimeout(() => particle.remove(), 700);
+            }
+        }
+
+        // ========== 屏幕闪光 ==========
+        function screenFlash(color) {
+            DOM.screenFlash.style.background = color;
+            DOM.screenFlash.style.opacity = '0.5';
+            setTimeout(() => { DOM.screenFlash.style.opacity = '0'; }, 150);
+        }
+
+        // ========== 得分飞出动画 ==========
+        function showScoreFly(points) {
+            const fly = document.createElement('span');
+            fly.textContent = '+' + (points * 100000).toLocaleString();
+            fly.className = 'score-fly absolute text-cyan-400 font-black text-lg';
+            fly.style.cssText = 'top: -10px; right: 0;';
+            DOM.scoreDisp.parentElement.style.position = 'relative';
+            DOM.scoreDisp.parentElement.appendChild(fly);
+            setTimeout(() => fly.remove(), 1000);
+        }
+
+        // ========== 日志 ==========
+        function addLog(item, caught) {
+            const entry = document.createElement('div');
+            entry.className = 'log-entry glass-panel p-3 rounded-xl flex justify-between items-center animate__animated animate__fadeInUp text-xs';
+
+            const left = document.createElement('span');
+            left.className = 'flex items-center gap-2';
+
+            const iconSpan = document.createElement('span');
+            iconSpan.className = 'text-base';
+            iconSpan.textContent = item.icon;
+            left.appendChild(iconSpan);
+
+            const nameSpan = document.createElement('span');
+            nameSpan.textContent = item.name;
+            left.appendChild(nameSpan);
+
+            const rarityBadge = document.createElement('span');
+            rarityBadge.className = `rarity-${item.rarity} text-[10px] ml-1`;
+            rarityBadge.textContent = RARITY_LABELS[item.rarity];
+            left.appendChild(rarityBadge);
+
+            if (caught) {
+                const catchBadge = document.createElement('span');
+                catchBadge.className = 'text-[9px] ml-1 text-cyan-400';
+                catchBadge.textContent = '🎯精准';
+                left.appendChild(catchBadge);
+            }
+
+            const right = document.createElement('span');
+            right.className = 'text-cyan-400 font-bold font-tech';
+            right.textContent = `+${(item.points * 100000).toLocaleString()} GLC`;
+
+            entry.appendChild(left);
+            entry.appendChild(right);
+            DOM.logContainer.prepend(entry);
+        }
+
+        // ========== 游戏结束 ==========
+        const SCORE_LOW = 15;
+        const SCORE_HIGH = 28;
+
+        function finishGame() {
+            setTimeout(() => {
+                DOM.airdropScore.textContent = (totalScore * 100000).toLocaleString();
+                reportGreatLoveResult();
+
+                if (totalScore >= SCORE_HIGH) {
+                    DOM.airdropEmoji.textContent = '🎉';
+                    const beatPct = Math.min(95, 60 + Math.round((totalScore - SCORE_HIGH) / (45 - SCORE_HIGH) * 35));
+                    DOM.airdropEncourage.textContent = `太棒了！你的采集效率超越了 ${beatPct}% 的矿工！`;
+                    DOM.airdropRank.textContent = `⭐ 高级矿工称号已解锁`;
+                    DOM.airdropRank.classList.remove('hidden');
+                    DOM.airdropRank.classList.add('text-yellow-400');
+                    DOM.retrySection.classList.add('hidden');
+                } else if (totalScore < SCORE_LOW) {
+                    DOM.airdropEmoji.textContent = '😅';
+                    DOM.airdropEncourage.textContent = `能量采集偏低，瞄准稀有矿物可以获得更高能量哦！`;
+                    DOM.airdropRank.classList.add('hidden');
+                    DOM.retrySection.classList.remove('hidden');
+                } else {
+                    DOM.airdropEmoji.textContent = '✨';
+                    DOM.airdropEncourage.textContent = `不错的成绩！提交钱包地址领取你的 ${(totalScore * 100000).toLocaleString()} GLC 能量空投。`;
+                    DOM.airdropRank.classList.add('hidden');
+                    DOM.retrySection.classList.add('hidden');
+                }
+
+                DOM.msgBox.textContent = "能量采集完成！";
+                DOM.airdropSection.classList.remove('hidden');
+                setTimeout(() => {
+                    DOM.airdropSection.scrollIntoView({ behavior: 'smooth' });
+                }, 300);
+            }, 800);
+        }
+
+        // ========== 重玩（不清除已领取记录） ==========
+        function retryGame() {
+            beginGreatLoveAttempt();
+            totalScore = 0;
+            leftCounts = 3;
+            gamePhase = 'WAITING';
+            caughtMineral = null;
+            currentMinerals = [];
+
+            DOM.scoreDisp.textContent = '0';
+            DOM.countDisp.textContent = '3';
+            DOM.logContainer.innerHTML = '';
+
+            DOM.btn.classList.add('hidden');
+
+            DOM.walletInput.value = '';
+            DOM.errorMsg.classList.add('hidden');
+
+            DOM.airdropSection.classList.add('hidden');
+            DOM.gameMain.scrollIntoView({ behavior: 'smooth' });
+
+            DOM.msgBox.classList.remove('hint-blink');
+            setTimeout(() => startRound(), 300);
+        }
+
+        // ========== 页面加载时检查已领取状态 ==========
+        function checkClaimStatus() {
+            const savedWallet = localStorage.getItem('glc_miner_claimed_wallet');
+            const savedScore = localStorage.getItem('glc_miner_claimed_score');
+            if (savedWallet) {
+                DOM.briefingScreen.style.display = 'none';
+                DOM.gameWrapper.style.opacity = '1';
+                DOM.gameWrapper.style.pointerEvents = 'auto';
+
+                DOM.gameMain.classList.add('hidden');
+                DOM.gameLog.classList.add('hidden');
+                DOM.airdropSection.classList.add('hidden');
+
+                DOM.landingSection.classList.remove('hidden');
+                DOM.landingTitle.textContent = "您已领取过奖励";
+                DOM.landingScore.textContent = ((savedScore || 0) * 100000).toLocaleString();
+                DOM.landingMsg.innerHTML = `钱包 <span class="text-cyan-400 font-mono text-xs">${savedWallet}</span> 已成功领取 <span class="text-white font-bold">${((savedScore || 0) * 100000).toLocaleString()}</span> GLC。`;
+                return true;
+            }
+            return false;
+        }
+
+        // ========== 重新开始（换钱包） ==========
+        function resetForNewWallet() {
+            localStorage.removeItem('glc_miner_claimed_wallet');
+            localStorage.removeItem('glc_miner_claimed_score');
+            beginGreatLoveAttempt();
+
+            totalScore = 0;
+            leftCounts = 3;
+            gamePhase = 'WAITING';
+            caughtMineral = null;
+            currentMinerals = [];
+
+            DOM.scoreDisp.textContent = '0';
+            DOM.countDisp.textContent = '3';
+            DOM.logContainer.innerHTML = '';
+
+            DOM.btn.classList.add('hidden');
+
+            DOM.walletInput.value = '';
+            DOM.errorMsg.classList.add('hidden');
+
+            DOM.gameMain.classList.remove('hidden');
+            DOM.gameLog.classList.remove('hidden');
+            DOM.airdropSection.classList.add('hidden');
+            DOM.landingSection.classList.add('hidden');
+
+            setTimeout(() => startRound(), 300);
+            DOM.msgBox.classList.remove('hint-blink');
+        }
+
+        // ========== 显示"已领取"UI ==========
+        function showAlreadyClaimedUI(wallet) {
+            DOM.airdropSection.classList.add('hidden');
+            DOM.landingSection.classList.remove('hidden');
+            DOM.landingTitle.textContent = "该钱包已领取过奖励";
+            DOM.landingScore.textContent = (totalScore * 100000).toLocaleString();
+            DOM.landingMsg.innerHTML = `钱包 <span class="text-cyan-400 font-mono text-xs">${wallet}</span> 已参与过活动，每个钱包仅可领取一次。<br/>请使用其他钱包地址参与。`;
+            DOM.landingSection.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // ========== 钱包提交 ==========
+        async function handleSubmit() {
+            const wallet = DOM.walletInput.value.trim();
+
+            if (!isEvm(wallet)) {
+                DOM.errorMsg.textContent = "请输入有效的 EVM 钱包地址 (0x 开头，共42位)";
+                DOM.errorMsg.classList.remove('hidden');
+                return;
+            }
+
+            if (claimedWallets.has(wallet.toLowerCase())) {
+                addDebugLog("⚠️", "内存中已存在该钱包", { wallet });
+                showAlreadyClaimedUI(wallet);
+                return;
+            }
+
+            DOM.errorMsg.classList.add('hidden');
+            DOM.submitBtn.disabled = true;
+            DOM.submitBtnText.textContent = "正在验证钱包...";
+            DOM.submitSpinner.classList.remove('hidden');
+
+            // 重复检查
+            try {
+                const checkController = new AbortController();
+                const checkTimeout = setTimeout(() => checkController.abort(), 10000);
+
+                addDebugLog("🔍", "开始检查钱包", { wallet, vendor_slug: VENDOR_SLUG });
+
+                const checkResponse = await fetch(DUPLICATE_CHECK_ENDPOINT, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ vendor_slug: VENDOR_SLUG, wallet }),
+                    signal: checkController.signal
+                });
+
+                clearTimeout(checkTimeout);
+                addDebugLog("📡", "重复检查API响应状态", { status: checkResponse.status });
+
+                const rawText = await checkResponse.text();
+                let duplicateData;
+                try { duplicateData = JSON.parse(rawText); } catch { duplicateData = rawText; }
+
+                addDebugLog("📡", "重复检查API返回数据", { data: duplicateData });
+
+                const normalized = typeof duplicateData === "string"
+                    ? duplicateData.trim().toUpperCase() : "";
+
+                const isDuplicate =
+                    normalized === "YES" ||
+                    duplicateData === true ||
+                    String(duplicateData?.claimed || "").trim().toUpperCase() === "YES" ||
+                    String(duplicateData?.is_claimed || "").trim().toUpperCase() === "YES" ||
+                    String(duplicateData?.duplicate || "").trim().toUpperCase() === "YES" ||
+                    String(duplicateData?.result || "").trim().toUpperCase() === "YES" ||
+                    duplicateData?.claimed === true ||
+                    duplicateData?.is_claimed === true ||
+                    duplicateData?.duplicate === true;
+
+                if (checkResponse.ok && isDuplicate) {
+                    addDebugLog("🚫", "API判定为重复领取", { wallet });
+                    addClaimedWallet(wallet);
+                    resetSubmitBtn();
+                    showAlreadyClaimedUI(wallet);
+                    return;
+                }
+
+                if (!checkResponse.ok) {
+                    addDebugLog("⚠️", "重复检查API失败", { status: checkResponse.status });
+                    showError("服务器繁忙，请稍后再试。");
+                    resetSubmitBtn();
+                    return;
+                }
+
+                addDebugLog("✅", "重复检查通过");
+            } catch (err) {
+                addDebugLog("❌", "重复检查API异常", { message: err.message });
+                showError("服务器繁忙，请稍后再试。");
+                resetSubmitBtn();
+                return;
+            }
+
+            // 注册钱包
+            DOM.submitBtnText.textContent = "正在提交...";
+
+            const payload = {
+                wallet,
+                refURL: `https://www.greatlovedao.com?score=${totalScore}`,
+                score1: totalScore
+            };
+
+            addDebugLog("📤", "开始提交到register-wallet", payload);
+
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+                const response = await fetch(PROXY_ENDPOINT, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify(payload),
+                    signal: controller.signal
+                });
+
+                clearTimeout(timeoutId);
+                addDebugLog("📤", "register-wallet响应状态", { status: response.status });
+
+                if (response.ok) {
+                    addDebugLog("✅", "注册成功");
+                    addClaimedWallet(wallet);
+
+                    DOM.airdropSection.classList.add('hidden');
+                    DOM.landingSection.classList.remove('hidden');
+                    DOM.landingTitle.textContent = "领取成功!";
+                    DOM.landingScore.textContent = (totalScore * 100000).toLocaleString();
+                    DOM.landingMsg.innerHTML = `钱包 <span class="text-cyan-400 font-mono text-xs">${wallet}</span> 已成功领取 <span class="text-white font-bold">${(totalScore * 100000).toLocaleString()}</span> GLC。`;
+                    DOM.landingSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    const data = await response.json().catch(() => ({}));
+                    addDebugLog("❌", "register-wallet返回错误", { status: response.status });
+
+                    if (response.status === 409 || data?.code === 'WALLET_EXISTS') {
+                        addClaimedWallet(wallet);
+                        showAlreadyClaimedUI(wallet);
+                    } else {
+                        showError("提交失败，请稍后重试。");
+                    }
+                }
+            } catch (err) {
+                addDebugLog("❌", "提交异常", { message: err.message });
+                showError("网络连接失败，请稍后再试。");
+            } finally {
+                resetSubmitBtn();
+            }
+        }
+
+        function resetSubmitBtn() {
+            DOM.submitBtn.disabled = false;
+            DOM.submitBtnText.textContent = "确定领取";
+            DOM.submitSpinner.classList.add('hidden');
+        }
+
+        function showError(msg) {
+            DOM.errorMsg.textContent = msg;
+            DOM.errorMsg.classList.remove('hidden');
+        }
+
+        // ========== 事件绑定 ==========
+        DOM.submitBtn.addEventListener('click', handleSubmit);
+        DOM.replayBtn.addEventListener('click', resetForNewWallet);
+        DOM.retryBtn.addEventListener('click', retryGame);
+
+        // ========== 初始化 ==========
+        resizeCanvas();
+        window.addEventListener('resize', resizeCanvas);
+        drawFrame(); // 开始渲染循环
+
+        if (!checkClaimStatus()) {
+            playBriefing();
+        }
+    </script>
+</body>
+
+</html>

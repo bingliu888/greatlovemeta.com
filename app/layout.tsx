@@ -19,8 +19,8 @@ export async function generateMetadata(): Promise<Metadata> {
     metadataBase: origin,
     title: { default: title, template: "%s | GreatLoveMeta.com" },
     description,
-    openGraph: { title, description, type: "website", url: origin, images: [{ url: new URL("/og.png", origin).toString(), width: 1536, height: 1024, alt: "GreatLoveMeta.com — AI, RWA and Community" }] },
-    twitter: { card: "summary_large_image", title, description, images: [new URL("/og.png", origin).toString()] },
+    openGraph: { title, description, type: "website", url: origin, images: [{ url: new URL("/og-games.png", origin).toString(), width: 1536, height: 1024, alt: "GreatLoveMeta.com games — play, explore and record" }] },
+    twitter: { card: "summary_large_image", title, description, images: [new URL("/og-games.png", origin).toString()] },
   };
 }
 
