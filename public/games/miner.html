@@ -404,11 +404,11 @@
 
         // ========== 游戏数据 ==========
         const MINERALS = [
-            { name: "脉冲星晶体", icon: "💎", points: 15, msg: "发现极高能量反应！",   rarity: "legendary", weight: 5  },
-            { name: "暗物质核心", icon: "🕳️", points: 12, msg: "捕获稀有暗物质！",     rarity: "epic",      weight: 10 },
-            { name: "钛金碎片",   icon: "🛡️", points: 8,  msg: "坚固的金属资源。",     rarity: "rare",      weight: 25 },
-            { name: "星际尘埃",   icon: "🌫️", points: 5,  msg: "基础能量粒子。",       rarity: "common",    weight: 35 },
-            { name: "宇宙废铁",   icon: "⚙️", points: 2,  msg: "聊胜于无的发现。",     rarity: "common",    weight: 25 },
+            { name: "脉冲星晶体", icon: "💎", points: 12, msg: "发现极高能量反应！",   rarity: "legendary", weight: 5  },
+            { name: "暗物质核心", icon: "🕳️", points: 10, msg: "捕获稀有暗物质！",     rarity: "epic",      weight: 10 },
+            { name: "钛金碎片",   icon: "🛡️", points: 6,  msg: "坚固的金属资源。",     rarity: "rare",      weight: 25 },
+            { name: "星际尘埃",   icon: "🌫️", points: 3,  msg: "基础能量粒子。",       rarity: "common",    weight: 35 },
+            { name: "宇宙废铁",   icon: "⚙️", points: 1,  msg: "聊胜于无的发现。",     rarity: "common",    weight: 25 },
         ];
 
         const RARITY_LABELS = { legendary: "传说", epic: "史诗", rare: "稀有", common: "普通" };
@@ -1143,8 +1143,8 @@
         }
 
         // ========== 游戏结束 ==========
-        const SCORE_LOW = 15;
-        const SCORE_HIGH = 28;
+        const SCORE_LOW = 12;
+        const SCORE_HIGH = 22;
 
         function finishGame() {
             setTimeout(() => {
@@ -1153,7 +1153,7 @@
 
                 if (totalScore >= SCORE_HIGH) {
                     DOM.airdropEmoji.textContent = '🎉';
-                    const beatPct = Math.min(95, 60 + Math.round((totalScore - SCORE_HIGH) / (45 - SCORE_HIGH) * 35));
+                    const beatPct = Math.min(95, 60 + Math.round((totalScore - SCORE_HIGH) / (36 - SCORE_HIGH) * 35));
                     DOM.airdropEncourage.textContent = `太棒了！你的采集效率超越了 ${beatPct}% 的矿工！`;
                     DOM.airdropRank.textContent = `⭐ 高级矿工称号已解锁`;
                     DOM.airdropRank.classList.remove('hidden');

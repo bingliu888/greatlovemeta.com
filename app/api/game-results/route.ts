@@ -6,7 +6,7 @@ import { requestUser } from "../../../lib/request-user";
 
 const GAME_LIMITS = {
   monopoly: { minimum: 3, maximum: 36 },
-  miner: { minimum: 6, maximum: 45 },
+  miner: { minimum: 3, maximum: 36 },
 } as const;
 const DAILY_PLAY_LIMIT = 3;
 const POINT_VALUE = 10_000;
