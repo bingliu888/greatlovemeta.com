@@ -376,6 +376,7 @@
     <!-- Canvas 粒子背景 -->
     <canvas id="particleBg" class="fixed inset-0 pointer-events-none z-0"></canvas>
 
+    <script src="/games/greatlove-game-runtime.js"></script>
     <script>
         // ===== Bokeh 光斑背景 =====
         (function () {
@@ -516,18 +517,14 @@
             greatLoveResultReported = false;
         }
 
-        function reportGreatLoveResult() {
-            if (greatLoveResultReported || window.parent === window) return;
+        async function reportGreatLoveResult() {
+            if (greatLoveResultReported) return;
             greatLoveResultReported = true;
             const attemptId = typeof crypto.randomUUID === 'function'
                 ? crypto.randomUUID()
                 : `${Date.now()}-${Math.random().toString(36).slice(2)}-monopoly`;
-            window.parent.postMessage({
-                type: 'greatlove:game-result',
-                game: 'monopoly',
-                rawScore: totalScore,
-                attemptId
-            }, window.location.origin);
+            const handled = await window.GreatLoveGameRuntime.reportResult('monopoly', totalScore, attemptId);
+            if (!handled) greatLoveResultReported = false;
         }
 
         const wheelEl = document.getElementById('wheel');
@@ -676,6 +673,7 @@
         if (spinBtn) spinBtn.onclick = handleSpin;
 
         initWheel();
+        window.GreatLoveGameRuntime.guard('monopoly');
     </script>
 </body>
 

@@ -17,29 +17,32 @@ test("homepage places two games after the membership section", async () => {
   assert.match(source, /mode=play/);
 });
 
-test("both games report completed sessions to the authenticated wrapper", async () => {
-  const [monopoly, miner] = await Promise.all([
+test("both full-page games report completed sessions directly through the shared runtime", async () => {
+  const [monopoly, miner, runtime] = await Promise.all([
     readFile(new URL("../public/games/monopoly.html", import.meta.url), "utf8"),
     readFile(new URL("../public/games/miner.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
   ]);
 
   for (const [game, source] of [["monopoly", monopoly], ["miner", miner]]) {
-    assert.match(source, /greatlove:game-result/);
-    assert.match(source, new RegExp(`game: '${game}'`));
-    assert.match(source, /rawScore: totalScore/);
+    assert.match(source, /greatlove-game-runtime\.js/);
+    assert.match(source, new RegExp(`GreatLoveGameRuntime\\.reportResult\\('${game}', totalScore, attemptId\\)`));
     assert.match(source, /reportGreatLoveResult\(\)/);
     assert.match(source, /1 Point = 10,000 GLC/);
     assert.doesNotMatch(source, /100,000 GLC/);
     assert.doesNotMatch(source, /wallet-input|walletInput|register-wallet/);
   }
+  assert.match(runtime, /fetch\('\/api\/game-results'/);
+  assert.match(runtime, /fetch\(`\/api\/game-results\?date=/);
+  assert.match(runtime, /disableRetry\(\)/);
 });
 
 test("game result writes use the new reward rate and enforce one daily play per game", async () => {
-  const [route, rules, schema, player] = await Promise.all([
+  const [route, rules, schema, runtime] = await Promise.all([
     readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../lib/game-reward-rules.js", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
-    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
   ]);
 
   assert.match(route, /if \(!user\).*401/);
@@ -54,17 +57,16 @@ test("game result writes use the new reward rate and enforce one daily play per 
   assert.match(route, /status: 429/);
   assert.match(schema, /game_daily_logs/);
   assert.match(schema, /attempt_id/);
-  assert.match(player, /mode === "trial"/);
-  assert.match(player, /\/api\/game-results/);
-  assert.match(player, /Play again tomorrow/);
-  assert.match(player, /playsRemaining/);
+  assert.match(runtime, /mode !== 'play'/);
+  assert.match(runtime, /\/api\/game-results/);
+  assert.match(runtime, /Play again tomorrow/);
+  assert.match(runtime, /playsRemaining/);
 });
 
 test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit", async () => {
-  const [miner, rules, player] = await Promise.all([
+  const [miner, rules] = await Promise.all([
     readFile(new URL("../public/games/miner.html", import.meta.url), "utf8"),
     readFile(new URL("../lib/game-reward-rules.js", import.meta.url), "utf8"),
-    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(miner, /leftCounts = 3/);
@@ -77,31 +79,35 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(miner, /briefing-play-btn/);
   assert.match(miner, /startMission\(true\)/);
   assert.match(rules, /miner: Object\.freeze\(\{ minimum: 0, maximum: 36 \}\)/);
-  assert.match(player, /game !== "miner"/);
+  assert.match(miner, /GreatLoveGameRuntime\.guard\('miner'\)/);
 });
 
-test("mobile header keeps sign-in on one line and game pages omit the back-to-games button", async () => {
-  const [styles, player] = await Promise.all([
+test("mobile header keeps sign-in on one line and game pages use no iframe", async () => {
+  const [styles, gamePage] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
-    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.match(styles, /\.header-cta \{[^}]*white-space: nowrap/);
-  assert.doesNotMatch(player, /返回游戏区|All games/);
-  assert.doesNotMatch(player, /#games/);
+  assert.doesNotMatch(gamePage, /iframe|GameExperience/);
+  assert.doesNotMatch(styles, /\.game-frame-shell iframe/);
+  assert.match(gamePage, /redirect\(`\/games\/\$\{game\}\.html\?mode=/);
 });
 
-test("Play uses full document navigation and the daily multi-user reward test is scheduled", async () => {
-  const [home, player, workflow, scheduledTest] = await Promise.all([
+test("both game modes use full-page navigation and the daily multi-user reward test is scheduled", async () => {
+  const [home, gamePage, runtime, workflow, scheduledTest] = await Promise.all([
     readFile(new URL("../app/[lang]/page.tsx", import.meta.url), "utf8"),
-    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/daily-game-rewards.yml", import.meta.url), "utf8"),
     readFile(new URL("./daily-game-rewards.test.mjs", import.meta.url), "utf8"),
   ]);
 
   assert.match(home, /<a className="primary" href=\{`\/\$\{lang\}\/games\/\$\{game\.key\}\?mode=play`\}/);
+  assert.match(home, /<a href=\{`\/games\/\$\{game\.key\}\.html\?mode=trial&lang=\$\{lang\}`\}/);
   assert.doesNotMatch(home, /<Link className="primary"[^>]*mode=play/);
-  assert.match(player, /<a className=\{mode === "play"/);
+  assert.match(gamePage, /redirect\(`\/games\//);
+  assert.match(runtime, /window\.location\.assign/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /node scripts\/check-protected-navigation\.mjs/);
   assert.match(workflow, /node --test tests\/daily-game-rewards\.test\.mjs/);

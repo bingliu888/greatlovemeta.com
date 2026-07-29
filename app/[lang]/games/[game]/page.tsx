@@ -1,9 +1,6 @@
 import type { Metadata } from "next";
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { GameExperience } from "../../../../components/GameExperience";
-import { SiteFooter } from "../../../../components/SiteFooter";
-import { SiteHeader } from "../../../../components/SiteHeader";
 import { getSessionUser } from "../../../../lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -41,9 +38,5 @@ export default async function GamePage({
       redirect(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
   }
-  return <main className="game-page">
-    <SiteHeader lang={lang}/>
-    <GameExperience lang={lang} game={game as GameKey} mode={mode} autoStart={autoStart}/>
-    <SiteFooter lang={lang}/>
-  </main>;
+  redirect(`/games/${game}.html?mode=${mode}&lang=${lang}${autoStart ? "&start=1" : ""}`);
 }

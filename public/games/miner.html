@@ -364,6 +364,7 @@
         </div>
     </div>
 
+    <script src="/games/greatlove-game-runtime.js"></script>
     <script>
         // ========== 星空粒子背景 ==========
         const starCanvas = document.getElementById('star-canvas');
@@ -481,18 +482,14 @@
             greatLoveResultReported = false;
         }
 
-        function reportGreatLoveResult() {
-            if (greatLoveResultReported || window.parent === window) return;
+        async function reportGreatLoveResult() {
+            if (greatLoveResultReported) return;
             greatLoveResultReported = true;
             const attemptId = typeof crypto.randomUUID === 'function'
                 ? crypto.randomUUID()
                 : `${Date.now()}-${Math.random().toString(36).slice(2)}-miner`;
-            window.parent.postMessage({
-                type: 'greatlove:game-result',
-                game: 'miner',
-                rawScore: totalScore,
-                attemptId
-            }, window.location.origin);
+            const handled = await window.GreatLoveGameRuntime.reportResult('miner', totalScore, attemptId);
+            if (!handled) greatLoveResultReported = false;
         }
 
         // ========== Web Audio 声效 ==========
@@ -687,7 +684,11 @@
                 startMission();
                 return;
             }
-            window.top.location.href = `/${currentLang}/games/miner?mode=${selectedMode}&start=1`;
+            if (selectedMode === 'play') {
+                window.location.assign(`/${currentLang}/games/miner?mode=play&start=1`);
+            } else {
+                window.location.assign(`/games/miner.html?mode=trial&lang=${currentLang}&start=1`);
+            }
         }
 
         DOM.briefingTrialBtn.addEventListener('click', () => chooseMode('trial'));
@@ -1237,11 +1238,14 @@
         window.addEventListener('resize', resizeCanvas);
         drawFrame(); // 开始渲染循环
 
-        if (launchParams.get('start') === '1') {
-            startMission(true);
-        } else {
-            playBriefing();
-        }
+        window.GreatLoveGameRuntime.guard('miner').then(allowed => {
+            if (!allowed) return;
+            if (launchParams.get('start') === '1') {
+                startMission(true);
+            } else {
+                playBriefing();
+            }
+        });
     </script>
 </body>
 
