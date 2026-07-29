@@ -4,6 +4,8 @@ import { useEffect } from "react";
 
 type SwapTool = "stable" | "auto";
 
+const swapAssetVersion = "20260728-rpc-failover";
+
 const sharedAssets = [
   { id: "greatlove-ethers", src: "/swap-assets/ethers.umd.min.js" },
   { id: "greatlove-wallet-onboard", src: "/swap-assets/autoswap-onboard.js" },
@@ -11,12 +13,12 @@ const sharedAssets = [
 
 const toolAssets: Record<SwapTool, Array<{ id: string; src: string }>> = {
   stable: [
-    { id: "greatlove-stableswap-config", src: "/swap-assets/stableswap.config.js" },
-    { id: "greatlove-stableswap-app", src: "/swap-assets/stableswap.js" },
+    { id: "greatlove-stableswap-config", src: `/swap-assets/stableswap.config.js?v=${swapAssetVersion}` },
+    { id: "greatlove-stableswap-app", src: `/swap-assets/stableswap.js?v=${swapAssetVersion}` },
   ],
   auto: [
-    { id: "greatlove-autoswap-config", src: "/swap-assets/autoswap.config.js" },
-    { id: "greatlove-autoswap-app", src: "/swap-assets/autoswap.js" },
+    { id: "greatlove-autoswap-config", src: `/swap-assets/autoswap.config.js?v=${swapAssetVersion}` },
+    { id: "greatlove-autoswap-app", src: `/swap-assets/autoswap.js?v=${swapAssetVersion}` },
   ],
 };
 

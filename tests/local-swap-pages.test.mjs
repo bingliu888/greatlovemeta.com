@@ -70,3 +70,11 @@ test("swap pages use current Polygon RPC providers with failover", () => {
   const autoRuntime = read("public/swap-assets/autoswap.js");
   assert.match(autoRuntime, /chunkSize = Math\.max\(5000, Math\.floor\(chunkSize \/ 2\)\);\s*toBlock \+= chunkSize;/);
 });
+
+test("swap runtime assets are cache-busted when RPC configuration changes", () => {
+  const source = read("components/SwapAssetLoader.tsx");
+  assert.match(source, /swapAssetVersion = "20260728-rpc-failover"/);
+  for (const asset of ["autoswap.config.js", "autoswap.js", "stableswap.config.js", "stableswap.js"]) {
+    assert.ok(source.includes(`${asset}?v=\${swapAssetVersion}`), `${asset} must include the swap asset version`);
+  }
+});
