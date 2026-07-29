@@ -283,8 +283,8 @@
             <div class="h-[1px] w-6 md:w-12 bg-gradient-to-l from-transparent to-[#FFD700]/50"></div>
         </div>
         <p class="text-white/70 text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mx-auto leading-relaxed font-medium">
-            转动轮盘赢取地产，每块地产对应 GLC 空投奖励。<br class="hidden sm:block" />
-            每人可转动 3 次，输入钱包地址即可领取。
+            转动轮盘赢取地产，每块地产对应 GLC 游戏成绩。<br class="hidden sm:block" />
+            每局可转动 3 次，完成后自动记录，无需钱包。
         </p>
     </header>
 
@@ -337,87 +337,25 @@
             </div>
         </div>
 
-        <!-- Claim Form Section -->
+        <!-- Completion Section -->
         <div id="airdropSection" class="w-full max-w-md hidden px-2 mb-10 fade-in">
             <div id="formContainer" class="card-panel backdrop-blur-md p-6 sm:p-8 rounded-[2rem] relative overflow-hidden neon-border">
-
-                <!-- 总分展示区 -->
                 <div id="scoreSummary" class="text-center mb-6">
                     <div id="summaryEmoji" class="text-5xl mb-3"></div>
                     <p class="text-[#FFD700]/60 text-xs font-bold uppercase tracking-widest mb-1">本次总收益</p>
                     <p id="summaryScore" class="text-4xl sm:text-5xl font-black text-[#FFD700] mb-1" style="text-shadow: 0 0 20px rgba(255,215,0,0.4);"></p>
-                    <p class="text-[#FFD700]/40 text-[10px] font-bold mt-1">1 Point = 100,000 GLC</p>
+                    <p class="text-[#FFD700]/50 text-[10px] font-bold mt-1">1 Point = 10,000 GLC</p>
                     <p id="summaryMsg" class="text-white/70 text-sm leading-relaxed mt-3 px-2"></p>
                 </div>
-
-                <!-- 低分重玩按钮 -->
                 <button id="retryBtn"
-                    class="w-full font-black py-3 rounded-2xl text-base mb-4 hidden transition-all duration-300 hover:brightness-110 border-2 border-[#FFD700]/40"
+                    class="w-full font-black py-3 rounded-2xl text-base mb-4 transition-all duration-300 hover:brightness-110 border-2 border-[#FFD700]/40"
                     style="background: transparent; color: #FFD700;"
                     onclick="retryGame()">
-                    再来一局，冲击高分!
+                    再来一局
                 </button>
-
-                <!-- 低分时的分隔线 -->
-                <div id="retryDivider" class="hidden flex items-center gap-3 mb-5">
-                    <div class="flex-1 h-[1px] bg-[#FFD700]/15"></div>
-                    <span class="text-[#FFD700]/40 text-[10px] font-bold">或直接领取</span>
-                    <div class="flex-1 h-[1px] bg-[#FFD700]/15"></div>
-                </div>
-
-                <h3 id="claimTitle" class="text-xl sm:text-2xl font-black text-[#FFD700] mb-6 text-center" style="text-shadow: 0 0 15px rgba(255,215,0,0.4);">
-                    领取你的地产收益
-                </h3>
-                <div class="space-y-5">
-                    <div class="relative">
-                        <label class="block text-[10px] md:text-xs font-bold text-[#FFD700]/80 mb-2 ml-1 uppercase tracking-widest">
-                            EVM 钱包地址 (以 0x 开头)
-                        </label>
-                        <input id="walletInput" type="text" placeholder="0x71C...3a52"
-                            class="w-full border-2 border-[#FFD700]/20 rounded-2xl px-5 py-4 text-white focus:outline-none focus:border-[#FFD700] text-sm font-mono transition-all duration-300"
-                            style="background: rgba(10, 5, 25, 0.6);">
-                        <p id="errorMsg" class="text-red-400 text-[10px] mt-2 ml-1 font-bold hidden"></p>
-                    </div>
-
-                    <button id="submitBtn"
-                        class="w-full font-black py-4 rounded-2xl text-lg shadow-lg flex items-center justify-center gap-3 transition-all duration-300 hover:brightness-110"
-                        style="background: linear-gradient(145deg, #FFD700 0%, #e6ac00 50%, #cc9900 100%); color: #1a0e2e;">
-                        <span id="submitBtnText">确定领取并加入</span>
-                        <div id="submitSpinner" class="spinner hidden"></div>
-                    </button>
-
-                    <div class="pt-6 border-t border-[#FFD700]/15 text-center">
-                        <p class="text-[#FFD700]/70 text-xs font-bold mb-4 italic">没有钱包？下载 GreatLove App 免费获取地址</p>
-                        <div class="grid grid-cols-2 gap-3">
-                            <a href="https://apps.apple.com/app/greatlove-%E5%A4%A7%E7%88%B1/id6741927371"
-                                target="_blank"
-                                class="hover:bg-white/10 text-white/80 text-[10px] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-[#FFD700]/15"
-                                style="background: rgba(10, 5, 25, 0.5);">
-                                <span>🍎</span> App Store
-                            </a>
-                            <a href="https://files.greatlovedao.com/storage/v1/object/public/apk/greatlove.apk"
-                                target="_blank"
-                                class="hover:bg-white/10 text-white/80 text-[10px] font-bold py-3 rounded-xl flex items-center justify-center gap-2 transition-all border border-[#FFD700]/15"
-                                style="background: rgba(10, 5, 25, 0.5);">
-                                <span>🤖</span> Android APK
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Landing Success Section -->
-        <div id="landingSection" class="w-full max-w-md hidden px-2 mb-10 fade-in">
-            <div class="card-panel p-6 sm:p-8 rounded-[2rem] text-center neon-border mb-8">
-                <div class="text-5xl mb-4">🏆</div>
-                <h3 class="text-2xl sm:text-3xl font-black text-[#FFD700] mb-2 text-glow">领取成功!</h3>
-                <p id="landingMsg" class="text-white/80 text-sm mb-6 leading-relaxed"></p>
-                <button id="replayBtn"
-                    class="w-full font-black py-4 rounded-2xl text-lg shadow-lg hover:brightness-110 transition-all duration-300"
-                    style="background: linear-gradient(145deg, #FFD700 0%, #e6ac00 50%, #cc9900 100%); color: #1a0e2e;">
-                    换个钱包继续玩
-                </button>
+                <p class="text-center text-[#FFD700]/65 text-xs leading-relaxed">
+                    正式 Play 的成绩会自动保存，每天最多 3 局；试玩不限次数，无需输入钱包。
+                </p>
             </div>
         </div>
     </main>
@@ -553,10 +491,6 @@
         })();
 
         // ===== 游戏逻辑 =====
-        const PROXY_ENDPOINT = "https://partners.greatlovedao.com/partner/glc/register-wallet";
-        const DUPLICATE_CHECK_ENDPOINT = "https://partners.greatlovedao.com/claim/is-claimed-already";
-        const VENDOR_SLUG = "glc";
-
         const PROPERTY_DATA = [
             { emoji: '💎', name: '钻石大道', points: 12 },
             { emoji: '🏰', name: '皇家城堡', points: 10 },
@@ -596,11 +530,6 @@
             }, window.location.origin);
         }
 
-        const LS_PREFIX = 'glc_monopoly_';
-        const claimedWallets = new Set(
-            JSON.parse(localStorage.getItem(LS_PREFIX + 'claimed_wallets') || '[]').map(w => w.toLowerCase())
-        );
-
         const wheelEl = document.getElementById('wheel');
         const spinBtn = document.getElementById('spinBtn');
         const spinBtnText = document.getElementById('spinBtnText');
@@ -611,79 +540,6 @@
         const winEmoji = document.getElementById('winEmoji');
         const winText = document.getElementById('winText');
         const airdropSection = document.getElementById('airdropSection');
-        const landingSection = document.getElementById('landingSection');
-        const walletInput = document.getElementById('walletInput');
-        const submitBtn = document.getElementById('submitBtn');
-        const submitBtnText = document.getElementById('submitBtnText');
-        const submitSpinner = document.getElementById('submitSpinner');
-        const errorMsg = document.getElementById('errorMsg');
-
-        function addClaimedWallet(wallet) {
-            claimedWallets.add(wallet.toLowerCase());
-            const list = JSON.parse(localStorage.getItem(LS_PREFIX + 'claimed_wallets') || '[]');
-            if (!list.some(w => w.toLowerCase() === wallet.toLowerCase())) {
-                list.push(wallet);
-                localStorage.setItem(LS_PREFIX + 'claimed_wallets', JSON.stringify(list));
-            }
-            localStorage.setItem(LS_PREFIX + 'claimed_wallet', wallet);
-            localStorage.setItem(LS_PREFIX + 'claimed_score', totalScore);
-        }
-
-        function checkClaimStatus() {
-            const savedWallet = localStorage.getItem(LS_PREFIX + 'claimed_wallet');
-            const savedScore = localStorage.getItem(LS_PREFIX + 'claimed_score');
-            if (savedWallet) {
-                if (airdropSection) airdropSection.classList.add('hidden');
-                if (wheelEl) wheelEl.parentElement.classList.add('hidden');
-                const scoreboard = document.querySelector('.flex.justify-between.w-full.max-w-\\[300px\\]');
-                if (scoreboard) scoreboard.classList.add('hidden');
-                if (winDisplay) winDisplay.classList.add('hidden');
-
-                if (landingSection) {
-                    landingSection.classList.remove('hidden');
-                    const landingTitle = landingSection.querySelector('h3');
-                    if (landingTitle) landingTitle.innerText = "您已领取过奖励";
-                    const landingMsg = document.getElementById('landingMsg');
-                    if (landingMsg) {
-                        landingMsg.innerHTML = `钱包 <span class="text-[#FFD700] font-mono">${savedWallet}</span> 已成功领取 ${((savedScore || 0) * 100000).toLocaleString()} GLC。`;
-                    }
-                }
-            }
-        }
-
-        function resetForNewWallet() {
-            localStorage.removeItem(LS_PREFIX + 'claimed_wallet');
-            localStorage.removeItem(LS_PREFIX + 'claimed_score');
-            beginGreatLoveAttempt();
-
-            rotation = 0;
-            spinsLeft = 3;
-            totalScore = 0;
-            isSpinning = false;
-
-            scoreEl.innerHTML = formatReward(0);
-            spinsLeftEl.innerText = '3';
-            wheelEl.style.transition = 'none';
-            wheelEl.style.transform = 'rotate(0deg)';
-            setTimeout(() => { wheelEl.style.transition = ''; }, 50);
-
-            spinBtnText.innerHTML = '掷骰<br/>开转';
-            spinSubText.classList.remove('hidden');
-            spinBtn.classList.remove('grayscale', 'opacity-50');
-            spinBtn.classList.add('btn-casino-glow');
-
-            winDisplay.classList.add('invisible');
-            winDisplay.classList.remove('hidden');
-            airdropSection.classList.add('hidden');
-            landingSection.classList.add('hidden');
-
-            wheelEl.parentElement.classList.remove('hidden');
-            const scoreboard = document.querySelector('.flex.justify-between.w-full.max-w-\\[300px\\]');
-            if (scoreboard) scoreboard.classList.remove('hidden');
-
-            walletInput.value = '';
-            errorMsg.classList.add('hidden');
-        }
 
         // 为每格配色 — 交替深紫/暗红营造赌场感
         const SEGMENT_COLORS = [
@@ -717,16 +573,13 @@
         const SCORE_HIGH = 20;  // 高于此值给鼓励（最高32）
 
         function formatReward(num) {
-            return `${(num * 100000).toLocaleString()}<span class="reward-unit">GLC</span>`;
+            return `${(num * 10000).toLocaleString()}<span class="reward-unit">GLC</span>`;
         }
 
         function showScoreSummary() {
             const summaryEmoji = document.getElementById('summaryEmoji');
             const summaryScore = document.getElementById('summaryScore');
             const summaryMsg = document.getElementById('summaryMsg');
-            const retryBtn = document.getElementById('retryBtn');
-            const retryDivider = document.getElementById('retryDivider');
-            const claimTitle = document.getElementById('claimTitle');
 
             summaryScore.innerHTML = formatReward(totalScore);
 
@@ -735,28 +588,16 @@
                 const pct = Math.min(95, Math.round(60 + (totalScore - SCORE_HIGH) / (32 - SCORE_HIGH) * 35));
                 summaryEmoji.textContent = '🎉';
                 summaryMsg.innerHTML = `手气爆棚！你超越了 <span class="text-[#FFD700] font-black">${pct}%</span> 的玩家，<br/>堪称地产大亨！`;
-                claimTitle.textContent = '立即领取你的丰厚收益';
-                retryBtn.classList.add('hidden');
-                retryDivider.classList.add('hidden');
             } else if (totalScore < SCORE_LOW) {
-                // 低分提示重玩
                 summaryEmoji.textContent = '😅';
                 summaryMsg.innerHTML = '这次运气差了点，分数不太够哦...<br/>要不再来一局试试手气？';
-                claimTitle.textContent = '领取你的地产收益';
-                retryBtn.classList.remove('hidden');
-                retryDivider.classList.remove('hidden');
             } else {
-                // 中等分数
                 summaryEmoji.textContent = '✨';
                 summaryMsg.innerHTML = '收益不错，恭喜你成功投资了一波地产！';
-                claimTitle.textContent = '领取你的地产收益';
-                retryBtn.classList.add('hidden');
-                retryDivider.classList.add('hidden');
             }
         }
 
         function retryGame() {
-            // 重玩但不清除已领取钱包记录
             beginGreatLoveAttempt();
             rotation = 0;
             spinsLeft = 3;
@@ -781,10 +622,6 @@
             const scoreboard = document.querySelector('.flex.justify-between.w-full.max-w-\\[300px\\]');
             if (scoreboard) scoreboard.classList.remove('hidden');
             window.scrollTo({ top: 0, behavior: 'smooth' });
-        }
-
-        function isEvm(addr) {
-            return /^0x[a-fA-F0-9]{40}$/.test(addr);
         }
 
         function handleSpin() {
@@ -836,177 +673,9 @@
             }, 4100);
         }
 
-        function addDebugLog(emoji, message, data = null) {
-            console.log(`${emoji} [DEBUG]`, message, data || '');
-        }
-
-        function showAlreadyClaimedUI(wallet) {
-            airdropSection.classList.add('hidden');
-            landingSection.classList.remove('hidden');
-            const landingTitle = landingSection.querySelector('h3');
-            if (landingTitle) landingTitle.innerText = "该钱包已领取过奖励";
-            const landingMsg = document.getElementById('landingMsg');
-            if (landingMsg) {
-                landingMsg.innerHTML = `钱包 <span class="text-[#FFD700] font-mono">${wallet}</span> 已参与过活动，每个钱包仅可领取一次。<br/>请使用其他钱包地址参与。`;
-            }
-            landingSection.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        async function handleSubmit() {
-            const wallet = walletInput.value.trim();
-
-            if (!isEvm(wallet)) {
-                errorMsg.innerText = "请输入有效的EVM钱包地址 (0x 开头)";
-                errorMsg.classList.remove('hidden');
-                return;
-            }
-
-            if (claimedWallets.has(wallet.toLowerCase())) {
-                addDebugLog("⚠️", "内存中已存在该钱包", { wallet });
-                showAlreadyClaimedUI(wallet);
-                return;
-            }
-
-            errorMsg.classList.add('hidden');
-            submitBtn.disabled = true;
-            submitBtnText.innerText = "正在验证钱包...";
-            submitSpinner.classList.remove('hidden');
-
-            // Step 1: Check wallet duplicate
-            try {
-                const checkController = new AbortController();
-                const checkTimeout = setTimeout(() => checkController.abort(), 10000);
-
-                addDebugLog("🔍", "开始检查钱包", { wallet, vendor_slug: VENDOR_SLUG });
-
-                const checkResponse = await fetch(DUPLICATE_CHECK_ENDPOINT, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ vendor_slug: VENDOR_SLUG, wallet }),
-                    signal: checkController.signal
-                });
-
-                clearTimeout(checkTimeout);
-                addDebugLog("📡", "重复检查API响应状态", { status: checkResponse.status });
-
-                const rawText = await checkResponse.text();
-                let duplicateData;
-                try { duplicateData = JSON.parse(rawText); } catch { duplicateData = rawText; }
-
-                addDebugLog("📡", "重复检查API返回数据", { data: duplicateData });
-
-                const normalized = typeof duplicateData === "string"
-                    ? duplicateData.trim().toUpperCase() : "";
-
-                const isDuplicate =
-                    normalized === "YES" ||
-                    duplicateData === true ||
-                    String(duplicateData?.claimed || "").trim().toUpperCase() === "YES" ||
-                    String(duplicateData?.is_claimed || "").trim().toUpperCase() === "YES" ||
-                    String(duplicateData?.duplicate || "").trim().toUpperCase() === "YES" ||
-                    String(duplicateData?.result || "").trim().toUpperCase() === "YES" ||
-                    duplicateData?.claimed === true ||
-                    duplicateData?.is_claimed === true ||
-                    duplicateData?.duplicate === true;
-
-                if (checkResponse.ok && isDuplicate) {
-                    addDebugLog("🚫", "API判定为重复领取", { wallet });
-                    addClaimedWallet(wallet);
-                    submitBtn.disabled = false;
-                    submitBtnText.innerText = "确定领取并加入";
-                    submitSpinner.classList.add('hidden');
-                    showAlreadyClaimedUI(wallet);
-                    return;
-                }
-
-                if (!checkResponse.ok) {
-                    addDebugLog("⚠️", "重复检查API失败", { status: checkResponse.status });
-                    errorMsg.innerText = "服务器繁忙，请稍后再试。";
-                    errorMsg.classList.remove('hidden');
-                    submitBtn.disabled = false;
-                    submitBtnText.innerText = "确定领取并加入";
-                    submitSpinner.classList.add('hidden');
-                    return;
-                }
-
-                addDebugLog("✅", "重复检查通过");
-            } catch (err) {
-                addDebugLog("❌", "重复检查API异常", { message: err.message });
-                errorMsg.innerText = "服务器繁忙，请稍后再试。";
-                errorMsg.classList.remove('hidden');
-                submitBtn.disabled = false;
-                submitBtnText.innerText = "确定领取并加入";
-                submitSpinner.classList.add('hidden');
-                return;
-            }
-
-            // Step 2: Register wallet
-            submitBtnText.innerText = "正在提交...";
-
-            const payload = {
-                wallet,
-                refURL: `https://www.greatlovedao.com?score=${totalScore}`,
-                score1: totalScore
-            };
-
-            addDebugLog("📤", "开始提交到register-wallet", payload);
-
-            try {
-                const controller = new AbortController();
-                const timeoutId = setTimeout(() => controller.abort(), 15000);
-
-                const response = await fetch(PROXY_ENDPOINT, {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify(payload),
-                    signal: controller.signal
-                });
-
-                clearTimeout(timeoutId);
-                addDebugLog("📤", "register-wallet响应状态", { status: response.status });
-
-                if (response.ok) {
-                    addDebugLog("✅", "注册成功");
-
-                    airdropSection.classList.add('hidden');
-                    landingSection.classList.remove('hidden');
-                    const landingTitle = landingSection.querySelector('h3');
-                    if (landingTitle) landingTitle.innerText = "领取成功!";
-                    const landingMsg = document.getElementById('landingMsg');
-                    if (landingMsg) {
-                        landingMsg.innerHTML = `钱包 <span class="text-[#FFD700] font-mono">${wallet}</span> 已成功领取 ${(totalScore * 100000).toLocaleString()} GLC 地产收益。`;
-                    }
-                    landingSection.scrollIntoView({ behavior: 'smooth' });
-                    addClaimedWallet(wallet);
-                } else {
-                    const data = await response.json().catch(() => ({}));
-                    addDebugLog("❌", "register-wallet返回错误", { status: response.status });
-
-                    if (response.status === 409 || data?.code === 'WALLET_EXISTS') {
-                        addClaimedWallet(wallet);
-                        showAlreadyClaimedUI(wallet);
-                    } else {
-                        errorMsg.innerText = "提交失败，请稍后重试。";
-                        errorMsg.classList.remove('hidden');
-                    }
-                }
-            } catch (err) {
-                addDebugLog("❌", "提交异常", { message: err.message });
-                errorMsg.innerText = "网络连接失败，请稍后再试。";
-                errorMsg.classList.remove('hidden');
-            } finally {
-                submitBtn.disabled = false;
-                submitBtnText.innerText = "确定领取并加入";
-                submitSpinner.classList.add('hidden');
-            }
-        }
-
         if (spinBtn) spinBtn.onclick = handleSpin;
-        if (submitBtn) submitBtn.onclick = handleSubmit;
-        document.getElementById('replayBtn').onclick = resetForNewWallet;
 
         initWheel();
-        checkClaimStatus();
     </script>
 </body>
 

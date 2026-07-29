@@ -1,4 +1,4 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, count, eq, sql } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { gameDailyLogs } from "../../../db/schema";
 import { createId } from "../../../lib/auth";
@@ -8,6 +8,8 @@ const GAME_LIMITS = {
   monopoly: { minimum: 3, maximum: 36 },
   miner: { minimum: 6, maximum: 45 },
 } as const;
+const DAILY_PLAY_LIMIT = 3;
+const POINT_VALUE = 10_000;
 
 type GameKey = keyof typeof GAME_LIMITS;
 
@@ -45,7 +47,19 @@ export async function GET(request: Request) {
     .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, requestedDate)))
     .orderBy(asc(gameDailyLogs.createdAt))
     .limit(100);
-  return Response.json({ date: requestedDate, entries });
+  const normalizedEntries = entries.map((entry) => ({
+    ...entry,
+    score: entry.rawScore * POINT_VALUE,
+  }));
+  const playsUsed = normalizedEntries.length;
+  return Response.json({
+    date: requestedDate,
+    entries: normalizedEntries,
+    limit: DAILY_PLAY_LIMIT,
+    playsUsed,
+    playsRemaining: Math.max(0, DAILY_PLAY_LIMIT - playsUsed),
+    limitReached: playsUsed >= DAILY_PLAY_LIMIT,
+  });
 }
 
 export async function POST(request: Request) {
@@ -76,7 +90,38 @@ export async function POST(request: Request) {
     .from(gameDailyLogs)
     .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.attemptId, attemptId)))
     .limit(1);
-  if (existing) return Response.json({ ok: true, duplicate: true, id: existing.id });
+  if (existing) {
+    const [usage] = await database
+      .select({ value: count() })
+      .from(gameDailyLogs)
+      .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+    const playsUsed = usage?.value ?? 0;
+    return Response.json({
+      ok: true,
+      duplicate: true,
+      id: existing.id,
+      limit: DAILY_PLAY_LIMIT,
+      playsUsed,
+      playsRemaining: Math.max(0, DAILY_PLAY_LIMIT - playsUsed),
+      limitReached: playsUsed >= DAILY_PLAY_LIMIT,
+    });
+  }
+
+  const [usage] = await database
+    .select({ value: count() })
+    .from(gameDailyLogs)
+    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+  const playsUsed = usage?.value ?? 0;
+  if (playsUsed >= DAILY_PLAY_LIMIT) {
+    return Response.json({
+      error: "Daily play limit reached",
+      code: "DAILY_PLAY_LIMIT",
+      limit: DAILY_PLAY_LIMIT,
+      playsUsed,
+      playsRemaining: 0,
+      limitReached: true,
+    }, { status: 429 });
+  }
 
   const now = Math.floor(Date.now() / 1000);
   const entry = {
@@ -85,17 +130,60 @@ export async function POST(request: Request) {
     gameKey: game,
     playDate,
     rawScore,
-    score: rawScore * 100_000,
+    score: rawScore * POINT_VALUE,
     unit: "GLC",
     attemptId,
     createdAt: now,
   };
-  await database.insert(gameDailyLogs).values(entry).onConflictDoNothing();
+  await database.run(sql`
+    INSERT INTO game_daily_logs (
+      id, user_id, game_key, play_date, raw_score, score, unit, attempt_id, created_at
+    )
+    SELECT
+      ${entry.id}, ${entry.userId}, ${entry.gameKey}, ${entry.playDate}, ${entry.rawScore},
+      ${entry.score}, ${entry.unit}, ${entry.attemptId}, ${entry.createdAt}
+    WHERE (
+      SELECT count(*) FROM game_daily_logs
+      WHERE user_id = ${entry.userId} AND play_date = ${entry.playDate}
+    ) < ${DAILY_PLAY_LIMIT}
+    ON CONFLICT(attempt_id) DO NOTHING
+  `);
   const [saved] = await database
     .select({ id: gameDailyLogs.id })
     .from(gameDailyLogs)
     .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.attemptId, attemptId)))
     .limit(1);
-  if (!saved) return Response.json({ error: "Unable to save result" }, { status: 409 });
-  return Response.json({ ok: true, duplicate: saved.id !== entry.id, id: saved.id, entry });
+  if (!saved) {
+    const [latestUsage] = await database
+      .select({ value: count() })
+      .from(gameDailyLogs)
+      .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+    const latestPlays = latestUsage?.value ?? 0;
+    if (latestPlays >= DAILY_PLAY_LIMIT) {
+      return Response.json({
+        error: "Daily play limit reached",
+        code: "DAILY_PLAY_LIMIT",
+        limit: DAILY_PLAY_LIMIT,
+        playsUsed: latestPlays,
+        playsRemaining: 0,
+        limitReached: true,
+      }, { status: 429 });
+    }
+    return Response.json({ error: "Unable to save result" }, { status: 409 });
+  }
+  const [latestUsage] = await database
+    .select({ value: count() })
+    .from(gameDailyLogs)
+    .where(and(eq(gameDailyLogs.userId, user.id), eq(gameDailyLogs.playDate, playDate)));
+  const savedPlays = latestUsage?.value ?? playsUsed + 1;
+  return Response.json({
+    ok: true,
+    duplicate: saved.id !== entry.id,
+    id: saved.id,
+    entry,
+    limit: DAILY_PLAY_LIMIT,
+    playsUsed: savedPlays,
+    playsRemaining: Math.max(0, DAILY_PLAY_LIMIT - savedPlays),
+    limitReached: savedPlays >= DAILY_PLAY_LIMIT,
+  });
 }

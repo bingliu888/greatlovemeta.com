@@ -28,10 +28,13 @@ test("both games report completed sessions to the authenticated wrapper", async 
     assert.match(source, new RegExp(`game: '${game}'`));
     assert.match(source, /rawScore: totalScore/);
     assert.match(source, /reportGreatLoveResult\(\)/);
+    assert.match(source, /1 Point = 10,000 GLC/);
+    assert.doesNotMatch(source, /100,000 GLC/);
+    assert.doesNotMatch(source, /wallet-input|walletInput|register-wallet/);
   }
 });
 
-test("game result writes are authenticated and persisted in the daily log", async () => {
+test("game result writes use the new reward rate and enforce three daily plays", async () => {
   const [route, schema, player] = await Promise.all([
     readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
@@ -39,10 +42,16 @@ test("game result writes are authenticated and persisted in the daily log", asyn
   ]);
 
   assert.match(route, /if \(!user\).*401/);
-  assert.match(route, /database\.insert\(gameDailyLogs\)/);
-  assert.match(route, /rawScore \* 100_000/);
+  assert.match(route, /INSERT INTO game_daily_logs/);
+  assert.match(route, /SELECT count\(\*\) FROM game_daily_logs/);
+  assert.match(route, /POINT_VALUE = 10_000/);
+  assert.match(route, /DAILY_PLAY_LIMIT = 3/);
+  assert.match(route, /code: "DAILY_PLAY_LIMIT"/);
+  assert.match(route, /status: 429/);
   assert.match(schema, /game_daily_logs/);
   assert.match(schema, /attempt_id/);
   assert.match(player, /mode === "trial"/);
   assert.match(player, /\/api\/game-results/);
+  assert.match(player, /Play again tomorrow/);
+  assert.match(player, /playsRemaining/);
 });
