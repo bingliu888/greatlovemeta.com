@@ -28,6 +28,7 @@ test("both full-page games report completed sessions directly through the shared
     assert.match(source, /greatlove-game-runtime\.js/);
     assert.match(source, new RegExp(`GreatLoveGameRuntime\\.reportResult\\('${game}', totalScore, attemptId\\)`));
     assert.match(source, /reportGreatLoveResult\(\)/);
+    assert.match(source, /id="greatlove-trial-result"/);
     assert.match(source, /1 Point = 10,000 GLC/);
     assert.doesNotMatch(source, /100,000 GLC/);
     assert.doesNotMatch(source, /wallet-input|walletInput|register-wallet/);
@@ -35,6 +36,8 @@ test("both full-page games report completed sessions directly through the shared
   assert.match(runtime, /fetch\('\/api\/game-results'/);
   assert.match(runtime, /fetch\(`\/api\/game-results\?date=/);
   assert.match(runtime, /disableRetry\(\)/);
+  assert.match(runtime, /showTrialResult\(/);
+  assert.match(runtime, /window\.location\.assign\(gameLogRoute\(\)\)/);
 });
 
 test("game result writes use the new reward rate and enforce one daily play per game", async () => {
@@ -96,12 +99,13 @@ test("mobile header keeps sign-in on one line and game pages use no iframe", asy
   assert.match(gamePage, /redirect\(`\/games\/\$\{game\}\.html\?mode=/);
 });
 
-test("Play uses a server-side login launch check and daily reward tests are scheduled", async () => {
-  const [home, gamePage, launchRoute, runtime, workflow, scheduledTest] = await Promise.all([
+test("Play uses a server-side login launch check, returns to the game, and opens the saved log", async () => {
+  const [home, gamePage, launchRoute, runtime, gameLog, workflow, scheduledTest] = await Promise.all([
     readFile(new URL("../app/[lang]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/game-launch/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
+    readFile(new URL("../components/GameDailyLog.tsx", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/daily-game-rewards.yml", import.meta.url), "utf8"),
     readFile(new URL("./daily-game-rewards.test.mjs", import.meta.url), "utf8"),
   ]);
@@ -115,7 +119,9 @@ test("Play uses a server-side login launch check and daily reward tests are sche
   assert.match(gamePage, /redirect\(`\/games\//);
   assert.match(gamePage, /const user = await getSessionUser\(\)/);
   assert.match(runtime, /\/api\/game-launch\?game=/);
+  assert.match(runtime, /\/\$\{lang\}\/dashboard#game-log/);
   assert.match(runtime, /window\.location\.assign/);
+  assert.match(gameLog, /<section id="game-log"/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /node scripts\/check-protected-navigation\.mjs/);
   assert.match(workflow, /node --test tests\/daily-game-rewards\.test\.mjs/);

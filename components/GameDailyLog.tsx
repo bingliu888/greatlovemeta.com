@@ -64,7 +64,7 @@ export function GameDailyLog({ lang, compact = false }: { lang: "en" | "zh"; com
     miner: zh ? "星际矿工" : "Miner",
   };
 
-  return <section className={`game-daily-log${compact ? " compact" : ""}`} aria-labelledby={`game-log-title-${compact ? "compact" : "full"}`}>
+  return <section id="game-log" className={`game-daily-log${compact ? " compact" : ""}`} aria-labelledby={`game-log-title-${compact ? "compact" : "full"}`}>
     <div className="game-log-heading">
       <div><p className="section-kicker">{zh ? "每日游戏记录" : "DAILY GAME LOG"}</p><h2 id={`game-log-title-${compact ? "compact" : "full"}`}>{zh ? "今天的游戏成绩" : "Today's game results"}</h2></div>
       {available && !loading && <div className="game-log-total"><small>{zh ? `今日 ${entries.length} 局 · 每款最多 ${playLimit} 局` : `${entries.length} today · ${playLimit} per game`}</small><strong>{total.toLocaleString()} GLC</strong></div>}

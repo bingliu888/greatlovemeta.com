@@ -22,6 +22,14 @@
         window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 
+    function gameLogRoute() {
+        return `/${lang}/dashboard#game-log`;
+    }
+
+    function goToGameLog() {
+        window.setTimeout(() => window.location.assign(gameLogRoute()), 1200);
+    }
+
     function statusElement() {
         let element = document.getElementById('greatlove-game-status');
         if (element) return element;
@@ -59,6 +67,16 @@
             : tone === 'saved'
                 ? 'rgba(72,232,189,.65)'
                 : 'rgba(255,215,0,.55)';
+    }
+
+    function showTrialResult(message) {
+        const element = document.getElementById('greatlove-trial-result');
+        if (!element) {
+            showStatus(message, 'trial');
+            return;
+        }
+        element.textContent = message;
+        element.classList.remove('hidden');
     }
 
     function guardElement() {
@@ -134,11 +152,10 @@
     async function reportResult(game, rawScore, attemptId) {
         const reward = Number(rawScore) * 10000;
         if (mode !== 'play') {
-            showStatus(
+            showTrialResult(
                 lang === 'zh'
                     ? `试玩完成：${reward.toLocaleString()} GLC。正式 Play 登录后会保存成绩。`
-                    : `Trial complete: ${reward.toLocaleString()} GLC. Sign in through Play to save it.`,
-                'trial'
+                    : `Trial complete: ${reward.toLocaleString()} GLC. Sign in through Play to save it.`
             );
             return true;
         }
@@ -160,6 +177,7 @@
                     'saved'
                 );
                 disableRetry();
+                goToGameLog();
                 return true;
             }
             if (!response.ok) throw new Error(result.error || 'Unable to save');
@@ -170,6 +188,7 @@
                 'saved'
             );
             disableRetry();
+            goToGameLog();
             return true;
         } catch {
             showStatus(
