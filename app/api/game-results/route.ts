@@ -2,28 +2,17 @@ import { and, asc, count, eq, sql } from "drizzle-orm";
 import { getDb } from "../../../db";
 import { gameDailyLogs } from "../../../db/schema";
 import { createId } from "../../../lib/auth";
+import {
+  createRewardLogEntry,
+  DAILY_PLAY_LIMIT,
+  GAME_LIMITS,
+  isGameKey,
+  isValidPlayDate,
+  POINT_VALUE,
+} from "../../../lib/game-reward-rules.js";
 import { requestUser } from "../../../lib/request-user";
 
-const GAME_LIMITS = {
-  monopoly: { minimum: 3, maximum: 36 },
-  miner: { minimum: 0, maximum: 36 },
-} as const;
-const DAILY_PLAY_LIMIT = 1;
-const POINT_VALUE = 10_000;
-
 type GameKey = keyof typeof GAME_LIMITS;
-
-function isGameKey(value: string): value is GameKey {
-  return value in GAME_LIMITS;
-}
-
-function validDate(value: string) {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
-  const parsed = Date.parse(`${value}T12:00:00Z`);
-  if (!Number.isFinite(parsed)) return false;
-  const difference = Math.abs(parsed - Date.now());
-  return difference <= 36 * 60 * 60 * 1000;
-}
 
 function utcDate() {
   return new Date().toISOString().slice(0, 10);
@@ -35,7 +24,7 @@ export async function GET(request: Request) {
   const searchParams = new URL(request.url).searchParams;
   const requestedDate = searchParams.get("date") || utcDate();
   const requestedGame = searchParams.get("game") || "";
-  if (!validDate(requestedDate)) return Response.json({ error: "Invalid date" }, { status: 400 });
+  if (!isValidPlayDate(requestedDate)) return Response.json({ error: "Invalid date" }, { status: 400 });
   if (requestedGame && !isGameKey(requestedGame)) return Response.json({ error: "Invalid game" }, { status: 400 });
   const entries = await getDb()
     .select({
@@ -81,13 +70,13 @@ export async function POST(request: Request) {
   const attemptId = String(payload.attemptId || "");
   const playDate = String(payload.playDate || "");
   if (!isGameKey(game)) return Response.json({ error: "Invalid game" }, { status: 400 });
-  if (!Number.isInteger(rawScore) || rawScore < GAME_LIMITS[game].minimum || rawScore > GAME_LIMITS[game].maximum) {
+  if (!Number.isInteger(rawScore) || rawScore < GAME_LIMITS[game as GameKey].minimum || rawScore > GAME_LIMITS[game as GameKey].maximum) {
     return Response.json({ error: "Invalid score" }, { status: 400 });
   }
   if (!/^[A-Za-z0-9-]{16,80}$/.test(attemptId)) {
     return Response.json({ error: "Invalid attempt" }, { status: 400 });
   }
-  if (!validDate(playDate)) return Response.json({ error: "Invalid date" }, { status: 400 });
+  if (!isValidPlayDate(playDate)) return Response.json({ error: "Invalid date" }, { status: 400 });
 
   const database = getDb();
   const [existing] = await database
@@ -129,17 +118,15 @@ export async function POST(request: Request) {
   }
 
   const now = Math.floor(Date.now() / 1000);
-  const entry = {
+  const entry = createRewardLogEntry({
     id: createId(),
     userId: user.id,
-    gameKey: game,
+    game,
     playDate,
     rawScore,
-    score: rawScore * POINT_VALUE,
-    unit: "GLC",
     attemptId,
     createdAt: now,
-  };
+  });
   await database.run(sql`
     INSERT INTO game_daily_logs (
       id, user_id, game_key, play_date, raw_score, score, unit, attempt_id, created_at

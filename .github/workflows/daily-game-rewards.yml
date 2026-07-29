@@ -1,0 +1,26 @@
+name: Daily game reward log test
+
+on:
+  schedule:
+    - cron: "17 09 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify-game-rewards:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out site code
+        uses: actions/checkout@v6
+      - name: Use Node.js 22
+        uses: actions/setup-node@v6
+        with:
+          node-version: "22.13.0"
+          package-manager-cache: false
+      - name: Verify Play navigation
+        run: node --test tests/games.test.mjs
+      - name: Simulate multiple users playing both games
+        run: node --test tests/daily-game-rewards.test.mjs

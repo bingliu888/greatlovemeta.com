@@ -35,8 +35,9 @@ test("both games report completed sessions to the authenticated wrapper", async 
 });
 
 test("game result writes use the new reward rate and enforce one daily play per game", async () => {
-  const [route, schema, player] = await Promise.all([
+  const [route, rules, schema, player] = await Promise.all([
     readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/game-reward-rules.js", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
   ]);
@@ -44,8 +45,9 @@ test("game result writes use the new reward rate and enforce one daily play per 
   assert.match(route, /if \(!user\).*401/);
   assert.match(route, /INSERT INTO game_daily_logs/);
   assert.match(route, /SELECT count\(\*\) FROM game_daily_logs/);
-  assert.match(route, /POINT_VALUE = 10_000/);
-  assert.match(route, /DAILY_PLAY_LIMIT = 1/);
+  assert.match(rules, /POINT_VALUE = 10_000/);
+  assert.match(rules, /DAILY_PLAY_LIMIT = 1/);
+  assert.match(route, /createRewardLogEntry/);
   assert.match(route, /eq\(gameDailyLogs\.gameKey, game\)/);
   assert.match(route, /AND game_key = \$\{entry\.gameKey\}/);
   assert.match(route, /code: "DAILY_PLAY_LIMIT"/);
@@ -59,9 +61,9 @@ test("game result writes use the new reward rate and enforce one daily play per 
 });
 
 test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit", async () => {
-  const [miner, route, player] = await Promise.all([
+  const [miner, rules, player] = await Promise.all([
     readFile(new URL("../public/games/miner.html", import.meta.url), "utf8"),
-    readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/game-reward-rules.js", import.meta.url), "utf8"),
     readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
   ]);
 
@@ -74,7 +76,7 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(miner, /briefing-trial-btn/);
   assert.match(miner, /briefing-play-btn/);
   assert.match(miner, /startMission\(true\)/);
-  assert.match(route, /miner: \{ minimum: 0, maximum: 36 \}/);
+  assert.match(rules, /miner: Object\.freeze\(\{ minimum: 0, maximum: 36 \}\)/);
   assert.match(player, /game !== "miner"/);
 });
 
@@ -87,4 +89,22 @@ test("mobile header keeps sign-in on one line and game pages omit the back-to-ga
   assert.match(styles, /\.header-cta \{[^}]*white-space: nowrap/);
   assert.doesNotMatch(player, /返回游戏区|All games/);
   assert.doesNotMatch(player, /#games/);
+});
+
+test("Play uses full document navigation and the daily multi-user reward test is scheduled", async () => {
+  const [home, player, workflow, scheduledTest] = await Promise.all([
+    readFile(new URL("../app/[lang]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../components/GameExperience.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../.github/workflows/daily-game-rewards.yml", import.meta.url), "utf8"),
+    readFile(new URL("./daily-game-rewards.test.mjs", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(home, /<a className="primary" href=\{`\/\$\{lang\}\/games\/\$\{game\.key\}\?mode=play`\}/);
+  assert.doesNotMatch(home, /<Link className="primary"[^>]*mode=play/);
+  assert.match(player, /<a className=\{mode === "play"/);
+  assert.match(workflow, /schedule:/);
+  assert.match(workflow, /node --test tests\/daily-game-rewards\.test\.mjs/);
+  assert.match(scheduledTest, /daily-test-user-01/);
+  assert.match(scheduledTest, /daily-test-user-02/);
+  assert.match(scheduledTest, /daily-test-user-03/);
 });
