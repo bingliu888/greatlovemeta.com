@@ -14,7 +14,7 @@ test("homepage places two games after the membership section", async () => {
   assert.match(source, /title: "Monopoly"/);
   assert.match(source, /title: "Miner"/);
   assert.match(source, /mode=trial/);
-  assert.match(source, /mode=play/);
+  assert.match(source, /\/api\/game-launch\?game=/);
 });
 
 test("both full-page games report completed sessions directly through the shared runtime", async () => {
@@ -75,9 +75,11 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(miner, /points: 0/);
   assert.match(miner, /本次奖励为 0 GLC/);
   assert.match(miner, /points \* 10000/);
-  assert.match(miner, /briefing-trial-btn/);
-  assert.match(miner, /briefing-play-btn/);
-  assert.match(miner, /startMission\(true\)/);
+  assert.match(miner, /BRIEFING_SECONDS = 6/);
+  assert.match(miner, /briefing-countdown/);
+  assert.match(miner, /setInterval\(\(\) => \{/);
+  assert.doesNotMatch(miner, /briefing-trial-btn|briefing-play-btn|chooseMode/);
+  assert.doesNotMatch(miner, /startMission\(true\)/);
   assert.match(rules, /miner: Object\.freeze\(\{ minimum: 0, maximum: 36 \}\)/);
   assert.match(miner, /GreatLoveGameRuntime\.guard\('miner'\)/);
 });
@@ -94,19 +96,25 @@ test("mobile header keeps sign-in on one line and game pages use no iframe", asy
   assert.match(gamePage, /redirect\(`\/games\/\$\{game\}\.html\?mode=/);
 });
 
-test("both game modes use full-page navigation and the daily multi-user reward test is scheduled", async () => {
-  const [home, gamePage, runtime, workflow, scheduledTest] = await Promise.all([
+test("Play uses a server-side login launch check and daily reward tests are scheduled", async () => {
+  const [home, gamePage, launchRoute, runtime, workflow, scheduledTest] = await Promise.all([
     readFile(new URL("../app/[lang]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/game-launch/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
     readFile(new URL("../.github/workflows/daily-game-rewards.yml", import.meta.url), "utf8"),
     readFile(new URL("./daily-game-rewards.test.mjs", import.meta.url), "utf8"),
   ]);
 
-  assert.match(home, /<a className="primary" href=\{`\/\$\{lang\}\/games\/\$\{game\.key\}\?mode=play`\}/);
+  assert.match(home, /<a className="primary" href=\{`\/api\/game-launch\?game=\$\{game\.key\}&lang=\$\{lang\}`\}/);
   assert.match(home, /<a href=\{`\/games\/\$\{game\.key\}\.html\?mode=trial&lang=\$\{lang\}`\}/);
   assert.doesNotMatch(home, /<Link className="primary"[^>]*mode=play/);
+  assert.match(launchRoute, /getSessionUser\(request\)/);
+  assert.match(launchRoute, /auth\/login\?returnTo=/);
+  assert.match(launchRoute, /\/games\/\$\{game\}\.html\?mode=play&lang=/);
   assert.match(gamePage, /redirect\(`\/games\//);
+  assert.match(gamePage, /const user = await getSessionUser\(\)/);
+  assert.match(runtime, /\/api\/game-launch\?game=/);
   assert.match(runtime, /window\.location\.assign/);
   assert.match(workflow, /schedule:/);
   assert.match(workflow, /node scripts\/check-protected-navigation\.mjs/);

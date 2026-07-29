@@ -14,9 +14,10 @@ test("all public calls to login-protected pages use full document navigation", a
 
   assert.equal(hardCommunityLinks.length, 3);
   assert.equal(hardMemberLinks.length, 1);
+  assert.match(source, /<a className="primary" href=\{`\/api\/game-launch\?game=/);
   assert.doesNotMatch(source, /<Link\b[^>]*href=\{`\/\$\{lang\}\/community`\}/);
   assert.doesNotMatch(source, /<Link\b[^>]*href=\{`\/\$\{lang\}\/members`\}/);
-  assert.doesNotMatch(source, /<Link\b[^>]*mode=play/);
+  assert.doesNotMatch(source, /<Link\b[^>]*(?:mode=play|\/api\/game-launch)/);
 });
 
 test("the protected-navigation policy checker passes", async () => {

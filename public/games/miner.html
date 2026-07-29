@@ -58,27 +58,15 @@
             transform: translateY(0);
         }
 
-        .typewriter {
-            overflow: hidden;
-            border-right: 2px solid rgba(0, 242, 255, 0.8);
-            white-space: nowrap;
-            animation: blink-caret 0.75s step-end infinite;
-        }
-
-        @keyframes blink-caret {
-            0%, 100% { border-color: rgba(0, 242, 255, 0.8); }
-            50% { border-color: transparent; }
-        }
-
-        .briefing-btn {
+        .briefing-countdown {
             opacity: 0;
-            transform: translateY(20px) scale(0.9);
-            transition: opacity 0.8s ease, transform 0.8s ease;
+            transform: translateY(12px);
+            transition: opacity 0.6s ease, transform 0.6s ease;
         }
 
-        .briefing-btn.visible {
+        .briefing-countdown.visible {
             opacity: 1;
-            transform: translateY(0) scale(1);
+            transform: translateY(0);
         }
 
         /* ===== 玻璃面板 ===== */
@@ -265,19 +253,13 @@
             </div>
             <div class="briefing-line">
                 <div class="glass-panel rounded-2xl p-4 mt-4 inline-block">
-                    <p class="text-neutral-400 text-xs mb-1">可用抓取次数</p>
+                    <p id="briefing-attempts-label" class="text-neutral-400 text-xs mb-1">可用抓取次数</p>
                     <p class="text-3xl font-black text-white font-tech">3</p>
                 </div>
             </div>
-            <div class="briefing-btn pt-4 grid grid-cols-2 gap-3 w-full">
-                <button id="briefing-trial-btn"
-                    class="glass-panel border border-cyan-400/40 text-cyan-200 font-black px-5 py-4 rounded-2xl text-sm tracking-wider">
-                    试玩 Trial
-                </button>
-                <button id="briefing-play-btn"
-                    class="btn-neon btn-pulse text-black font-black px-5 py-4 rounded-2xl text-sm tracking-wider">
-                    正式 Play
-                </button>
+            <div class="briefing-countdown glass-panel rounded-2xl p-4 mt-4 w-full" role="status" aria-live="polite">
+                <p id="briefing-countdown-label" class="text-cyan-300 text-xs tracking-wider">6 秒后自动进入游戏</p>
+                <p class="mt-2 text-3xl font-black text-white font-tech"><span id="briefing-countdown">6</span>s</p>
             </div>
         </div>
     </div>
@@ -435,8 +417,9 @@
         // ========== 缓存 DOM ==========
         const DOM = {
             briefingScreen: document.getElementById('briefing-screen'),
-            briefingTrialBtn: document.getElementById('briefing-trial-btn'),
-            briefingPlayBtn: document.getElementById('briefing-play-btn'),
+            briefingCountdown: document.getElementById('briefing-countdown'),
+            briefingCountdownLabel: document.getElementById('briefing-countdown-label'),
+            briefingAttemptsLabel: document.getElementById('briefing-attempts-label'),
             gameWrapper:   document.getElementById('game-wrapper'),
             header:        document.getElementById('game-header'),
             gameMain:      document.getElementById('game-main'),
@@ -615,59 +598,51 @@
             return items[items.length - 1];
         }
 
-        function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
-
         // ========== 开场简报 ==========
-        const BRIEFING_LINES = [
-            { id: "briefing-text-1", text: "公元 3047 年，深空第七矿区..." },
-            { id: "briefing-text-2", text: "你操控采矿飞船的钩爪系统，精准捕获漂浮矿物。" },
-            { id: "briefing-text-3", text: "任务：每局发射 3 次。命中获得奖励，未命中为 0。" },
-        ];
-
-        async function playBriefing() {
-            const lines = DOM.briefingScreen.querySelectorAll('.briefing-line');
-            for (let i = 0; i < lines.length; i++) {
-                await sleep(600);
-                lines[i].classList.add('visible');
-                if (i > 0 && i <= BRIEFING_LINES.length) {
-                    const cfg = BRIEFING_LINES[i - 1];
-                    const el = document.getElementById(cfg.id);
-                    if (el) await typeText(el, cfg.text, 40);
-                }
-            }
-            await sleep(400);
-            DOM.briefingScreen.querySelector('.briefing-btn').classList.add('visible');
-        }
-
-        function typeText(el, text, speed) {
-            return new Promise(resolve => {
-                el.textContent = '';
-                el.classList.add('typewriter');
-                let i = 0;
-                const timer = setInterval(() => {
-                    el.textContent += text[i];
-                    i++;
-                    if (i >= text.length) {
-                        clearInterval(timer);
-                        el.classList.remove('typewriter');
-                        resolve();
-                    }
-                }, speed);
-            });
-        }
-
         const launchParams = new URLSearchParams(window.location.search);
-        const currentMode = launchParams.get('mode') === 'play' ? 'play' : 'trial';
         const currentLang = launchParams.get('lang') === 'en' ? 'en' : 'zh';
+        const BRIEFING_SECONDS = 6;
+        const BRIEFING_COPY = {
+            zh: [
+                "公元 3047 年，深空第七矿区...",
+                "你操控采矿飞船的钩爪系统，精准捕获漂浮矿物。",
+                "任务：每局发射 3 次。命中获得奖励，未命中为 0。",
+            ],
+            en: [
+                "Year 3047, Deep-Space Mining Sector Seven...",
+                "Guide the mining ship's claw system to capture drifting minerals.",
+                "Mission: take 3 shots. Hits earn rewards; a miss earns 0.",
+            ],
+        };
 
-        function startMission(immediate = false) {
-            if (immediate) {
-                DOM.briefingScreen.style.display = 'none';
-                DOM.gameWrapper.style.opacity = '1';
-                DOM.gameWrapper.style.pointerEvents = 'auto';
-                setTimeout(() => startRound(), 100);
-                return;
-            }
+        function playBriefing() {
+            const copy = BRIEFING_COPY[currentLang];
+            copy.forEach((text, index) => {
+                const element = document.getElementById(`briefing-text-${index + 1}`);
+                if (element) element.textContent = text;
+            });
+            DOM.briefingCountdownLabel.textContent = currentLang === 'zh'
+                ? `${BRIEFING_SECONDS} 秒后自动进入游戏`
+                : `Game starts automatically in ${BRIEFING_SECONDS} seconds`;
+            DOM.briefingAttemptsLabel.textContent = currentLang === 'zh' ? '可用抓取次数' : 'Available shots';
+            DOM.briefingCountdown.textContent = String(BRIEFING_SECONDS);
+            DOM.briefingScreen.querySelectorAll('.briefing-line').forEach((line, index) => {
+                setTimeout(() => line.classList.add('visible'), index * 140);
+            });
+            DOM.briefingScreen.querySelector('.briefing-countdown').classList.add('visible');
+
+            let remaining = BRIEFING_SECONDS;
+            const timer = setInterval(() => {
+                remaining -= 1;
+                DOM.briefingCountdown.textContent = String(Math.max(0, remaining));
+                if (remaining <= 0) {
+                    clearInterval(timer);
+                    startMission();
+                }
+            }, 1000);
+        }
+
+        function startMission() {
             DOM.briefingScreen.style.transition = 'opacity 0.8s ease';
             DOM.briefingScreen.style.opacity = '0';
             setTimeout(() => {
@@ -678,21 +653,6 @@
                 setTimeout(() => startRound(), 600);
             }, 800);
         }
-
-        function chooseMode(selectedMode) {
-            if (selectedMode === currentMode) {
-                startMission();
-                return;
-            }
-            if (selectedMode === 'play') {
-                window.location.assign(`/${currentLang}/games/miner?mode=play&start=1`);
-            } else {
-                window.location.assign(`/games/miner.html?mode=trial&lang=${currentLang}&start=1`);
-            }
-        }
-
-        DOM.briefingTrialBtn.addEventListener('click', () => chooseMode('trial'));
-        DOM.briefingPlayBtn.addEventListener('click', () => chooseMode('play'));
 
         // ========== Canvas 尺寸 ==========
         function resizeCanvas() {
@@ -1240,11 +1200,7 @@
 
         window.GreatLoveGameRuntime.guard('miner').then(allowed => {
             if (!allowed) return;
-            if (launchParams.get('start') === '1') {
-                startMission(true);
-            } else {
-                playBriefing();
-            }
+            playBriefing();
         });
     </script>
 </body>

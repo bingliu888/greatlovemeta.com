@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { getSessionUser } from "../../../../lib/auth";
 
@@ -23,20 +22,18 @@ export default async function GamePage({
   searchParams,
 }: {
   params: Promise<{ lang: string; game: string }>;
-  searchParams: Promise<{ mode?: string; start?: string }>;
+  searchParams: Promise<{ mode?: string }>;
 }) {
   const { lang, game } = await params;
   const query = await searchParams;
   if ((lang !== "en" && lang !== "zh") || !(game in games)) notFound();
   const mode = query.mode === "play" ? "play" : "trial";
-  const autoStart = game === "miner" && query.start === "1";
   if (mode === "play") {
-    const requestHeaders = await headers();
-    const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: requestHeaders.get("cookie") ?? "" } }));
+    const user = await getSessionUser();
     if (!user) {
-      const returnTo = `/${lang}/games/${game}?mode=play${autoStart ? "&start=1" : ""}`;
+      const returnTo = `/api/game-launch?game=${game}&lang=${lang}`;
       redirect(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
   }
-  redirect(`/games/${game}.html?mode=${mode}&lang=${lang}${autoStart ? "&start=1" : ""}`);
+  redirect(`/games/${game}.html?mode=${mode}&lang=${lang}`);
 }

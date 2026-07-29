@@ -18,7 +18,7 @@
     }
 
     function goToLogin(game) {
-        const returnTo = gameRoute(game, 'play', true);
+        const returnTo = `/api/game-launch?game=${encodeURIComponent(game)}&lang=${encodeURIComponent(lang)}`;
         window.location.assign(`/${lang}/auth/login?returnTo=${encodeURIComponent(returnTo)}`);
     }
 

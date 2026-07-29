@@ -15,6 +15,9 @@ const PROTECTED_ROUTE_MARKERS = [
 
 function protectedDestination(linkTag) {
   return PROTECTED_ROUTE_MARKERS.find((route) => linkTag.includes(route)) ||
+    (linkTag.includes("/api/game-launch")
+      ? "/api/game-launch"
+      : "") ||
     (linkTag.includes("/games/") && linkTag.includes("mode=play")
       ? "/games/*?mode=play"
       : "");
