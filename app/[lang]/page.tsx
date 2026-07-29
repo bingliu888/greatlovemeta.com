@@ -32,9 +32,9 @@ const content = {
     accessCommunityTitle: "GreatLoveMeta Community",
     accessCommunityBody: "Join the forum, meet members and use group Live Chat.",
     accessCommunityCta: "Enter Community",
-    officialCommunityTitle: "GreatLove Membership Community",
-    officialCommunityBody: "Continue to the membership experience shown on the GreatLoveDAO homepage.",
-    officialCommunityCta: "Join Now",
+    officialCommunityTitle: "GreatLoveMeta Member Directory",
+    officialCommunityBody: "Discover public member profiles and connect through the GreatLoveMeta community.",
+    officialCommunityCta: "View Members",
     gamesKicker: "GreatLove Games",
     gamesTitle: "Play, explore and keep a daily game log.",
     gamesBody: "Test either game without an account, or sign in for Play so every completed result is added to your personal daily log.",
@@ -54,11 +54,11 @@ const content = {
     ],
     rwaKicker: "RWA digital collections",
     rwaTitle: "GreatLove RWA and NFT Collections",
-    rwaBody: "Explore the three collection areas that are visibly presented on the current GreatLoveDAO homepage.",
+    rwaBody: "Explore three GreatLove digital collection areas without leaving GreatLoveMeta.",
     rwaCards: [
-      ["Lang Shining Eight Horses RWA Digital Collection NFT", "Eight Horses collection", "Explore the Eight Horses cultural digital collection.", "/greatlove-horses.png", "https://www.greatlovedao.com/nft11_en.html"],
-      ["GreatLove RWA NFT Collection", "RWA and NFT collection", "Browse the RWA and NFT collection carousel presented on the homepage.", "/greatlove-rwa.gif", "https://www.greatlovedao.com/nft6_en.html"],
-      ["GreatLove NFT Professional Collection", "Professional collection", "Browse the professional cultural digital collection series.", "/greatlove-pro.gif", "https://www.greatlovedao.com/nft_1_en.html"],
+      ["Lang Shining Eight Horses RWA Digital Collection NFT", "Eight Horses collection", "Explore the Eight Horses cultural digital collection.", "/greatlove-horses.png", "/en/collections/eight-horses"],
+      ["GreatLove RWA NFT Collection", "RWA and NFT collection", "Browse the GreatLove RWA and NFT collection.", "/greatlove-rwa.gif", "/en/collections/rwa-nft"],
+      ["GreatLove NFT Professional Collection", "Professional collection", "Browse the professional cultural digital collection series.", "/greatlove-pro.gif", "/en/collections/professional"],
     ],
     partnersKicker: "Technical ecosystem",
     partnersTitle: "Technical Partners",
@@ -86,7 +86,7 @@ const content = {
     membersCta: "View members",
     ecosystemKicker: "Connected applications",
     ecosystemTitle: "One community, many ways to participate.",
-    ecosystemBody: "Continue into learning with BingAcademy, AI agents with MyClaw, collective insight with WhatsReal, or the wider GreatLoveDAO ecosystem.",
+    ecosystemBody: "Continue into learning with BingAcademy, AI agents with MyClaw, collective insight with WhatsReal, or the GreatLove.Art community.",
     communityKicker: "Built for shared progress",
     communityTitle: "Community, Live Chat and Ask Guru—ready from day one.",
     communityBody: "Your account connects profile, member directory, Community discussions, private messages, live group conversations, referrals and bilingual AI assistance.",
@@ -119,9 +119,9 @@ const content = {
     accessCommunityTitle: "GreatLoveMeta 社区",
     accessCommunityBody: "加入论坛、认识会员，并使用群组 Live Chat。",
     accessCommunityCta: "进入社区",
-    officialCommunityTitle: "大爱会员社区",
-    officialCommunityBody: "继续进入 GreatLoveDAO 首页展示的会员社区体验。",
-    officialCommunityCta: "立即加入",
+    officialCommunityTitle: "GreatLoveMeta 会员名录",
+    officialCommunityBody: "浏览公开会员档案，并通过 GreatLoveMeta 社区建立连接。",
+    officialCommunityCta: "查看会员",
     gamesKicker: "大爱游戏",
     gamesTitle: "轻松体验，记录每天的游戏成绩。",
     gamesBody: "无需账户即可试玩；登录后选择 Play，每局完成成绩会自动加入您的个人每日游戏记录。",
@@ -141,11 +141,11 @@ const content = {
     ],
     rwaKicker: "RWA 数字藏品",
     rwaTitle: "大爱 RWA 与 NFT 收藏",
-    rwaBody: "浏览当前 GreatLoveDAO 首页实际展示的三组数字收藏内容。",
+    rwaBody: "无需离开 GreatLoveMeta，即可浏览三组大爱数字收藏内容。",
     rwaCards: [
-      ["郎士宁八骏图 RWA数字藏品NFT", "八骏图数字收藏", "探索八骏图文化数字收藏。", "/greatlove-horses.png", "https://www.greatlovedao.com/nft11.html"],
-      ["大爱 RWA NFT 收藏", "RWA 与 NFT 收藏", "浏览首页实际展示的 RWA 与 NFT 收藏轮播内容。", "/greatlove-rwa.gif", "https://www.greatlovedao.com/nft6.html"],
-      ["大爱NFT系列专业收藏", "专业收藏", "浏览专业文化数字收藏系列。", "/greatlove-pro.gif", "https://www.greatlovedao.com/nft_1.html"],
+      ["郎士宁八骏图 RWA数字藏品NFT", "八骏图数字收藏", "探索八骏图文化数字收藏。", "/greatlove-horses.png", "/zh/collections/eight-horses"],
+      ["大爱 RWA NFT 收藏", "RWA 与 NFT 收藏", "浏览大爱 RWA 与 NFT 收藏内容。", "/greatlove-rwa.gif", "/zh/collections/rwa-nft"],
+      ["大爱NFT系列专业收藏", "专业收藏", "浏览专业文化数字收藏系列。", "/greatlove-pro.gif", "/zh/collections/professional"],
     ],
     partnersKicker: "技术生态",
     partnersTitle: "技术合作伙伴",
@@ -173,7 +173,7 @@ const content = {
     membersCta: "查看会员",
     ecosystemKicker: "连接生态应用",
     ecosystemTitle: "一个社区，多种参与方式。",
-    ecosystemBody: "通过 BingAcademy 参与 AI 学习、用 MyClaw 构建智能体、在 WhatsReal 汇聚集体判断，或继续探索 GreatLoveDAO 生态。",
+    ecosystemBody: "通过 BingAcademy 参与 AI 学习、用 MyClaw 构建智能体、在 WhatsReal 汇聚集体判断，或加入 GreatLove.Art 艺术社区。",
     communityKicker: "为共同成长而建",
     communityTitle: "社区、Live Chat 与 Ask Guru，从第一天即可使用。",
     communityBody: "一个账号连接个人档案、会员目录、社区讨论、私信、群组实时交流、推荐奖励与中英双语 AI 助手。",
@@ -193,7 +193,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
   const t = content[lang];
   return <main>
     <div className="hero-shell">
-      <a className="glm-source-announcement" href={lang === "zh" ? "https://www.greatlovedao.com/index.html" : "https://www.greatlovedao.com/index_en.html"}><span>{t.announcement}</span><b>{t.readNews} →</b></a>
+      <a className="glm-source-announcement" href={`/${lang}/news`}><span>{t.announcement}</span><b>{t.readNews} →</b></a>
       <SiteHeader lang={lang}/>
       <section className="hero glm-welcome-hero" id="welcome" aria-labelledby="glm-welcome-title">
         <div className="hero-copy">
@@ -226,7 +226,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
       <div className="section-heading"><p className="section-kicker">{t.accessKicker}</p><h2>{t.accessTitle}</h2><p>{t.accessBody}</p></div>
       <div className="glm-access-grid glm-membership-grid">
         <a className="glm-access-card featured" href={`/${lang}/community`}><small>{lang === "zh" ? "社区" : "COMMUNITY"}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
-        <a className="glm-access-card" href={lang === "zh" ? "https://www.greatlovedao.com/index.html" : "https://www.greatlovedao.com/index_en.html"}><small>GREATLOVEDAO</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
+        <a className="glm-access-card" href={`/${lang}/members`}><small>{lang === "zh" ? "会员" : "MEMBERS"}</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
       </div>
     </section>
 
@@ -249,7 +249,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
       </div>
     </section>
 
-    <section className="glm-rwa-section">
+    <section className="glm-rwa-section" id="collections">
       <div className="section-heading"><p className="section-kicker">{t.rwaKicker}</p><h2>{t.rwaTitle}</h2><p>{t.rwaBody}</p></div>
       <div className="glm-rwa-grid glm-rwa-visible">{t.rwaCards.map(([title,label,body,image,href]) => <a href={href} key={title}><img src={image} alt=""/><div><small>{label}</small><h3>{title}</h3><p>{body}</p><b>{lang === "zh" ? "了解更多" : "Learn more"} →</b></div></a>)}</div>
     </section>
@@ -262,7 +262,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
 
     <section className="members-home-section"><div className="members-home-card"><div><p className="section-kicker">{t.membersKicker}</p><h2>{t.membersTitle}</h2><p>{t.membersBody}</p><a className="primary-button" href={`/${lang}/members`}>{t.membersCta}<span>→</span></a></div><div className="members-home-visual" aria-hidden="true"><span>AI</span><span>RWA</span><span>GLC</span><span>∞</span></div></div></section>
 
-    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href="https://www.greatlovedao.com"><b>GreatLoveDAO</b><span>{lang === "zh" ? "RWA 生态系统" : "RWA ecosystem"} →</span></a></div></section>
+    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href={`https://greatlove.art/${lang}`}><b>GreatLove.Art</b><span>{lang === "zh" ? "大爱艺术社区" : "GreatLove art community"} →</span></a></div></section>
 
     <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a></div><div className="four-seats gc-network" aria-hidden="true"><span>{lang === "zh" ? "成员" : "MEMBERS"}</span><span>GURU</span><strong>{lang === "zh" ? "您" : "YOU"}</strong><span>{lang === "zh" ? "聊天" : "CHAT"}</span><span>{lang === "zh" ? "共建" : "BUILD"}</span></div></div></section>
     <SiteFooter lang={lang}/>

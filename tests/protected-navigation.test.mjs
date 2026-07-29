@@ -13,7 +13,7 @@ test("all public calls to login-protected pages use full document navigation", a
   const hardMemberLinks = source.match(/<a\b[^>]*href=\{`\/\$\{lang\}\/members`\}/g) ?? [];
 
   assert.equal(hardCommunityLinks.length, 3);
-  assert.equal(hardMemberLinks.length, 1);
+  assert.equal(hardMemberLinks.length, 2);
   assert.match(source, /<a className="primary" href=\{`\/api\/game-launch\?game=/);
   assert.doesNotMatch(source, /<Link\b[^>]*href=\{`\/\$\{lang\}\/community`\}/);
   assert.doesNotMatch(source, /<Link\b[^>]*href=\{`\/\$\{lang\}\/members`\}/);
