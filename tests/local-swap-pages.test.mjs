@@ -37,4 +37,16 @@ test("swap runtime assets are local and language-aware", () => {
     assert.match(source, /document\.documentElement\.lang|location\.pathname/);
     assert.doesNotMatch(source, /greatlovedao\.com/i);
   }
+
+  const autoSource = read("public/swap-assets/autoswap.js");
+  assert.match(autoSource, /fetch\(['"]\/swap-assets\/abi\/AutoSwapLimitOrderBook\.json['"]/);
+  assert.doesNotMatch(autoSource, /fetch\(['"]assets\/abi\//);
+
+  const abiPath = path.join(root, "public/swap-assets/abi/AutoSwapLimitOrderBook.json");
+  assert.ok(fs.existsSync(abiPath), "AutoSwapLimitOrderBook ABI must be stored locally");
+  const abi = JSON.parse(fs.readFileSync(abiPath, "utf8"));
+  assert.ok(Array.isArray(abi) && abi.length > 0, "AutoSwapLimitOrderBook ABI must be a non-empty array");
+  for (const name of ["getPriceLevels", "getOrderByID", "placeLimitBuyCrossThenPost", "placeLimitSellCrossThenPost"]) {
+    assert.ok(abi.some((entry) => entry.type === "function" && entry.name === name), `${name} must exist in AutoSwapLimitOrderBook ABI`);
+  }
 });

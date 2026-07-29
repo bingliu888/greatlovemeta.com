@@ -283,7 +283,7 @@
 
   async function loadAbi() {
     if (state.orderBookAbi) return state.orderBookAbi;
-    var response = await fetch('assets/abi/AutoSwapLimitOrderBook.json', { cache: 'no-store' });
+    var response = await fetch('/swap-assets/abi/AutoSwapLimitOrderBook.json', { cache: 'no-store' });
     if (!response.ok) throw new Error('Unable to load AutoSwapLimitOrderBook ABI.');
     state.orderBookAbi = await response.json();
     return state.orderBookAbi;
