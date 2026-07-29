@@ -131,3 +131,34 @@ test("Play uses a server-side login launch check, returns to the game, and opens
   assert.match(scheduledTest, /daily-test-user-02/);
   assert.match(scheduledTest, /daily-test-user-03/);
 });
+
+test("game log combines both games, shows 14 days, and supports wallet-backed redemption", async () => {
+  const [log, resultsRoute, redemptionRoute, profileRoute, profileEditor, schema, migration] = await Promise.all([
+    readFile(new URL("../components/GameDailyLog.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/game-redemptions/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/profile/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../components/ProfileEditor.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
+    readFile(new URL("../drizzle/0010_amusing_lucky_pierre.sql", import.meta.url), "utf8"),
+  ]);
+
+  assert.match(log, /index < 14/);
+  assert.match(log, /allTimeTotal/);
+  assert.match(log, /Monopoly.*Miner/);
+  assert.match(log, /zh \? "兑换" : "Redeem"/);
+  assert.match(log, /fetch\("\/api\/game-redemptions"/);
+  assert.match(log, /fetch\("\/api\/profile"/);
+  assert.match(resultsRoute, /searchParams\.get\("summary"\) === "1"/);
+  assert.match(resultsRoute, /sum\(\$\{gameDailyLogs\.rawScore\}\)/);
+  assert.match(resultsRoute, /availableBalance/);
+  assert.match(redemptionRoute, /INSERT INTO game_redemptions/);
+  assert.match(redemptionRoute, /status IN \('pending', 'approved', 'completed'\)/);
+  assert.match(profileRoute, /wallet_address/);
+  assert.match(profileRoute, /\^0x\[a-fA-F0-9\]\{40\}\$/);
+  assert.match(profileEditor, /EVM wallet/);
+  assert.match(profileEditor, /walletEditing/);
+  assert.match(schema, /game_redemptions/);
+  assert.match(schema, /wallet_address/);
+  assert.match(migration, /ALTER TABLE `users` ADD `wallet_address`/);
+});

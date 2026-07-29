@@ -1,6 +1,6 @@
-import { and, asc, count, eq, sql } from "drizzle-orm";
+import { and, asc, count, eq, gte, lte, sql } from "drizzle-orm";
 import { getDb } from "../../../db";
-import { gameDailyLogs } from "../../../db/schema";
+import { gameDailyLogs, gameRedemptions, users } from "../../../db/schema";
 import { createId } from "../../../lib/auth";
 import {
   createRewardLogEntry,
@@ -22,6 +22,66 @@ export async function GET(request: Request) {
   const user = await requestUser();
   if (!user) return Response.json({ error: "Authentication required" }, { status: 401 });
   const searchParams = new URL(request.url).searchParams;
+  const summary = searchParams.get("summary") === "1";
+  if (summary) {
+    const from = searchParams.get("from") || "";
+    const to = searchParams.get("to") || "";
+    if (!isValidPlayDate(from) || !isValidPlayDate(to) || from > to) {
+      return Response.json({ error: "Invalid date range" }, { status: 400 });
+    }
+    const database = getDb();
+    const entries = await database
+      .select({
+        id: gameDailyLogs.id,
+        game: gameDailyLogs.gameKey,
+        playDate: gameDailyLogs.playDate,
+        rawScore: gameDailyLogs.rawScore,
+        score: gameDailyLogs.score,
+        unit: gameDailyLogs.unit,
+        playedAt: gameDailyLogs.createdAt,
+      })
+      .from(gameDailyLogs)
+      .where(and(eq(gameDailyLogs.userId, user.id), gte(gameDailyLogs.playDate, from), lte(gameDailyLogs.playDate, to)))
+      .orderBy(asc(gameDailyLogs.playDate), asc(gameDailyLogs.createdAt))
+      .limit(100);
+    const [scoreTotal] = await database
+      .select({ rawTotal: sql<number>`coalesce(sum(${gameDailyLogs.rawScore}), 0)` })
+      .from(gameDailyLogs)
+      .where(eq(gameDailyLogs.userId, user.id));
+    const [claimedTotal] = await database
+      .select({ total: sql<number>`coalesce(sum(${gameRedemptions.amount}), 0)` })
+      .from(gameRedemptions)
+      .where(and(eq(gameRedemptions.userId, user.id), sql`${gameRedemptions.status} IN ('pending', 'approved', 'completed')`));
+    const [wallet] = await database
+      .select({ walletAddress: users.walletAddress })
+      .from(users)
+      .where(eq(users.id, user.id))
+      .limit(1);
+    const [lastRedemption] = await database
+      .select({
+        id: gameRedemptions.id,
+        amount: gameRedemptions.amount,
+        status: gameRedemptions.status,
+        requestedAt: gameRedemptions.requestedAt,
+      })
+      .from(gameRedemptions)
+      .where(eq(gameRedemptions.userId, user.id))
+      .orderBy(sql`${gameRedemptions.requestedAt} DESC`)
+      .limit(1);
+    const allTimeTotal = Number(scoreTotal?.rawTotal || 0) * POINT_VALUE;
+    const redeemedTotal = Number(claimedTotal?.total || 0);
+    return Response.json({
+      from,
+      to,
+      entries: entries.map((entry) => ({ ...entry, score: entry.rawScore * POINT_VALUE })),
+      allTimeTotal,
+      redeemedTotal,
+      availableBalance: Math.max(0, allTimeTotal - redeemedTotal),
+      walletAddress: wallet?.walletAddress ?? "",
+      lastRedemption: lastRedemption ?? null,
+      limit: DAILY_PLAY_LIMIT,
+    });
+  }
   const requestedDate = searchParams.get("date") || utcDate();
   const requestedGame = searchParams.get("game") || "";
   if (!isValidPlayDate(requestedDate)) return Response.json({ error: "Invalid date" }, { status: 400 });

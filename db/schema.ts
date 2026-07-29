@@ -6,6 +6,7 @@ export const users = sqliteTable("users", {
   displayName: text("display_name").notNull(),
   passwordHash: text("password_hash").notNull(),
   preferredLanguage: text("preferred_language").notNull().default("en"),
+  walletAddress: text("wallet_address"),
   createdAt: integer("created_at").notNull(),
 });
 
@@ -188,4 +189,16 @@ export const gameDailyLogs = sqliteTable("game_daily_logs", {
 }, (table) => [
   index("greatlovemeta_game_log_user_date_idx").on(table.userId, table.playDate),
   index("greatlovemeta_game_log_user_created_idx").on(table.userId, table.createdAt),
+]);
+
+export const gameRedemptions = sqliteTable("game_redemptions", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  walletAddress: text("wallet_address").notNull(),
+  amount: integer("amount").notNull(),
+  status: text("status").notNull().default("pending"),
+  requestedAt: integer("requested_at").notNull(),
+}, (table) => [
+  index("greatlovemeta_game_redemption_user_idx").on(table.userId, table.requestedAt),
+  index("greatlovemeta_game_redemption_status_idx").on(table.status),
 ]);

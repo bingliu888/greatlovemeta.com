@@ -46,6 +46,19 @@ class IsolatedRewardLog {
       entry.userId === userId && entry.playDate === playDate
     );
   }
+
+  allTimeTotal(userId) {
+    return this.#entries
+      .filter((entry) => entry.userId === userId)
+      .reduce((total, entry) => total + entry.score, 0);
+  }
+
+  recentDailyTotals(userId, dates) {
+    return dates.map((playDate) => ({
+      playDate,
+      total: this.dailyLog(userId, playDate).reduce((sum, entry) => sum + entry.score, 0),
+    }));
+  }
 }
 
 test("daily scheduled simulation isolates multiple users and verifies both game reward logs", () => {
@@ -75,6 +88,19 @@ test("daily scheduled simulation isolates multiple users and verifies both game 
       entries.map((entry) => entry.score).sort((a, b) => a - b),
       Object.entries(user.scores).map(([game, score]) => rewardFor(game, score)).sort((a, b) => a - b),
     );
+    assert.equal(
+      store.allTimeTotal(user.id),
+      Object.entries(user.scores).reduce((total, [game, score]) => total + rewardFor(game, score), 0),
+    );
+    const fourteenDays = Array.from({ length: 14 }, (_, index) => {
+      const date = new Date();
+      date.setUTCDate(date.getUTCDate() - index);
+      return date.toISOString().slice(0, 10);
+    });
+    const recent = store.recentDailyTotals(user.id, fourteenDays);
+    assert.equal(recent.length, 14);
+    assert.equal(recent[0].total, store.allTimeTotal(user.id));
+    assert.ok(recent.slice(1).every((day) => day.total === 0));
     assert.throws(
       () => store.play({
         userId: user.id,
