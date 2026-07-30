@@ -16,7 +16,7 @@ export function LanguageSync({ lang }: { lang: SiteLanguage }) {
 
 export function LanguageLink({ lang, className }: { lang: SiteLanguage; className?: string; compact?: boolean }) {
   const next = lang === "en" ? "zh" : "en";
-  return <Link className={className ?? "language-link"} href={`/${next}`} hrefLang={next} onClick={() => window.localStorage.setItem(storageKey, next)} aria-label={lang === "en" ? "Switch website to Chinese" : "Switch website to English"}>{lang === "en" ? "中文" : "EN"}</Link>;
+  return <Link className={className ?? "language-link"} href={`/${next}`} hrefLang={next} onClick={() => window.localStorage.setItem(storageKey, next)} aria-label={lang === "en" ? "Switch website to Chinese" : "切换网站语言为英文"}>{lang === "en" ? "中文" : "EN"}</Link>;
 }
 
 export function RootLanguageRedirect() {

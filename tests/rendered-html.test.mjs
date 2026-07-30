@@ -60,6 +60,11 @@ test("renders GreatLoveMeta production metadata", async () => {
   assert.match(html, /幸运轮盘/);
   assert.match(html, /\/zh\/lucky-wheel\?mode=trial/);
   assert.match(html, /大爱艺术世界/);
+  assert.match(html, /社区、实时聊天与智能助手，从第一天即可使用。/);
+  assert.doesNotMatch(
+    html,
+    /AI Agent|Live Chat|Ask Guru|>Guru<|>GURU<|\bPlay\b|\bMiner\b|Switch website to English|Primary navigation|Footer navigation/,
+  );
   assert.doesNotMatch(html, /GreatLoveMeta(?:\.com)? 社区|GreatLoveMeta(?:\.com)? 会员名录|大爱艺术社区|大富翁|Monopoly|地产策略/);
   assert.doesNotMatch(html, /领取 1 亿大爱社区币|六大板块简介|边玩边赚|大爱 FAQ|GLAC 大爱 RWA 艺术币|全球通 ezSwap/);
   assert.doesNotMatch(html, /codex-preview/);

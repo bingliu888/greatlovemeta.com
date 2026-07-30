@@ -4,6 +4,13 @@ import test from "node:test";
 
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
+test("Chinese shared chrome localizes navigation and assistant accessibility labels", () => {
+  assert.match(read("components/LanguageMemory.tsx"), /"切换网站语言为英文"/);
+  assert.match(read("components/SiteHeader.tsx"), /"主要导航"/);
+  assert.match(read("components/SiteFooter.tsx"), /"页脚导航"/);
+  assert.match(read("components/FloatingAssistant.tsx"), /"打开智能助手"/);
+});
+
 test("all primary GreatLoveMeta surfaces render the shared public header once", () => {
   const directRoutes = [
     "app/[lang]/page.tsx",
@@ -53,7 +60,7 @@ test("new messages and replies both provide a working bilingual Guru polish acti
   assert.match(source, /setDraft\(result\.reply\)/);
   assert.match(source, /disabled=\{busy \|\| !draft\.trim\(\)\}/);
   assert.equal((source.match(/"Polish with Guru"/g) || []).length, 2);
-  assert.equal((source.match(/"请 Guru 润色"/g) || []).length, 2);
+  assert.equal((source.match(/"请智能助手润色"/g) || []).length, 2);
   assert.match(source, /className="compose-actions"/);
   assert.match(source, /className="reply-box"/);
   assert.equal((source.match(/aria-label=\{zh \? "返回消息列表" : "Back to message list"\}/g) || []).length, 2);

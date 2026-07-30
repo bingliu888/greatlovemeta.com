@@ -9,6 +9,6 @@ export function FloatingAssistant() {
   const route = pathname.replace(/^\/(en|zh)/, "") || "/";
   const topLevelPages = ["/", "/news", "/events", "/project"];
   if (!topLevelPages.includes(route)) return null;
-  const label = lang === "zh" ? "打开 AI 助手" : "Open AI assistant";
+  const label = lang === "zh" ? "打开智能助手" : "Open AI assistant";
   return <div className="floating-assistant-layer"><Link className="floating-assistant" href={`/${lang}/assistant`} aria-label={label} title={label}><span aria-hidden="true"/></Link></div>;
 }

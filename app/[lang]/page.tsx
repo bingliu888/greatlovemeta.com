@@ -155,7 +155,7 @@ const content = {
     introTitle: "把 AI、现实世界资产与社区放进一个清晰体验。",
     introBody: "大爱元宇宙以现代会员中心承载大爱生态：邮箱验证码轻松加入、透明了解项目、参与社区交流，并随时获得智能指导。",
     features: [
-      ["01", "每位会员都可使用 AI 智能体", "向 Guru 了解生态信息、使用实时语音助手，并连接 MyClaw AI 智能体操作系统的愿景。"],
+      ["01", "每位会员都可使用 AI 智能体", "向智能助手了解生态信息、使用实时语音助手，并连接 MyClaw AI 智能体操作系统的愿景。"],
       ["02", "发现 RWA 与 NFT", "了解实体资产、数字证书与区块链记录如何连接，同时清晰区分事实、溯源、权益和风险。"],
       ["03", "让社区真正共同建设", "发现会员、发送消息、建立群组实时聊天，把共同想法推进为公开可见的生态项目。"],
     ],
@@ -165,7 +165,7 @@ const content = {
       ["发现", "探索大爱 RWA、AI、会员与应用生态。"],
       ["加入", "使用邮箱验证码创建账户，无需记住密码。"],
       ["连接", "通过社区、私信和群组实时聊天认识伙伴。"],
-      ["共建", "关注项目、邀请贡献者，并使用 Guru 推进想法。"],
+      ["共建", "关注项目、邀请贡献者，并使用智能助手推进想法。"],
     ],
     membersKicker: "大爱社区会员",
     membersTitle: "认识先锋会员、生态建设者与社区贡献者。",
@@ -175,7 +175,7 @@ const content = {
     ecosystemTitle: "一个社区，多种参与方式。",
     ecosystemBody: "通过 BingAcademy 参与 AI 学习、用 MyClaw 构建智能体、在 WhatsReal 汇聚集体判断，或进入 GreatLove.Art 艺术世界。",
     communityKicker: "为共同成长而建",
-    communityTitle: "社区、实时聊天与 Guru 助手，从第一天即可使用。",
+    communityTitle: "社区、实时聊天与智能助手，从第一天即可使用。",
     communityBody: "一个账号连接个人档案、会员目录、社区讨论、私信、群组实时交流、推荐奖励与中英双语 AI 助手。",
     communityCta: "进入社区",
   },
@@ -264,7 +264,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
 
     <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href={`https://greatlove.art/${lang}`}><b>GreatLove.Art</b><span>{lang === "zh" ? "大爱艺术世界" : "GreatLove art community"} →</span></a></div></section>
 
-    <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a></div><div className="four-seats gc-network" aria-hidden="true"><span>{lang === "zh" ? "成员" : "MEMBERS"}</span><span>GURU</span><strong>{lang === "zh" ? "您" : "YOU"}</strong><span>{lang === "zh" ? "聊天" : "CHAT"}</span><span>{lang === "zh" ? "共建" : "BUILD"}</span></div></div></section>
+    <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a></div><div className="four-seats gc-network" aria-hidden="true"><span>{lang === "zh" ? "成员" : "MEMBERS"}</span><span>{lang === "zh" ? "助手" : "GURU"}</span><strong>{lang === "zh" ? "您" : "YOU"}</strong><span>{lang === "zh" ? "聊天" : "CHAT"}</span><span>{lang === "zh" ? "共建" : "BUILD"}</span></div></div></section>
     <SiteFooter lang={lang}/>
   </main>;
 }
