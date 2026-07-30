@@ -1,0 +1,19 @@
+/* Permanent phone (375px), iPad (1024px), and desktop (1440px) text-fit contract. */
+:where(html,body){inline-size:100%;max-inline-size:100%}
+:where(main,header,footer,nav,section,article,aside,form,fieldset,figure,blockquote,div,ul,ol,li,dl,dt,dd){min-inline-size:0;max-inline-size:100%}
+:where(main,header,footer,nav,section,article,aside,form,fieldset,figure,blockquote,div,ul,ol,li,dl)>*{min-inline-size:0}
+:where(h1,h2,h3,h4,h5,h6){max-inline-size:100%;overflow-wrap:anywhere;word-break:normal;hyphens:auto;text-wrap:balance}
+:where(p,li,dt,dd,figcaption,label,legend,a,button,td,th){max-inline-size:100%;overflow-wrap:anywhere;word-break:normal}
+:where(a,button,[role="button"],label,legend){white-space:normal!important;text-wrap:pretty}
+:where(pre,code,kbd,samp){max-inline-size:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
+:where(input,textarea,select){min-inline-size:0;max-inline-size:100%}
+textarea{white-space:pre-wrap;overflow-wrap:anywhere}
+table{inline-size:100%;max-inline-size:100%;table-layout:fixed}
+:where(th,td){min-inline-size:0;overflow-wrap:anywhere;word-break:break-word}
+:where(img,video,canvas,svg,iframe){max-inline-size:100%}
+:where(.primary-button,.secondary-button,.gold-button,.dashboard-audio-button,.guru-polish,.message-send,.beta-pill,.new-feedback,.form-submit){block-size:auto!important;min-block-size:44px;max-inline-size:100%;text-align:center;line-height:1.3}
+:where(.site-notification-bar span,.composer-status,.site-header .brand>span:last-child,.message-sidebar nav b,.message-sidebar nav small,.member-picker-list b,.member-picker-list small,.member-column article b,.dashboard-share-actions>* span,.invite-action-row>* span){overflow:visible!important;text-overflow:clip!important;white-space:normal!important;overflow-wrap:anywhere}
+.site-notification-bar{block-size:auto;min-block-size:52px;padding-block:8px;flex-wrap:wrap}
+@media (max-width: 1180px){body :where(main,[role="main"]) h1{font-size:clamp(2rem,5.4vw,4.5rem)!important;line-height:1.08!important;letter-spacing:-.035em!important}}
+@media (max-width: 760px){body :where(main,[role="main"]) h1{font-size:clamp(1.9rem,10vw,3rem)!important}body :where(main,[role="main"]) h2{font-size:clamp(1.5rem,7vw,2.5rem)!important;line-height:1.15!important}body :where(main,[role="main"]) h3{font-size:clamp(1.15rem,5vw,1.75rem)!important;line-height:1.2!important}:where(.hero-actions,.reply-box>div,.compose-actions,.message-kind-tabs,.calendar-nav,.gg-calendar-nav,.report-summary,.dashboard-share-actions,.invite-action-row){flex-wrap:wrap}}
+@media (max-width: 420px){:where(.hero-actions,.reply-box>div,.compose-actions,.dashboard-share-actions,.invite-action-row)>:where(a,button){flex:1 1 100%;inline-size:100%}}

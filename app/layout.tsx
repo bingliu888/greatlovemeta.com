@@ -7,6 +7,7 @@ import { NotificationBar } from "../components/NotificationBar";
 import "./globals.css";
 import "./readability.css";
 import "./project-status.css";
+import "./text-containment.css";
 
 export async function generateMetadata(): Promise<Metadata> {
   const requestHeaders = await headers();
