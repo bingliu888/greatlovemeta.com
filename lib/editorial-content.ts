@@ -13,7 +13,7 @@ export const fallbackNews: EditorialDocument = {
   zh: [
     { label: "平台 · 身份", date: "2026-07-22", title: "统一数字公民档案进入建设阶段", body: "首个账号身份层将连接个人档案、社区参与、私信、Live Chat、项目与未来数字凭证。" },
     { label: "社区 · 双语", date: "2026-07-22", title: "中英文用户共用同一个全球社区", body: "会员可在中英文界面之间自由切换，并保留同一账号、会话与项目关系。" },
-    { label: "生态 · cz.cool", date: "2026-07-22", title: "更轻松地进入全球数字公民生态", body: "cz.cool 将作为年轻化导流入口，用于互动身份卡、社交活动与分享，并由 GreatLoveMeta.com 提供品牌和身份基础。" },
+    { label: "生态 · cz.cool", date: "2026-07-22", title: "更轻松地进入全球数字公民生态", body: "cz.cool 将作为年轻化导流入口，用于互动身份卡、社交活动与分享，并由大爱元宇宙提供品牌和身份基础。" },
   ],
 };
 

@@ -26,9 +26,9 @@ export function SiteHeader({ lang }: { lang: "en" | "zh" }) {
   }, []);
   return (
     <header className="site-header">
-      <Link className="brand" href={`/${lang}`} aria-label="GreatLoveMeta.com home">
+      <Link className="brand" href={`/${lang}`} aria-label={lang === "zh" ? "大爱元宇宙首页" : "GreatLoveMeta.com home"}>
         <span className="brand-seal gc-brand-seal" aria-hidden="true">GL</span>
-        <span>GreatLoveMeta.com</span>
+        <span>{lang === "zh" ? "大爱元宇宙" : "GreatLoveMeta.com"}</span>
       </Link>
       <nav className="desktop-nav" aria-label="Primary navigation">
         <GlobalLinks lang={lang}/>

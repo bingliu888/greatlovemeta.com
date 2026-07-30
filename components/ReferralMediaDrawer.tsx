@@ -37,7 +37,7 @@ export function ReferralMediaDrawer({ open, onClose, lang, referralUrl, referral
         const text = zh
           ? `和我一起学习全球公民。填写推荐码 ${referralCode}，双方各得 100 积分。\n${referralUrl}`
           : `Learn GreatLove Meta with me. Add referral code ${referralCode} and we each receive 100 points.\n${referralUrl}`;
-        await navigator.share({ title: "GreatLoveMeta.com", text, url: referralUrl, files: [file] });
+        await navigator.share({ title: zh ? "大爱元宇宙" : "GreatLoveMeta.com", text, url: referralUrl, files: [file] });
         setMessage(zh ? "已把作品文件和推荐链接送到系统分享菜单。" : "The media file and referral link were sent to the system share sheet.");
       } else {
         await navigator.clipboard?.writeText(referralUrl).catch(() => undefined);

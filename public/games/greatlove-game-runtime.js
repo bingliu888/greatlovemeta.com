@@ -10,11 +10,12 @@
 
     function gameRoute(game, nextMode, start) {
         const suffix = start ? '&start=1' : '';
-        return `/${lang}/games/${game}?mode=${nextMode}${suffix}`;
+        const path = game === 'monopoly' ? `/${lang}/lucky-wheel` : `/${lang}/games/${game}`;
+        return `${path}?mode=${nextMode}${suffix}`;
     }
 
     function trialRoute(game) {
-        return `/${lang}/games/${game}?mode=trial`;
+        return game === 'monopoly' ? `/${lang}/lucky-wheel?mode=trial` : `/${lang}/games/${game}?mode=trial`;
     }
 
     function navigate(path) {

@@ -59,7 +59,7 @@ const copy = {
     loading: "正在加载兑换数据…",
     executing: "交易执行中",
     executingBody: "请在钱包中确认，并等待 Polygon 确认。",
-    brand: "GreatLoveMeta.com",
+    brand: "大爱元宇宙",
   },
 };
 

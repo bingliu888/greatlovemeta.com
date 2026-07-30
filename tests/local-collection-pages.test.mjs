@@ -43,7 +43,7 @@ test("homepage collection and ecosystem links no longer open GreatLoveDAO pages"
   assert.match(home, /href=\{`https:\/\/greatlove\.art\/\$\{lang\}`\}/);
   assert.match(home, /<b>GreatLove\.Art<\/b>/);
   assert.match(home, /GreatLove art community/);
-  assert.match(home, /大爱艺术社区/);
+  assert.match(home, /大爱艺术世界/);
   assert.doesNotMatch(home, /href=.*www\.greatlovedao\.com/i);
   assert.doesNotMatch(monopoly, /href="https:\/\/www\.greatlovedao\.com/i);
 
@@ -55,7 +55,7 @@ test("homepage collection and ecosystem links no longer open GreatLoveDAO pages"
     "/greatlove-rwa.gif",
     "/greatlove-pro.gif",
     "This collection page and its artwork are now presented directly on GreatLoveMeta.com",
-    "本收藏页面与艺术图现已直接迁移至 GreatLoveMeta.com",
+    "本收藏页面与艺术图现已直接迁移至大爱元宇宙",
   ]) {
     assert.match(collection, new RegExp(expected.replaceAll("/", "\\/")));
   }
@@ -98,7 +98,7 @@ test("English and Chinese Eight Horses pages render locally", async () => {
   assert.doesNotMatch(english, /greatlovedao\.com/i);
 
   assert.match(chinese, /郎士宁八骏图 RWA数字藏品NFT/);
-  assert.match(chinese, /由 GREATLOVEMETA 本站呈现/i);
+  assert.match(chinese, /由大爱元宇宙本站呈现/);
   assert.match(chinese, /\/zh#collections/);
   assert.doesNotMatch(chinese, /greatlovedao\.com/i);
 });

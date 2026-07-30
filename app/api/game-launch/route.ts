@@ -18,5 +18,6 @@ export async function GET(request: Request) {
     return Response.redirect(new URL(loginPath, request.url), 303);
   }
 
-  return Response.redirect(new URL(`/${lang}/games/${game}?mode=play`, request.url), 303);
+  const gamePath = game === "monopoly" ? `/${lang}/lucky-wheel` : `/${lang}/games/${game}`;
+  return Response.redirect(new URL(`${gamePath}?mode=play`, request.url), 303);
 }

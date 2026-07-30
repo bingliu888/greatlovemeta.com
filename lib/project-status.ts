@@ -26,7 +26,7 @@ export const projectBuilds: ProjectBuild[] = [
     date: "2026-07-22",
     title: { zh: "GreatLove Meta 双语平台基础", en: "GreatLove Meta bilingual platform foundation" },
     completed: {
-      zh: ["建立独立于 Guandan.Guru 的 GreatLoveMeta.com 代码与数据边界", "发布中英文首页、新闻、活动、社区、项目与 Ask Guru 页面", "建立主站与 cz.cool 的双站角色"],
+      zh: ["建立独立于 Guandan.Guru 的大爱元宇宙代码与数据边界", "发布中英文首页、新闻、活动、社区、项目与 Ask Guru 页面", "建立主站与 cz.cool 的双站角色"],
       en: ["Established GreatLoveMeta.com code and data boundaries independent from Guandan.Guru", "Published bilingual Home, News, Events, Community, Projects, and Ask Guru routes", "Defined the main-site and cz.cool roles"],
     },
     testable: {
@@ -72,7 +72,7 @@ export const projectBuilds: ProjectBuild[] = [
       en: ["Recorded Guandan UI as the generic feature baseline", "Required GreatLove Meta content and data to remain independent", "Recorded this site’s delivery work on Projects"],
     },
     testable: {
-      zh: ["查看项目页公开运营说明", "确认项目链接属于 GreatLoveMeta.com", "检查站点规则文件"],
+      zh: ["查看项目页公开运营说明", "确认项目链接属于大爱元宇宙", "检查站点规则文件"],
       en: ["Review public project operations", "Confirm Project links belong to GreatLoveMeta.com", "Inspect the site rules"],
     },
     commit: "ee04168",
@@ -82,7 +82,7 @@ export const projectBuilds: ProjectBuild[] = [
     date: "2026-07-22",
     title: { zh: "独立项目记录与社区修复", en: "Independent project records and Community repair" },
     completed: {
-      zh: ["用 GreatLoveMeta.com 自身交付历史替换 Guandan 构建数据", "恢复网站自有邮箱验证码会话，移除社区对 Clerk 会话的依赖", "修正社区桌面三栏布局、频道分类和会员头像存储"],
+      zh: ["用大爱元宇宙自身交付历史替换 Guandan 构建数据", "恢复网站自有邮箱验证码会话，移除社区对 Clerk 会话的依赖", "修正社区桌面三栏布局、频道分类和会员头像存储"],
       en: ["Replaced Guandan build data with GreatLoveMeta.com’s own delivery history", "Restored the site-owned email-code session and removed Community’s Clerk-session dependency", "Corrected the Community desktop grid, channel categories, and member avatar storage"],
     },
     testable: {
@@ -144,7 +144,7 @@ export const projectTasks: ProjectTask[] = [
     status: "done",
     progress: 100,
     title: { zh: "分离项目报告数据", en: "Separate Project report data" },
-    summary: { zh: "保留项目日历与报告界面，但仅显示 GreatLoveMeta.com 本身的任务和构建。", en: "Kept the Project calendar and reporting UI while showing only GreatLoveMeta.com tasks and builds." },
+    summary: { zh: "保留项目日历与报告界面，但仅显示大爱元宇宙本身的任务和构建。", en: "Kept the Project calendar and reporting UI while showing only GreatLoveMeta.com tasks and builds." },
     category: { zh: "项目管理", en: "Project operations" },
     owner: { zh: "平台团队", en: "Platform team" },
   },
@@ -183,7 +183,7 @@ export const projectTasks: ProjectTask[] = [
 export const projectReports = [
   {
     date: "2026-07-22",
-    title: { zh: "GreatLoveMeta.com 建站、功能对齐与社区修复", en: "GreatLoveMeta.com launch, feature parity, and Community repair" },
+    title: { zh: "大爱元宇宙建站、功能对齐与社区修复", en: "GreatLoveMeta.com launch, feature parity, and Community repair" },
     beta: { zh: "公开检查点", en: "Public checkpoint" },
     completed: 5,
   },

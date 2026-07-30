@@ -24,5 +24,5 @@ export function RootLanguageRedirect() {
     const saved = window.localStorage.getItem(storageKey);
     window.location.replace(saved === "en" ? "/en" : "/zh");
   }, []);
-  return <main className="language-loading"><span>GreatLoveMeta.com</span></main>;
+  return <main className="language-loading"><span>大爱元宇宙</span></main>;
 }

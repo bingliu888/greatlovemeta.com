@@ -120,7 +120,7 @@ export function ShareStudio({ lang }: { lang: "en" | "zh" }) {
     context.fillRect(0, 450, 1024, 574);
     context.fillStyle = "#fffaf0";
     context.font = "700 62px Georgia,serif";
-    context.fillText("GreatLoveMeta.com", 72, 720);
+    context.fillText(zh ? "大爱元宇宙" : "GreatLoveMeta.com", 72, 720);
     context.font = "700 40px system-ui";
     context.fillText(zh ? "一起学全球公民，双方各得 100 积分" : "Learn together · 100 points each", 72, 790);
     context.fillStyle = "#e3bd63";
@@ -176,7 +176,7 @@ export function ShareStudio({ lang }: { lang: "en" | "zh" }) {
       const text = zh
         ? `和我一起学习全球公民。填写推荐码 ${platform.referral.code}，双方各得 100 积分。\n${platform.referral.url}`
         : `Learn GreatLove Meta with me. Add referral code ${platform.referral.code} and we each receive 100 points.\n${platform.referral.url}`;
-      await navigator.share({ title: "GreatLoveMeta.com", text, url: platform.referral.url, files: [file] });
+      await navigator.share({ title: zh ? "大爱元宇宙" : "GreatLoveMeta.com", text, url: platform.referral.url, files: [file] });
       return true;
     }
     return false;

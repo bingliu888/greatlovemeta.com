@@ -6,7 +6,7 @@ import { getSessionUser } from "../../../../lib/auth";
 export const dynamic = "force-dynamic";
 
 const games = {
-  monopoly: { en: "Monopoly", zh: "大富翁" },
+  monopoly: { en: "Lucky Wheel", zh: "幸运轮盘" },
   miner: { en: "Miner", zh: "星际矿工" },
 } as const;
 
@@ -29,6 +29,7 @@ export default async function GamePage({
   const query = await searchParams;
   if ((lang !== "en" && lang !== "zh") || !(game in games)) notFound();
   const mode = query.mode === "play" ? "play" : "trial";
+  if (game === "monopoly") redirect(`/${lang}/lucky-wheel?mode=${mode}`);
   if (mode === "play") {
     const user = await getSessionUser();
     if (!user) {

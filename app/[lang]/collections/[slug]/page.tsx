@@ -54,20 +54,20 @@ const collections = {
     zh: {
       eyebrow: "八骏图 · 数字文化收藏",
       title: "郎士宁八骏图 RWA数字藏品NFT",
-      summary: "以经典八骏图文化主题为灵感，在 GreatLoveMeta 本站连接艺术发现、负责任的数字记录与中英双语社区学习。",
+      summary: "以经典八骏图文化主题为灵感，在大爱元宇宙本站连接艺术发现、负责任的数字记录与中英双语社区学习。",
       imageAlt: "八骏图数字收藏艺术图",
-      localLabel: "由 GREATLOVEMETA 本站呈现",
-      localBody: "本收藏页面与艺术图现已直接迁移至 GreatLoveMeta.com，会员浏览时不再跳转到外部 GreatLoveDAO 页面。",
+      localLabel: "由大爱元宇宙本站呈现",
+      localBody: "本收藏页面与艺术图现已直接迁移至大爱元宇宙，会员浏览时不再跳转到外部 GreatLoveDAO 页面。",
       sectionKicker: "收藏视角",
       sections: [
         ["文化主题", "八骏图意象承载生命力、奔腾、陪伴以及艺术与马文化之间的长期联系。本页面以清晰、克制的方式呈现这一文化主题。"],
-        ["数字呈现", "收藏封面、中英文介绍与后续更新统一保存在 GreatLoveMeta。数字记录可以帮助发现与整理收藏，同时应明确区分艺术作品本身、历史背景和数字凭证。"],
+        ["数字呈现", "收藏封面、中英文介绍与后续更新统一保存在大爱元宇宙。数字记录可以帮助发现与整理收藏，同时应明确区分艺术作品本身、历史背景和数字凭证。"],
         ["负责任的记录", "未来收藏记录应清楚说明对应作品、图片来源、发行主体、相关权益与支持证据。区块链记录本身并不能自动证明实物艺术品的真伪。"],
       ],
       recordTitle: "收藏记录",
       records: [
         ["类别", "RWA · NFT · 数字文化收藏"],
-        ["呈现方式", "GreatLoveMeta 中英双语收藏页面"],
+        ["呈现方式", "大爱元宇宙中英双语收藏页面"],
         ["主题", "八骏图文化艺术"],
         ["当前状态", "社区发现与文化学习"],
       ],
@@ -101,10 +101,10 @@ const collections = {
     zh: {
       eyebrow: "大爱 · RWA 与 NFT 收藏",
       title: "大爱 RWA NFT 收藏",
-      summary: "在 GreatLoveMeta 本站探索现实世界资产、文化藏品、支持证据与数字记录如何在清晰边界下连接。",
+      summary: "在大爱元宇宙本站探索现实世界资产、文化藏品、支持证据与数字记录如何在清晰边界下连接。",
       imageAlt: "大爱 RWA 与 NFT 收藏艺术图",
-      localLabel: "由 GREATLOVEMETA 本站呈现",
-      localBody: "收藏发现现已保留在 GreatLoveMeta 站内，以统一的中英双语布局承载未来透明记录。",
+      localLabel: "由大爱元宇宙本站呈现",
+      localBody: "收藏发现现已保留在大爱元宇宙站内，以统一的中英双语布局承载未来透明记录。",
       sectionKicker: "收藏框架",
       sections: [
         ["从资产本身开始", "有意义的 RWA 记录首先需要明确对应的物品或权益，而不是只给出代币名称。描述应区分可观察事实、解释与推广内容。"],
@@ -114,7 +114,7 @@ const collections = {
       recordTitle: "收藏记录",
       records: [
         ["类别", "RWA 与 NFT 发现"],
-        ["呈现方式", "GreatLoveMeta 中英双语收藏页面"],
+        ["呈现方式", "大爱元宇宙中英双语收藏页面"],
         ["重点", "透明记录与文化背景"],
         ["当前状态", "社区发现与教育"],
       ],
@@ -148,20 +148,20 @@ const collections = {
     zh: {
       eyebrow: "专业文化数字收藏",
       title: "大爱NFT系列专业收藏",
-      summary: "GreatLoveMeta 面向专业文化收藏建立的专属页面，将清晰视觉呈现、结构化资料与负责任的专业解读连接起来。",
+      summary: "大爱元宇宙面向专业文化收藏建立的专属页面，将清晰视觉呈现、结构化资料与负责任的专业解读连接起来。",
       imageAlt: "大爱 NFT 专业收藏艺术图",
-      localLabel: "由 GREATLOVEMETA 本站呈现",
-      localBody: "专业收藏现已拥有 GreatLoveMeta 本站页面，不再依赖外部 GreatLoveDAO 页面。",
+      localLabel: "由大爱元宇宙本站呈现",
+      localBody: "专业收藏现已拥有大爱元宇宙本站页面，不再依赖外部 GreatLoveDAO 页面。",
       sectionKicker: "专业方法",
       sections: [
         ["策展背景", "专业收藏不能只有醒目的图片。每件藏品应说明主题、文化背景、材料、尺寸、保存状态，以及任何归属判断所依据的资料。"],
         ["专业审查", "如果具体藏品涉及年代、作者、稀缺性或价值主张，应明确列出合格的独立专业人士与支持文件。"],
-        ["清晰的会员体验", "GreatLoveMeta 提供一致的中英双语发现空间，同时将教育内容与鉴定、所有权和交易主张清楚区分。"],
+        ["清晰的会员体验", "大爱元宇宙提供一致的中英双语发现空间，同时将教育内容与鉴定、所有权和交易主张清楚区分。"],
       ],
       recordTitle: "收藏记录",
       records: [
         ["类别", "专业文化数字收藏"],
-        ["呈现方式", "GreatLoveMeta 中英双语收藏页面"],
+        ["呈现方式", "大爱元宇宙中英双语收藏页面"],
         ["重点", "结构化专业资料"],
         ["当前状态", "社区发现与教育"],
       ],
@@ -191,7 +191,7 @@ export async function generateMetadata({
   if (!isLanguage(lang) || !isCollectionSlug(slug)) return {};
   const copy = collections[slug][lang];
   return {
-    title: `${copy.title} | GreatLoveMeta.com`,
+    title: { absolute: `${copy.title} | ${lang === "zh" ? "大爱元宇宙" : "GreatLoveMeta.com"}` },
     description: copy.summary,
     alternates: {
       languages: {

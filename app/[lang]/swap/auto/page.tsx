@@ -14,7 +14,7 @@ const copy = {
     side: "Side", orderId: "Order ID", price: "Price", remaining: "GLC Remaining", value: "GLUSD Value", action: "Action", maker: "Maker", transaction: "Transaction", activity: "Activity", summary: "Summary", executing: "Transaction in progress", executingBody: "Confirm in your wallet and wait for on-chain confirmation.",
   },
   zh: {
-    title: "GreatLove 自动兑换", wallet: "钱包", network: "加载网络", notConnected: "未连接", connectHint: "连接钱包后开始交易", connect: "连接钱包", connected: "已连接钱包", switch: "切换", disconnect: "断开",
+    title: "大爱元宇宙自动兑换", wallet: "钱包", network: "加载网络", notConnected: "未连接", connectHint: "连接钱包后开始交易", connect: "连接钱包", connected: "已连接钱包", switch: "切换", disconnect: "断开",
     swap: "兑换", buy: "买入 GLC", sell: "卖出 GLC", baseAmount: "买入 GLC 数量", quoteAmount: "支付 GLUSD 数量", balance: "余额", orderPrice: "订单价格", priceHint: "输入 GLC 和 GLUSD 数量后计算价格。", checks: "输入数量后会自动检查价格范围、最小单位和余额。", connectFirst: "请先连接钱包",
     market: "市场", marketTitle: "GLC 市场信息", refreshMarket: "刷新市场", bestBid: "最高买价", bestAsk: "最低卖价", lastPrice: "最新成交价", range: "允许价格范围", minBuy: "最低买入额", minSell: "最低卖出额", maxBuy: "最高买入额", maxSell: "最高卖出额", minStep: "最小 GLC 单位",
     myWallet: "我的钱包", myOrders: "我的 GLC 挂单", refreshMyOrders: "刷新我的挂单", myOrdersEmpty: "连接钱包后查看你的当前挂单。", myHistory: "我的最近交易", refreshMyHistory: "刷新我的交易", myHistoryEmpty: "连接钱包后查看你的最近交易。",
@@ -26,7 +26,7 @@ const copy = {
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
   const title = lang === "zh" ? "GLUSD – GLC 自动兑换" : "GLUSD – GLC AutoSwap";
-  return { title, description: lang === "zh" ? "GreatLoveMeta 链上自动兑换订单市场。" : "The GreatLoveMeta on-chain AutoSwap order market." };
+  return { title, description: lang === "zh" ? "大爱元宇宙链上自动兑换订单市场。" : "The GreatLoveMeta on-chain AutoSwap order market." };
 }
 
 function OrdersTable({ t, mine = false }: { t: typeof copy.en; mine?: boolean }) {

@@ -34,8 +34,9 @@ test("renders GreatLoveMeta production metadata", async () => {
     /^text\/html\b/i,
   );
   const html = await response.text();
-  assert.match(html, /GreatLoveMeta\.com/);
-  assert.match(html, /欢迎光临 RWA/);
+  assert.match(html, /大爱元宇宙/);
+  assert.match(html, /欢迎来到大爱元宇宙。/);
+  assert.doesNotMatch(html, /欢迎光临 RWA|欢迎光临 RWA，/);
   assert.match(html, /大爱 AI Agent 与 RWA 奖励已上线。/);
   assert.match(
     html,
@@ -56,6 +57,10 @@ test("renders GreatLoveMeta production metadata", async () => {
   assert.match(html, /大爱 RWA NFT 收藏/);
   assert.match(html, /大爱NFT系列专业收藏/);
   assert.match(html, /技术合作伙伴/);
+  assert.match(html, /幸运轮盘/);
+  assert.match(html, /\/zh\/lucky-wheel\?mode=trial/);
+  assert.match(html, /大爱艺术世界/);
+  assert.doesNotMatch(html, /GreatLoveMeta(?:\.com)? 社区|GreatLoveMeta(?:\.com)? 会员名录|大爱艺术社区|大富翁|Monopoly|地产策略/);
   assert.doesNotMatch(html, /领取 1 亿大爱社区币|六大板块简介|边玩边赚|大爱 FAQ|GLAC 大爱 RWA 艺术币|全球通 ezSwap/);
   assert.doesNotMatch(html, /codex-preview/);
 });

@@ -11,7 +11,7 @@ test("homepage places two games after the membership section", async () => {
   assert.ok(membershipIndex >= 0);
   assert.ok(gamesIndex > membershipIndex);
   assert.ok(swapIndex > gamesIndex);
-  assert.match(source, /title: "Monopoly"/);
+  assert.match(source, /title: "Lucky Wheel"/);
   assert.match(source, /title: "Miner"/);
   assert.match(source, /mode=trial/);
   assert.match(source, /\/api\/game-launch\?game=/);
@@ -33,6 +33,9 @@ test("both full-page games report completed sessions directly through the shared
     assert.doesNotMatch(source, /100,000 GLC/);
     assert.doesNotMatch(source, /wallet-input|walletInput|register-wallet/);
   }
+  assert.match(monopoly, /GLC Lucky Wheel/);
+  assert.match(monopoly, /GLC 幸运轮盘/);
+  assert.doesNotMatch(monopoly, /Monopoly|大富翁|地产|PROPERTY/);
   assert.match(runtime, /fetch\('\/api\/game-results'/);
   assert.match(runtime, /fetch\(`\/api\/game-results\?date=/);
   assert.match(runtime, /disableRetry\(\)/);
@@ -87,15 +90,24 @@ test("Miner uses three shots, zero for a miss, and 10,000 to 120,000 GLC per hit
   assert.match(miner, /GreatLoveGameRuntime\.guard\('miner'\)/);
 });
 
-test("game pages keep the shared header around a titled same-origin iframe", async () => {
-  const [styles, gamePage] = await Promise.all([
+test("game pages keep the shared header and expose a clean Lucky Wheel route", async () => {
+  const [styles, gamePage, luckyWheelPage, cleanEntry] = await Promise.all([
     readFile(new URL("../app/globals.css", import.meta.url), "utf8"),
     readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/[lang]/lucky-wheel/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/lucky-wheel/page.tsx", import.meta.url), "utf8"),
   ]);
 
   assert.equal((gamePage.match(/<SiteHeader\b/g) || []).length, 1);
+  assert.equal((luckyWheelPage.match(/<SiteHeader\b/g) || []).length, 1);
   assert.match(gamePage, /const frameSrc = `\/games\/\$\{game\}\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
   assert.match(gamePage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
+  assert.match(gamePage, /game === "monopoly".*\/lucky-wheel\?mode=/);
+  assert.match(luckyWheelPage, /const frameSrc = `\/games\/monopoly\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
+  assert.match(luckyWheelPage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
+  assert.match(luckyWheelPage, /Lucky Wheel/);
+  assert.match(luckyWheelPage, /幸运轮盘/);
+  assert.match(cleanEntry, /redirect\(`\/zh\/lucky-wheel\?mode=/);
   assert.doesNotMatch(gamePage, /redirect\(`\/games\/\$\{game\}\.html/);
   assert.match(styles, /\.game-frame-shell iframe\{/);
   assert.match(styles, /\.game-frame-page\{min-height:calc\(100dvh - 88px\)/);
@@ -103,10 +115,11 @@ test("game pages keep the shared header around a titled same-origin iframe", asy
   assert.match(styles, /@media\(max-width:820px\)\{\s*\.game-frame-page,\.game-frame-shell\{min-height:calc\(100dvh - 74px\)\}\s*\.game-frame-shell\{height:calc\(100dvh - 74px\)\}/);
 });
 
-test("Play uses a server-side login launch check, returns to the game, and opens the saved log", async () => {
-  const [home, gamePage, launchRoute, runtime, gameLog, workflow, scheduledTest] = await Promise.all([
+test("Play uses a server-side login launch check, returns to the clean game route, and opens the saved log", async () => {
+  const [home, gamePage, luckyWheelPage, launchRoute, runtime, gameLog, workflow, scheduledTest] = await Promise.all([
     readFile(new URL("../app/[lang]/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/[lang]/games/[game]/page.tsx", import.meta.url), "utf8"),
+    readFile(new URL("../app/[lang]/lucky-wheel/page.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/game-launch/route.ts", import.meta.url), "utf8"),
     readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
     readFile(new URL("../components/GameDailyLog.tsx", import.meta.url), "utf8"),
@@ -115,15 +128,17 @@ test("Play uses a server-side login launch check, returns to the game, and opens
   ]);
 
   assert.match(home, /<a className="primary" href=\{`\/api\/game-launch\?game=\$\{game\.key\}&lang=\$\{lang\}`\}/);
-  assert.match(home, /<a href=\{`\/\$\{lang\}\/games\/\$\{game\.key\}\?mode=trial`\}/);
+  assert.match(home, /game\.key === "monopoly" \? `\/\$\{lang\}\/lucky-wheel\?mode=trial`/);
   assert.doesNotMatch(home, /<Link className="primary"[^>]*mode=play/);
   assert.match(launchRoute, /getSessionUser\(request\)/);
   assert.match(launchRoute, /auth\/login\?returnTo=/);
-  assert.match(launchRoute, /\/\$\{lang\}\/games\/\$\{game\}\?mode=play/);
+  assert.match(launchRoute, /game === "monopoly" \? `\/\$\{lang\}\/lucky-wheel`/);
   assert.match(gamePage, /const user = await getSessionUser\(\)/);
+  assert.match(luckyWheelPage, /const user = await getSessionUser\(\)/);
   assert.match(gamePage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
+  assert.match(luckyWheelPage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(runtime, /\/api\/game-launch\?game=/);
-  assert.match(runtime, /\/\$\{lang\}\/games\/\$\{game\}\?mode=trial/);
+  assert.match(runtime, /game === 'monopoly' \? `\/\$\{lang\}\/lucky-wheel\?mode=trial`/);
   assert.match(runtime, /\/\$\{lang\}\/dashboard#game-log/);
   assert.match(runtime, /const target = window\.top && window\.top !== window \? window\.top : window/);
   assert.match(runtime, /target\.location\.assign\(path\)/);
@@ -152,7 +167,8 @@ test("game log combines both games, shows 14 days, and supports wallet-backed re
 
   assert.match(log, /index < 14/);
   assert.match(log, /allTimeTotal/);
-  assert.match(log, /Monopoly.*Miner/);
+  assert.match(log, /Lucky Wheel.*Miner/);
+  assert.match(log, /幸运轮盘.*矿工/);
   assert.match(log, /zh \? "兑换" : "Redeem"/);
   assert.match(log, /fetch\("\/api\/game-redemptions"/);
   assert.match(log, /fetch\("\/api\/profile"/);

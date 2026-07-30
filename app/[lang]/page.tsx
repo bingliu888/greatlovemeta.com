@@ -39,7 +39,7 @@ const content = {
     gamesTitle: "Play, explore and keep a daily game log.",
     gamesBody: "Test either game without an account, or sign in for Play so every completed result is added to your personal daily log.",
     gameCards: [
-      { key: "monopoly", tag: "PROPERTY STRATEGY", title: "Monopoly", body: "Roll through a luminous property wheel, build your score across three turns, and see where fortune lands." },
+      { key: "monopoly", tag: "LUCK & REWARDS", title: "Lucky Wheel", body: "Spin the luminous wheel, build your score across three turns, and see where fortune lands." },
       { key: "miner", tag: "DEEP SPACE ARCADE", title: "Miner", body: "Take 3 shots per round and earn 10,000–120,000 GLC per hit (0 for a miss). Save 1 official round daily." },
     ],
     testTrial: "Test trial",
@@ -93,11 +93,11 @@ const content = {
     communityCta: "Enter Community",
   },
   zh: {
-    metaTitle: "GreatLoveMeta.com — AI、RWA 与全球社区",
+    metaTitle: "大爱元宇宙 — AI、RWA 与全球社区",
     announcement: "大爱 AI Agent 与 RWA 奖励已上线。",
     readNews: "查看新闻",
-    eyebrow: "欢迎光临 RWA · 大爱元宇宙",
-    title: <>欢迎光临 RWA，<br />欢迎来到大爱元宇宙。</>,
+    eyebrow: "RWA · AI · 社区",
+    title: <>欢迎来到大爱元宇宙。</>,
     lead: "AI + DeFi + SocialFi + GameFi，在中英双语生态中连接社区、区块链、现实资产、NFT 与实用数字体验。",
     start: "免密码加入",
     markers: ["AI 智能驱动", "连接现实资产", "社区共同治理"],
@@ -116,17 +116,17 @@ const content = {
     accessKicker: "大爱会员",
     accessTitle: "共建共赢的大爱社区",
     accessBody: "加入大爱会员社区、认识伙伴，一起参与大爱生态共建。",
-    accessCommunityTitle: "GreatLoveMeta 社区",
+    accessCommunityTitle: "大爱元宇宙社区",
     accessCommunityBody: "加入论坛、认识会员，并使用群组 Live Chat。",
     accessCommunityCta: "进入社区",
-    officialCommunityTitle: "GreatLoveMeta 会员名录",
-    officialCommunityBody: "浏览公开会员档案，并通过 GreatLoveMeta 社区建立连接。",
+    officialCommunityTitle: "大爱元宇宙会员名录",
+    officialCommunityBody: "浏览公开会员档案，并通过大爱元宇宙社区建立连接。",
     officialCommunityCta: "查看会员",
     gamesKicker: "大爱游戏",
     gamesTitle: "轻松体验，记录每天的游戏成绩。",
     gamesBody: "无需账户即可试玩；登录后选择 Play，每局完成成绩会自动加入您的个人每日游戏记录。",
     gameCards: [
-      { key: "monopoly", tag: "地产策略", title: "大富翁 Monopoly", body: "转动璀璨地产轮盘，在三次机会中累积成绩，看看幸运最终落在哪里。" },
+      { key: "monopoly", tag: "幸运挑战", title: "幸运轮盘", body: "转动璀璨轮盘，在三次机会中累积成绩，看看幸运最终落在哪里。" },
       { key: "miner", tag: "深空街机", title: "星际矿工 Miner", body: "每局发射 3 次，命中获得 10,000–120,000 GLC，未命中为 0；每天保存 1 局正式成绩。" },
     ],
     testTrial: "试玩",
@@ -141,7 +141,7 @@ const content = {
     ],
     rwaKicker: "RWA 数字藏品",
     rwaTitle: "大爱 RWA 与 NFT 收藏",
-    rwaBody: "无需离开 GreatLoveMeta，即可浏览三组大爱数字收藏内容。",
+    rwaBody: "无需离开大爱元宇宙，即可浏览三组大爱数字收藏内容。",
     rwaCards: [
       ["郎士宁八骏图 RWA数字藏品NFT", "八骏图数字收藏", "探索八骏图文化数字收藏。", "/greatlove-horses.png", "/zh/collections/eight-horses"],
       ["大爱 RWA NFT 收藏", "RWA 与 NFT 收藏", "浏览大爱 RWA 与 NFT 收藏内容。", "/greatlove-rwa.gif", "/zh/collections/rwa-nft"],
@@ -153,7 +153,7 @@ const content = {
     partnerLabels: ["POLYGON", "BASE", "BNB CHAIN", "WEB3", "AI", "RWA", "NFT", "DEFI"],
     introKicker: "一个相互连接的生态",
     introTitle: "把 AI、现实世界资产与社区放进一个清晰体验。",
-    introBody: "GreatLoveMeta.com 以现代会员中心承载大爱生态：邮箱验证码轻松加入、透明了解项目、参与社区交流，并随时获得智能指导。",
+    introBody: "大爱元宇宙以现代会员中心承载大爱生态：邮箱验证码轻松加入、透明了解项目、参与社区交流，并随时获得智能指导。",
     features: [
       ["01", "每位会员都可使用 AI 智能体", "向 Guru 了解生态信息、使用实时语音助手，并连接 MyClaw AI Agent OS 的智能体愿景。"],
       ["02", "发现 RWA 与 NFT", "了解实体资产、数字证书与区块链记录如何连接，同时清晰区分事实、溯源、权益和风险。"],
@@ -173,7 +173,7 @@ const content = {
     membersCta: "查看会员",
     ecosystemKicker: "连接生态应用",
     ecosystemTitle: "一个社区，多种参与方式。",
-    ecosystemBody: "通过 BingAcademy 参与 AI 学习、用 MyClaw 构建智能体、在 WhatsReal 汇聚集体判断，或加入 GreatLove.Art 艺术社区。",
+    ecosystemBody: "通过 BingAcademy 参与 AI 学习、用 MyClaw 构建智能体、在 WhatsReal 汇聚集体判断，或进入 GreatLove.Art 艺术世界。",
     communityKicker: "为共同成长而建",
     communityTitle: "社区、Live Chat 与 Ask Guru，从第一天即可使用。",
     communityBody: "一个账号连接个人档案、会员目录、社区讨论、私信、群组实时交流、推荐奖励与中英双语 AI 助手。",
@@ -184,7 +184,7 @@ const content = {
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
   const safeLang = lang === "zh" ? "zh" : "en";
-  return { title: content[safeLang].metaTitle, alternates: { languages: { en: "/en", "zh-CN": "/zh" } } };
+  return { title: { absolute: content[safeLang].metaTitle }, alternates: { languages: { en: "/en", "zh-CN": "/zh" } } };
 }
 
 export default async function LanguageHome({ params }: { params: Promise<{ lang: string }> }) {
@@ -237,7 +237,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
           <div className="glm-game-art" aria-hidden="true">
             {game.key === "monopoly" ? <><span>12</span><i>◆</i><b>GLC</b></> : <><span>✦</span><i>⛏</i><b>3047</b></>}
           </div>
-          <div className="glm-game-copy"><small>{String(index + 1).padStart(2, "0")} · {game.tag}</small><h3>{game.title}</h3><p>{game.body}</p><div className="glm-game-actions"><a href={`/${lang}/games/${game.key}?mode=trial`}>{t.testTrial}</a><a className="primary" href={`/api/game-launch?game=${game.key}&lang=${lang}`}>{t.playGame} →</a></div><em>{t.playNote}</em></div>
+          <div className="glm-game-copy"><small>{String(index + 1).padStart(2, "0")} · {game.tag}</small><h3>{game.title}</h3><p>{game.body}</p><div className="glm-game-actions"><a href={game.key === "monopoly" ? `/${lang}/lucky-wheel?mode=trial` : `/${lang}/games/${game.key}?mode=trial`}>{t.testTrial}</a><a className="primary" href={`/api/game-launch?game=${game.key}&lang=${lang}`}>{t.playGame} →</a></div><em>{t.playNote}</em></div>
         </article>)}
       </div>
     </section>
@@ -262,7 +262,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
 
     <section className="members-home-section"><div className="members-home-card"><div><p className="section-kicker">{t.membersKicker}</p><h2>{t.membersTitle}</h2><p>{t.membersBody}</p><a className="primary-button" href={`/${lang}/members`}>{t.membersCta}<span>→</span></a></div><div className="members-home-visual" aria-hidden="true"><span>AI</span><span>RWA</span><span>GLC</span><span>∞</span></div></div></section>
 
-    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href={`https://greatlove.art/${lang}`}><b>GreatLove.Art</b><span>{lang === "zh" ? "大爱艺术社区" : "GreatLove art community"} →</span></a></div></section>
+    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href={`https://greatlove.art/${lang}`}><b>GreatLove.Art</b><span>{lang === "zh" ? "大爱艺术世界" : "GreatLove art community"} →</span></a></div></section>
 
     <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a></div><div className="four-seats gc-network" aria-hidden="true"><span>{lang === "zh" ? "成员" : "MEMBERS"}</span><span>GURU</span><strong>{lang === "zh" ? "您" : "YOU"}</strong><span>{lang === "zh" ? "聊天" : "CHAT"}</span><span>{lang === "zh" ? "共建" : "BUILD"}</span></div></div></section>
     <SiteFooter lang={lang}/>

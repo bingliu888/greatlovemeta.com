@@ -7,7 +7,7 @@
     <meta http-equiv="Content-Security-Policy"
         content="default-src * 'unsafe-inline' 'unsafe-eval' data: blob:; connect-src * 'unsafe-inline'; script-src * 'unsafe-inline' 'unsafe-eval'; style-src * 'unsafe-inline';">
 
-    <title>GLC 大富翁 - 环球地产大亨</title>
+    <title>GLC 幸运轮盘 | Lucky Wheel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;700;900&display=swap" rel="stylesheet">
     <style>
@@ -271,19 +271,19 @@
             <span class="text-xl md:text-3xl opacity-60" style="color: #ff3344;">♦</span>
             <span class="text-xl md:text-3xl opacity-60" style="color: #FFD700;">♠</span>
         </div>
-        <h1 class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[#FFD700] text-glow tracking-tighter mb-2 italic transform -skew-x-6 neon-flicker">
-            GLC 大富翁
+        <h1 id="gameTitle" class="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-black text-[#FFD700] text-glow tracking-tighter mb-2 italic transform -skew-x-6 neon-flicker">
+            GLC 幸运轮盘
         </h1>
         <div class="flex items-center justify-center gap-2 mb-4">
             <div class="h-[1px] w-6 md:w-12 bg-gradient-to-r from-transparent to-[#FFD700]/50"></div>
-            <p class="text-[#FFD700]/90 font-bold text-xs sm:text-sm md:text-lg uppercase tracking-[0.15em] md:tracking-[0.4em]"
+            <p id="gameBrand" class="text-[#FFD700]/90 font-bold text-xs sm:text-sm md:text-lg uppercase tracking-[0.15em] md:tracking-[0.4em]"
                 style="text-shadow: 0 0 8px rgba(255,215,0,0.3);">
-                by GreatLoveMeta
+                大爱元宇宙
             </p>
             <div class="h-[1px] w-6 md:w-12 bg-gradient-to-l from-transparent to-[#FFD700]/50"></div>
         </div>
-        <p class="text-white/70 text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mx-auto leading-relaxed font-medium">
-            转动轮盘赢取地产，每块地产对应 GLC 游戏成绩。<br class="hidden sm:block" />
+        <p id="gameIntro" class="text-white/70 text-xs sm:text-sm md:text-base max-w-xs sm:max-w-md mx-auto leading-relaxed font-medium">
+            转动幸运轮盘，每次落点都对应 GLC 游戏成绩。<br class="hidden sm:block" />
             每局可转动 3 次，完成后自动记录，无需钱包。
         </p>
     </header>
@@ -293,13 +293,13 @@
         <!-- Score Board -->
         <div class="flex justify-between w-full max-w-[300px] sm:max-w-sm mb-8 px-6 py-4 card-panel backdrop-blur-md rounded-2xl neon-border">
             <div class="text-center flex-1">
-                <p class="text-[9px] md:text-[10px] text-[#FFD700]/70 uppercase font-black tracking-widest mb-1">Total Rewards 总奖励</p>
+                <p id="totalRewardsLabel" class="text-[9px] md:text-[10px] text-[#FFD700]/70 uppercase font-black tracking-widest mb-1">总奖励</p>
                 <p id="totalScore" class="text-2xl md:text-3xl font-black text-[#FFD700] drop-shadow-sm flex items-baseline justify-center">
                     0<span class="reward-unit">GLC</span></p>
             </div>
             <div class="w-[1px] bg-[#FFD700]/20 mx-3"></div>
             <div class="text-center flex-1">
-                <p class="text-[9px] md:text-[10px] text-[#FFD700]/70 uppercase font-black tracking-widest mb-1">剩余次数</p>
+                <p id="spinsLeftLabel" class="text-[9px] md:text-[10px] text-[#FFD700]/70 uppercase font-black tracking-widest mb-1">剩余次数</p>
                 <p id="spinsLeft" class="text-2xl md:text-3xl font-black text-[#FFD700] drop-shadow-sm">3</p>
             </div>
         </div>
@@ -322,8 +322,8 @@
                 <button id="spinBtn"
                     class="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-36 lg:h-36 rounded-full flex flex-col items-center justify-center transition-all duration-300 transform border-4 border-[#1a0e2e] btn-casino-glow"
                     style="background: linear-gradient(145deg, #FFD700 0%, #e6ac00 50%, #cc9900 100%); cursor: pointer;">
-                    <span id="spinBtnText" class="font-black text-center leading-tight text-[#1a0e2e] text-sm sm:text-base md:text-lg lg:text-2xl">掷骰<br />开转</span>
-                    <span id="spinSubText" class="text-[10px] md:text-xs font-bold text-[#1a0e2e]/60 mt-1">ROLL</span>
+                    <span id="spinBtnText" class="font-black text-center leading-tight text-[#1a0e2e] text-sm sm:text-base md:text-lg lg:text-2xl">转动<br />开始</span>
+                    <span id="spinSubText" class="text-[10px] md:text-xs font-bold text-[#1a0e2e]/60 mt-1">SPIN</span>
                 </button>
             </div>
         </div>
@@ -342,7 +342,7 @@
             <div id="formContainer" class="card-panel backdrop-blur-md p-6 sm:p-8 rounded-[2rem] relative overflow-hidden neon-border">
                 <div id="scoreSummary" class="text-center mb-6">
                     <div id="summaryEmoji" class="text-5xl mb-3"></div>
-                    <p class="text-[#FFD700]/60 text-xs font-bold uppercase tracking-widest mb-1">本次总收益</p>
+                    <p id="summaryLabel" class="text-[#FFD700]/60 text-xs font-bold uppercase tracking-widest mb-1">本次总奖励</p>
                     <p id="summaryScore" class="text-4xl sm:text-5xl font-black text-[#FFD700] mb-1" style="text-shadow: 0 0 20px rgba(255,215,0,0.4);"></p>
                     <p class="text-[#FFD700]/50 text-[10px] font-bold mt-1">1 Point = 10,000 GLC</p>
                     <p id="summaryMsg" class="text-white/70 text-sm leading-relaxed mt-3 px-2"></p>
@@ -351,9 +351,9 @@
                     class="w-full font-black py-3 rounded-2xl text-base mb-4 transition-all duration-300 hover:brightness-110 border-2 border-[#FFD700]/40"
                     style="background: transparent; color: #FFD700;"
                     onclick="retryGame()">
-                    再来一局
+                    再转一局
                 </button>
-                <p class="text-center text-[#FFD700]/65 text-xs leading-relaxed">
+                <p id="playNote" class="text-center text-[#FFD700]/65 text-xs leading-relaxed">
                     正式 Play 的成绩会自动保存，每天最多 1 局；试玩不限次数，无需输入钱包。
                 </p>
                 <p id="greatlove-trial-result"
@@ -371,8 +371,8 @@
             <div class="h-[1px] w-16 bg-gradient-to-r from-transparent via-[#FFD700]/20 to-transparent"></div>
             <span class="text-xs opacity-30" style="color: #ff3344;">♦</span>
         </div>
-        <p class="opacity-35 text-[10px] md:text-xs text-[#FFD700]/80 uppercase tracking-tighter">
-            © 2026 GLC Monopoly • <a href="/" target="_top" class="hover:text-[#FFD700] transition-colors">GreatLoveMeta</a> • 一掷千金
+        <p id="gameFooter" class="opacity-35 text-[10px] md:text-xs text-[#FFD700]/80 uppercase tracking-tighter">
+            © 2026 GLC 幸运轮盘 • <a href="/" target="_top" class="hover:text-[#FFD700] transition-colors">大爱元宇宙</a> • 好运随每次转动而来
         </p>
     </footer>
 
@@ -495,20 +495,77 @@
         })();
 
         // ===== 游戏逻辑 =====
-        const PROPERTY_DATA = [
-            { emoji: '💎', name: '钻石大道', points: 12 },
-            { emoji: '🏰', name: '皇家城堡', points: 10 },
-            { emoji: '🌟', name: '星光大道', points: 10 },
-            { emoji: '🏦', name: '中央银行', points: 8 },
-            { emoji: '🏗️', name: '摩天大楼', points: 8 },
-            { emoji: '🎡', name: '欢乐乐园', points: 6 },
-            { emoji: '🌴', name: '天堂海岛', points: 6 },
-            { emoji: '🚂', name: '环球铁路', points: 4 },
-            { emoji: '🎰', name: '幸运赌场', points: 4 },
-            { emoji: '🏠', name: '温馨小屋', points: 2 },
-            { emoji: '🏪', name: '街角商店', points: 2 },
-            { emoji: '🅿️', name: '免费停车', points: 1 },
+        const GAME_LANG = new URLSearchParams(window.location.search).get('lang') === 'en' ? 'en' : 'zh';
+        const IS_ZH = GAME_LANG === 'zh';
+        const GAME_COPY = {
+            zh: {
+                title: 'GLC 幸运轮盘',
+                brand: '大爱元宇宙',
+                intro: '转动幸运轮盘，每次落点都对应 GLC 游戏成绩。<br class="hidden sm:block" />每局可转动 3 次，完成后自动记录，无需钱包。',
+                totalRewards: '总奖励',
+                spinsLeft: '剩余次数',
+                start: '转动<br/>开始',
+                again: '再转<br/>一次',
+                complete: '已完成',
+                spin: 'SPIN',
+                summary: '本次总奖励',
+                retry: '再转一局',
+                playNote: '正式 Play 的成绩会自动保存，每天最多 1 局；试玩不限次数，无需输入钱包。',
+                highScore: (pct) => `幸运爆棚！你超越了 <span class="text-[#FFD700] font-black">${pct}%</span> 的玩家，<br/>成为本轮幸运之星！`,
+                lowScore: '这次运气差了点，分数不太够哦...<br/>要不再转一局试试手气？',
+                midScore: '收获不错，恭喜你转出一轮幸运奖励！',
+                win: (name, reward) => `恭喜转中「${name}」，获得 ${reward}!`,
+                footer: '© 2026 GLC 幸运轮盘 • <a href="/" target="_top" class="hover:text-[#FFD700] transition-colors">大爱元宇宙</a> • 好运随每次转动而来',
+            },
+            en: {
+                title: 'GLC Lucky Wheel',
+                brand: 'by GreatLoveMeta',
+                intro: 'Spin the Lucky Wheel and turn every landing into a GLC game score.<br class="hidden sm:block" />Each round includes 3 spins and records the completed result automatically—no wallet required.',
+                totalRewards: 'Total rewards',
+                spinsLeft: 'Spins left',
+                start: 'START<br/>SPIN',
+                again: 'SPIN<br/>AGAIN',
+                complete: 'COMPLETE',
+                spin: 'SPIN',
+                summary: 'Round reward',
+                retry: 'Spin another round',
+                playNote: 'Play saves one official result per day. Test trials are unlimited and need no wallet.',
+                highScore: (pct) => `Amazing luck! You outscored <span class="text-[#FFD700] font-black">${pct}%</span> of players.<br/>You are this round’s lucky star!`,
+                lowScore: 'Luck was quiet this time.<br/>Spin another round and try again.',
+                midScore: 'Nice result—your wheel delivered a bright reward!',
+                win: (name, reward) => `You landed on “${name}” and earned ${reward}!`,
+                footer: '© 2026 GLC Lucky Wheel • <a href="/" target="_top" class="hover:text-[#FFD700] transition-colors">GreatLoveMeta</a> • Fortune in every spin',
+            },
+        };
+        const copy = GAME_COPY[GAME_LANG];
+        const WHEEL_DATA = [
+            { emoji: '💎', name: { zh: '璀璨钻石', en: 'Brilliant Diamond' }, points: 12 },
+            { emoji: '👑', name: { zh: '幸运皇冠', en: 'Lucky Crown' }, points: 10 },
+            { emoji: '🌟', name: { zh: '闪耀星光', en: 'Shining Star' }, points: 10 },
+            { emoji: '🌈', name: { zh: '彩虹祝福', en: 'Rainbow Wish' }, points: 8 },
+            { emoji: '☀️', name: { zh: '金色阳光', en: 'Golden Sun' }, points: 8 },
+            { emoji: '🎡', name: { zh: '欢乐时刻', en: 'Joyful Moment' }, points: 6 },
+            { emoji: '🍀', name: { zh: '四叶好运', en: 'Lucky Clover' }, points: 6 },
+            { emoji: '🚀', name: { zh: '飞跃未来', en: 'Future Flight' }, points: 4 },
+            { emoji: '🎰', name: { zh: '惊喜一刻', en: 'Bright Surprise' }, points: 4 },
+            { emoji: '🎁', name: { zh: '暖心礼物', en: 'Warm Gift' }, points: 2 },
+            { emoji: '🎵', name: { zh: '快乐音符', en: 'Happy Note' }, points: 2 },
+            { emoji: '✨', name: { zh: '幸运微光', en: 'Lucky Spark' }, points: 1 },
         ];
+
+        document.documentElement.lang = IS_ZH ? 'zh-CN' : 'en';
+        document.title = IS_ZH ? 'GLC 幸运轮盘' : 'GLC Lucky Wheel';
+        document.getElementById('gameTitle').textContent = copy.title;
+        document.getElementById('gameBrand').textContent = copy.brand;
+        document.getElementById('gameIntro').innerHTML = copy.intro;
+        document.getElementById('totalRewardsLabel').textContent = copy.totalRewards;
+        document.getElementById('spinsLeftLabel').textContent = copy.spinsLeft;
+        document.getElementById('spinBtnText').innerHTML = copy.start;
+        document.getElementById('spinSubText').textContent = copy.spin;
+        document.getElementById('summaryLabel').textContent = copy.summary;
+        document.getElementById('retryBtn').textContent = copy.retry;
+        document.getElementById('playNote').textContent = copy.playNote;
+        document.getElementById('gameFooter').innerHTML = copy.footer;
 
         let rotation = 0;
         let spinsLeft = 3;
@@ -550,7 +607,7 @@
 
         function initWheel() {
             if (!wheelEl) return;
-            PROPERTY_DATA.forEach((item, i) => {
+            WHEEL_DATA.forEach((item, i) => {
                 const segment = document.createElement('div');
                 segment.className = 'wheel-segment';
                 segment.style.transform = `rotate(${i * 30}deg)`;
@@ -587,13 +644,13 @@
                 // 高分鼓励
                 const pct = Math.min(95, Math.round(60 + (totalScore - SCORE_HIGH) / (32 - SCORE_HIGH) * 35));
                 summaryEmoji.textContent = '🎉';
-                summaryMsg.innerHTML = `手气爆棚！你超越了 <span class="text-[#FFD700] font-black">${pct}%</span> 的玩家，<br/>堪称地产大亨！`;
+                summaryMsg.innerHTML = copy.highScore(pct);
             } else if (totalScore < SCORE_LOW) {
                 summaryEmoji.textContent = '😅';
-                summaryMsg.innerHTML = '这次运气差了点，分数不太够哦...<br/>要不再来一局试试手气？';
+                summaryMsg.innerHTML = copy.lowScore;
             } else {
                 summaryEmoji.textContent = '✨';
-                summaryMsg.innerHTML = '收益不错，恭喜你成功投资了一波地产！';
+                summaryMsg.innerHTML = copy.midScore;
             }
         }
 
@@ -610,7 +667,7 @@
             wheelEl.style.transform = 'rotate(0deg)';
             setTimeout(() => { wheelEl.style.transition = ''; }, 50);
 
-            spinBtnText.innerHTML = '掷骰<br/>开转';
+            spinBtnText.innerHTML = copy.start;
             spinSubText.classList.remove('hidden');
             spinBtn.classList.remove('grayscale', 'opacity-50');
             spinBtn.classList.add('btn-casino-glow');
@@ -634,7 +691,7 @@
             spinBtnText.classList.add('dice-bounce');
             spinSubText.classList.add('hidden');
 
-            const targetIndex = Math.floor(Math.random() * PROPERTY_DATA.length);
+            const targetIndex = Math.floor(Math.random() * WHEEL_DATA.length);
             const extraSpins = 6 + Math.floor(Math.random() * 4);
             const targetModulo = (360 - (targetIndex * 30)) % 360;
             const currentModulo = rotation % 360;
@@ -647,23 +704,23 @@
             setTimeout(() => {
                 isSpinning = false;
                 spinsLeft--;
-                const win = PROPERTY_DATA[targetIndex];
+                const win = WHEEL_DATA[targetIndex];
                 totalScore += win.points;
 
                 scoreEl.innerHTML = formatReward(totalScore);
                 spinsLeftEl.innerText = spinsLeft.toString();
                 winEmoji.innerText = win.emoji;
-                winText.innerHTML = `恭喜购入「${win.name}」获得 ${formatReward(win.points)}!`;
+                winText.innerHTML = copy.win(win.name[GAME_LANG], formatReward(win.points));
                 winDisplay.classList.remove('invisible');
                 spinBtnText.classList.remove('dice-bounce');
 
                 if (spinsLeft > 0) {
-                    spinBtnText.innerHTML = '再转<br/>一次';
+                    spinBtnText.innerHTML = copy.again;
                     spinSubText.classList.remove('hidden');
-                    spinSubText.textContent = 'ROLL';
+                    spinSubText.textContent = copy.spin;
                     spinBtn.classList.add('btn-casino-glow');
                 } else {
-                    spinBtnText.innerHTML = '已完成';
+                    spinBtnText.innerHTML = copy.complete;
                     spinBtn.classList.add('grayscale', 'opacity-50');
                     showScoreSummary();
                     reportGreatLoveResult();

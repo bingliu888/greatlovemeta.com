@@ -181,7 +181,7 @@ export function GameDailyLog({ lang, compact = false }: { lang: "en" | "zh"; com
         {message && <p className="game-redeem-message" role="status">{message}</p>}
         <div className="game-log-entries game-log-days">{dailyScores.map((day, index) => <article key={day.date}>
           <span>{String(index + 1).padStart(2, "0")}</span>
-          <div><b>{new Date(`${day.date}T12:00:00`).toLocaleDateString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", weekday: "short" })}</b><small>{zh ? `大富翁 ${day.monopoly.toLocaleString()} · 矿工 ${day.miner.toLocaleString()}` : `Monopoly ${day.monopoly.toLocaleString()} · Miner ${day.miner.toLocaleString()}`}</small></div>
+          <div><b>{new Date(`${day.date}T12:00:00`).toLocaleDateString(zh ? "zh-CN" : "en-US", { month: "short", day: "numeric", weekday: "short" })}</b><small>{zh ? `幸运轮盘 ${day.monopoly.toLocaleString()} · 矿工 ${day.miner.toLocaleString()}` : `Lucky Wheel ${day.monopoly.toLocaleString()} · Miner ${day.miner.toLocaleString()}`}</small></div>
           <strong>{day.total.toLocaleString()} GLC</strong>
         </article>)}</div>
         {summary.entries.length === 0 && <p className="game-log-empty">{zh ? "最近 14 天还没有正式游戏记录。完成一局 Play 后，成绩会显示在这里。" : "No official plays in the last 14 days. Complete a Play session to add your first result."} <Link href={`/${lang}#games`}>{zh ? "选择游戏" : "Choose a game"} →</Link></p>}
