@@ -41,9 +41,9 @@ const copy = {
     language: "界面语言",
     signOut: "退出登录",
     coming: "数字公民凭证即将推出",
-    comingBody: "您的账号已经可以使用社区、消息、Live Chat、推荐、Ask Guru 与透明共建项目。",
+    comingBody: "您的账号已经可以使用社区、消息、实时聊天、推荐、Guru 助手与透明共建项目。",
     audioTitle: "实时语音 AI 对话",
-    audioBody: "打开 Ask Guru，点击麦克风并直接说话，确认转换后的文字再发送。",
+    audioBody: "打开 Guru 助手，点击麦克风并直接说话，确认转换后的文字再发送。",
   },
 };
 

@@ -37,7 +37,7 @@ test("renders GreatLoveMeta production metadata", async () => {
   assert.match(html, /大爱元宇宙/);
   assert.match(html, /欢迎来到大爱元宇宙。/);
   assert.doesNotMatch(html, /欢迎光临 RWA|欢迎光临 RWA，/);
-  assert.match(html, /大爱 AI Agent 与 RWA 奖励已上线。/);
+  assert.match(html, /大爱 AI 智能体与 RWA 奖励已上线。/);
   assert.match(
     html,
     /\/docs\/GreatLove-RWA-Whitepaper-EN-2026-07-v9\.pdf/,
@@ -46,11 +46,11 @@ test("renders GreatLoveMeta production metadata", async () => {
     html,
     /\/docs\/GreatLove-RWA-Whitepaper-CN-2026-07-v9\.pdf/,
   );
-  assert.match(html, /Android APK 下载/);
+  assert.match(html, /Android 安装包下载/);
   assert.match(html, /App Store 下载/);
   assert.match(html, /加入社区/);
   assert.match(html, /\/zh\/community/);
-  assert.match(html, /论坛 · Live Chat · 会员交流/);
+  assert.match(html, /论坛 · 实时聊天 · 会员交流/);
   assert.match(html, /共建共赢的大爱社区/);
   assert.match(html, /链上兑换/);
   assert.match(html, /郎士宁八骏图 RWA数字藏品NFT/);

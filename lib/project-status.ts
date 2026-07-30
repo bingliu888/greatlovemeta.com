@@ -24,13 +24,13 @@ export const projectBuilds: ProjectBuild[] = [
   {
     version: 1,
     date: "2026-07-22",
-    title: { zh: "GreatLove Meta 双语平台基础", en: "GreatLove Meta bilingual platform foundation" },
+    title: { zh: "大爱元宇宙双语平台基础", en: "GreatLove Meta bilingual platform foundation" },
     completed: {
-      zh: ["建立独立于 Guandan.Guru 的大爱元宇宙代码与数据边界", "发布中英文首页、新闻、活动、社区、项目与 Ask Guru 页面", "建立主站与 cz.cool 的双站角色"],
+      zh: ["建立独立于掼蛋 Guru 的大爱元宇宙代码与数据边界", "发布中英文首页、新闻、活动、社区、项目与 Guru 助手页面", "建立主站与 cz.cool 的双站角色"],
       en: ["Established GreatLoveMeta.com code and data boundaries independent from Guandan.Guru", "Published bilingual Home, News, Events, Community, Projects, and Ask Guru routes", "Defined the main-site and cz.cool roles"],
     },
     testable: {
-      zh: ["切换中英文首页", "打开所有顶部导航页面", "确认 GreatLove Meta 品牌与内容"],
+      zh: ["切换中英文首页", "打开所有顶部导航页面", "确认大爱元宇宙品牌与内容"],
       en: ["Switch between English and Chinese", "Open every primary navigation route", "Confirm GreatLove Meta branding and content"],
     },
     commit: "ce48bbc",
@@ -38,7 +38,7 @@ export const projectBuilds: ProjectBuild[] = [
   {
     version: 2,
     date: "2026-07-22",
-    title: { zh: "GreatLove Meta 内容与公开访问", en: "GreatLove Meta content and public access" },
+    title: { zh: "大爱元宇宙内容与公开访问", en: "GreatLove Meta content and public access" },
     completed: {
       zh: ["清理继承的牌类项目文案", "补齐关于、隐私、条款、账户与社区内容", "保持公开页面无需登录即可访问"],
       en: ["Removed inherited card-game wording", "Completed About, Privacy, Terms, Account, and Community content", "Kept public pages accessible without sign-in"],
@@ -52,9 +52,9 @@ export const projectBuilds: ProjectBuild[] = [
   {
     version: 3,
     date: "2026-07-22",
-    title: { zh: "Guandan 功能与界面基线对齐", en: "Guandan feature and UI baseline parity" },
+    title: { zh: "掼蛋 Guru 功能与界面基线对齐", en: "Guandan feature and UI baseline parity" },
     completed: {
-      zh: ["对齐响应式页眉、移动菜单与语言切换", "恢复用户面板、账户、推荐链接、消息与 Live Chat 功能表面", "恢复项目日历、日报、任务与构建报告界面"],
+      zh: ["对齐响应式页眉、移动菜单与语言切换", "恢复用户面板、账户、推荐链接、消息与实时聊天功能界面", "恢复项目日历、日报、任务与构建报告界面"],
       en: ["Aligned the responsive header, mobile menu, and language switcher", "Restored Dashboard, Account, referral URL, Messages, and Live Chat surfaces", "Restored the Project calendar, daily report, task, and build-report UI"],
     },
     testable: {
@@ -66,9 +66,9 @@ export const projectBuilds: ProjectBuild[] = [
   {
     version: 4,
     date: "2026-07-22",
-    title: { zh: "GreatLove Meta 项目规则与交付报告", en: "GreatLove Meta project rules and delivery reporting" },
+    title: { zh: "大爱元宇宙项目规则与交付报告", en: "GreatLove Meta project rules and delivery reporting" },
     completed: {
-      zh: ["记录 Guandan UI 为通用功能基线", "明确 GreatLove Meta 内容与数据必须保持独立", "在项目页记录本网站交付"],
+      zh: ["记录掼蛋 Guru 界面为通用功能基线", "明确大爱元宇宙内容与数据必须保持独立", "在项目页记录本网站交付"],
       en: ["Recorded Guandan UI as the generic feature baseline", "Required GreatLove Meta content and data to remain independent", "Recorded this site’s delivery work on Projects"],
     },
     testable: {
@@ -82,11 +82,11 @@ export const projectBuilds: ProjectBuild[] = [
     date: "2026-07-22",
     title: { zh: "独立项目记录与社区修复", en: "Independent project records and Community repair" },
     completed: {
-      zh: ["用大爱元宇宙自身交付历史替换 Guandan 构建数据", "恢复网站自有邮箱验证码会话，移除社区对 Clerk 会话的依赖", "修正社区桌面三栏布局、频道分类和会员头像存储"],
+      zh: ["用大爱元宇宙自身交付历史替换掼蛋 Guru 构建数据", "恢复网站自有邮箱验证码会话，移除社区对 Clerk 会话的依赖", "修正社区桌面三栏布局、频道分类和会员头像存储"],
       en: ["Replaced Guandan build data with GreatLoveMeta.com’s own delivery history", "Restored the site-owned email-code session and removed Community’s Clerk-session dependency", "Corrected the Community desktop grid, channel categories, and member avatar storage"],
     },
     testable: {
-      zh: ["使用邮箱验证码登录后打开社区", "发布数字身份或共建项目主题", "在桌面、平板和手机宽度检查社区", "确认项目页仅显示 GreatLove Meta 工作"],
+      zh: ["使用邮箱验证码登录后打开社区", "发布数字身份或共建项目主题", "在桌面、平板和手机宽度检查社区", "确认项目页仅显示大爱元宇宙工作"],
       en: ["Sign in with an email code and open Community", "Post to Digital Identity or Projects", "Check Community at desktop, tablet, and phone widths", "Confirm Projects shows only GreatLove Meta work"],
     },
     commit: "current",
@@ -96,11 +96,11 @@ export const projectBuilds: ProjectBuild[] = [
     date: "2026-07-28",
     title: { zh: "同步最新站点、GitHub 与项目日报", en: "Synchronize the latest site, GitHub, and Project report" },
     completed: {
-      zh: ["保留并同步 iPad 发布的最新响应式页眉更新", "把 Project 日历与最新交付日期更新至 2026-07-28", "将同一份已验证代码同步至 GitHub 与 Sites 生产环境"],
+      zh: ["保留并同步 iPad 发布的最新响应式页眉更新", "把项目日历与最新交付日期更新至 2026-07-28", "将同一份已验证代码同步至 GitHub 与 Sites 生产环境"],
       en: ["Preserved and synchronized the latest responsive-header update published from iPad", "Moved the Project calendar and latest delivery date to 2026-07-28", "Synchronized the same validated source to GitHub and Sites production"],
     },
     testable: {
-      zh: ["打开 7 月 28 日项目日期", "查看 v18 构建报告", "检查中英文 Project 页面和生产首页"],
+      zh: ["打开 7 月 28 日项目日期", "查看 v18 构建报告", "检查中英文项目页面和生产首页"],
       en: ["Open the July 28 Project date", "Review the v18 build report", "Check the English and Chinese Project pages and production homepage"],
     },
     commit: "release-2026-07-28",
@@ -114,7 +114,7 @@ export const projectTasks: ProjectTask[] = [
     status: "done",
     progress: 100,
     title: { zh: "生产版本与 GitHub 同步", en: "Production build and GitHub synchronization" },
-    summary: { zh: "保留 iPad 新版本，发布今日 Project 报告，并让 GitHub 与 Sites 使用同一代码。", en: "Preserved the new iPad build, published today’s Project report, and aligned GitHub with Sites." },
+    summary: { zh: "保留 iPad 新版本，发布今日项目报告，并让 GitHub 与 Sites 使用同一代码。", en: "Preserved the new iPad build, published today’s Project report, and aligned GitHub with Sites." },
     category: { zh: "发布", en: "Release" },
     owner: { zh: "平台团队", en: "Platform team" },
   },
@@ -123,10 +123,10 @@ export const projectTasks: ProjectTask[] = [
     date: "2026-07-22",
     status: "done",
     progress: 100,
-    title: { zh: "建立 GreatLove Meta 独立平台", en: "Establish the independent GreatLove Meta platform" },
+    title: { zh: "建立大爱元宇宙独立平台", en: "Establish the independent GreatLove Meta platform" },
     summary: { zh: "完成双语主站、独立数据边界与 cz.cool 导流站分工。", en: "Completed the bilingual main site, independent data boundary, and cz.cool funnel role." },
     category: { zh: "平台", en: "Platform" },
-    owner: { zh: "GreatLove Meta 团队", en: "GreatLove Meta team" },
+    owner: { zh: "大爱元宇宙团队", en: "GreatLove Meta team" },
   },
   {
     id: "generic-feature-parity",
@@ -134,7 +134,7 @@ export const projectTasks: ProjectTask[] = [
     status: "done",
     progress: 100,
     title: { zh: "对齐通用功能与界面", en: "Align generic features and UI" },
-    summary: { zh: "采用 Guandan 成熟的导航、项目、账户、消息、Live Chat 与 Ask Guru 交互基线。", en: "Adopted Guandan’s mature navigation, Projects, Account, Messages, Live Chat, and Ask Guru interaction baseline." },
+    summary: { zh: "采用掼蛋 Guru 成熟的导航、项目、账户、消息、实时聊天与 Guru 助手交互基线。", en: "Adopted Guandan’s mature navigation, Projects, Account, Messages, Live Chat, and Ask Guru interaction baseline." },
     category: { zh: "产品", en: "Product" },
     owner: { zh: "产品团队", en: "Product team" },
   },

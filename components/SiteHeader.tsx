@@ -30,7 +30,7 @@ export function SiteHeader({ lang }: { lang: "en" | "zh" }) {
         <span className="brand-seal gc-brand-seal" aria-hidden="true">GL</span>
         <span>{lang === "zh" ? "大爱元宇宙" : "GreatLoveMeta.com"}</span>
       </Link>
-      <nav className="desktop-nav" aria-label="Primary navigation">
+      <nav className="desktop-nav" aria-label={lang === "zh" ? "主要导航" : "Primary navigation"}>
         <GlobalLinks lang={lang}/>
       </nav>
       <div className="header-actions">
