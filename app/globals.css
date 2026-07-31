@@ -88,8 +88,8 @@ button, a { -webkit-tap-highlight-color: transparent; }
 .mobile-menu summary span { width: 21px; height: 2px; border-radius: 999px; background: var(--ink); }
 .mobile-menu > div { position: absolute; top: 50px; right: 0; width: 220px; padding: 18px; display: grid; gap: 16px; border: 1px solid rgba(18,32,42,.15); border-radius: 12px; background: var(--paper); box-shadow: 0 20px 60px rgba(18,32,42,.14); }
 
-.hero { max-width: 1440px; min-height: 790px; margin: 0 auto; padding: 65px 56px 70px; display: grid; grid-template-columns: minmax(430px, .83fr) minmax(590px, 1.17fr); align-items: center; position: relative; z-index: 2; }
-.hero-copy { position: relative; z-index: 3; padding-left: 24px; }
+.hero { max-width: 1440px; min-height: 790px; margin: 0 auto; padding: 65px 56px 70px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); column-gap: clamp(28px, 4vw, 64px); align-items: center; position: relative; z-index: 2; }
+.hero-copy { position: relative; z-index: 3; padding-left: 0; }
 .eyebrow, .section-kicker { display: block; position: relative; max-width: 100%; margin: 0 0 18px; color: var(--vermillion); font-size: 11px; font-weight: 800; line-height: 1.45; letter-spacing: .18em; overflow-wrap: anywhere; text-transform: uppercase; }
 .hero h1, .section-heading h2, .community-card h2, .auth-box h1, .dashboard-title h1 { font-family: "Iowan Old Style", "Noto Serif SC", Georgia, serif; font-weight: 500; letter-spacing: -.045em; }
 .hero h1 { max-width: 650px; margin: 0; font-size: clamp(62px, 5.25vw, 88px); line-height: .98; }
@@ -341,7 +341,8 @@ footer .brand { font-size: 22px; } footer p { margin: 0 auto 0 0; color: var(--m
 /* GreatLoveDAO source programs, presented inside one GreatLoveMeta welcome flow. */
 .glm-source-announcement{min-height:42px;padding:9px 20px;display:flex;align-items:center;justify-content:center;gap:12px;position:relative;z-index:21;background:#102b27;color:#fff;font-size:13px;letter-spacing:.01em}
 .glm-source-announcement b{color:#edcf96;font-size:12px}
-.glm-welcome-hero{min-height:940px;grid-template-columns:minmax(520px,1.03fr) minmax(470px,.97fr);gap:64px;align-items:center;padding-top:72px;padding-bottom:90px;scroll-margin-top:86px}
+.glm-welcome-hero{min-height:940px;grid-template-columns:repeat(2,minmax(0,1fr));gap:clamp(28px,4vw,64px);align-items:center;padding-top:72px;padding-bottom:90px;scroll-margin-top:86px}
+.glm-welcome-hero>.hero-copy,.glm-welcome-hero>.glm-welcome-side{width:100%;justify-self:stretch}
 .glm-welcome-hero .hero-copy{padding-left:0}
 .glm-welcome-hero .hero-actions{gap:12px}
 .glm-resource-kicker{margin:34px 0 11px;color:var(--jade);font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
@@ -505,7 +506,7 @@ footer .brand { font-size: 22px; } footer p { margin: 0 auto 0 0; color: var(--m
 .glm-partner-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
 .glm-partner-grid span{min-height:104px;display:grid;place-items:center;border:1px solid rgba(18,32,42,.13);border-radius:11px;background:#fffaf0;color:#455850;font-size:12px;font-weight:900;letter-spacing:.1em;text-align:center}
 
-@media(max-width:1100px){
+@media(max-width:1180px){
   .glm-welcome-hero{min-height:auto;grid-template-columns:1fr;gap:55px}
   .glm-welcome-side{width:min(820px,100%);min-height:650px;margin:0 auto}
   .glm-hero-resources{margin-left:auto;margin-right:auto;text-align:left}
@@ -521,6 +522,7 @@ footer .brand { font-size: 22px; } footer p { margin: 0 auto 0 0; color: var(--m
 }
 @media(max-width:820px){
   .glm-welcome-hero{padding:52px 28px 72px}
+  .feature-grid p{max-width:75ch}
   .glm-welcome-side{min-height:610px;padding:38px}
   .glm-dao-directory,.glm-access-section,.glm-rwa-section{padding:90px 28px}
   .glm-glc-callout{grid-template-columns:1fr}

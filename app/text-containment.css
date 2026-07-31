@@ -2,7 +2,7 @@
 :where(html,body){inline-size:100%;max-inline-size:100%}
 :where(main,header,footer,nav,section,article,aside,form,fieldset,figure,blockquote,div,ul,ol,li,dl,dt,dd){min-inline-size:0;max-inline-size:100%}
 :where(main,header,footer,nav,section,article,aside,form,fieldset,figure,blockquote,div,ul,ol,li,dl)>*{min-inline-size:0}
-:where(h1,h2,h3,h4,h5,h6){max-inline-size:100%;overflow-wrap:anywhere;word-break:normal;hyphens:auto;text-wrap:balance}
+:where(h1,h2,h3,h4,h5,h6){max-inline-size:100%;overflow-wrap:anywhere;word-break:normal;hyphens:auto;text-wrap:wrap}
 :where(p,li,dt,dd,figcaption,label,legend,a,button,td,th){max-inline-size:100%;overflow-wrap:anywhere;word-break:normal}
 :where(a,button,[role="button"],label,legend){white-space:normal!important;text-wrap:pretty}
 :where(pre,code,kbd,samp){max-inline-size:100%;white-space:pre-wrap;overflow-wrap:anywhere;word-break:break-word}
