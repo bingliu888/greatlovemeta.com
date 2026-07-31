@@ -223,7 +223,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     </div>
 
     <section className="glm-access-section">
-      <div className="section-heading"><p className="section-kicker">{t.accessKicker}</p><h2>{t.accessTitle}</h2><p>{t.accessBody}</p></div>
+      <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.accessKicker}</p><h2>{t.accessTitle}</h2><p>{t.accessBody}</p></div>
       <div className="glm-access-grid glm-membership-grid">
         <a className="glm-access-card featured" href={`/${lang}/community`}><small>{lang === "zh" ? "社区" : "COMMUNITY"}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
         <a className="glm-access-card" href={`/${lang}/members`}><small>{lang === "zh" ? "会员" : "MEMBERS"}</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
@@ -231,7 +231,7 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     </section>
 
     <section className="glm-games-section" id="games">
-      <div className="section-heading"><p className="section-kicker">{t.gamesKicker}</p><h2>{t.gamesTitle}</h2><p>{t.gamesBody}</p></div>
+      <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.gamesKicker}</p><h2>{t.gamesTitle}</h2><p>{t.gamesBody}</p></div>
       <div className="glm-game-grid">
         {t.gameCards.map((game, index) => <article className={`glm-game-card ${game.key}`} key={game.key}>
           <div className="glm-game-art" aria-hidden="true">
@@ -243,20 +243,20 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     </section>
 
     <section className="glm-access-section glm-swap-section">
-      <div className="section-heading"><p className="section-kicker">{t.swapKicker}</p><h2>{t.swapTitle}</h2><p>{t.swapBody}</p></div>
+      <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.swapKicker}</p><h2>{t.swapTitle}</h2><p>{t.swapBody}</p></div>
       <div className="glm-access-grid glm-swap-grid">
         {t.swaps.map(([label,href]) => <a className="glm-swap-card" href={href} key={label}>{label}</a>)}
       </div>
     </section>
 
     <section className="glm-rwa-section" id="collections">
-      <div className="section-heading"><p className="section-kicker">{t.rwaKicker}</p><h2>{t.rwaTitle}</h2><p>{t.rwaBody}</p></div>
+      <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.rwaKicker}</p><h2>{t.rwaTitle}</h2><p>{t.rwaBody}</p></div>
       <div className="glm-rwa-grid glm-rwa-visible">{t.rwaCards.map(([title,label,body,image,href]) => <a href={href} key={title}><img src={image} alt=""/><div><small>{label}</small><h3>{title}</h3><p>{body}</p><b>{lang === "zh" ? "了解更多" : "Learn more"} →</b></div></a>)}</div>
     </section>
 
     <section className="glm-partners-section"><div><p className="section-kicker">{t.partnersKicker}</p><h2>{t.partnersTitle}</h2><p>{t.partnersBody}</p></div><div className="glm-partner-grid">{t.partnerLabels.map((partner) => <span key={partner}>{partner}</span>)}</div></section>
 
-    <section className="intro-section" id="ecosystem"><div className="section-heading"><p className="section-kicker">{t.introKicker}</p><h2>{t.introTitle}</h2><p>{t.introBody}</p></div><div className="feature-grid">{t.features.map(([number,title,body]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{body}</p><div className="card-glyph gc-card-glyph" aria-hidden="true">∞</div></article>)}</div></section>
+    <section className="intro-section" id="ecosystem"><div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.introKicker}</p><h2>{t.introTitle}</h2><p>{t.introBody}</p></div><div className="feature-grid">{t.features.map(([number,title,body]) => <article key={number}><span>{number}</span><h3>{title}</h3><p>{body}</p><div className="card-glyph gc-card-glyph" aria-hidden="true">∞</div></article>)}</div></section>
 
     <section className="rules-section"><div className="section-heading light"><p className="section-kicker">{t.pathKicker}</p><h2>{t.pathTitle}</h2></div><div className="step-list">{t.steps.map(([title,body],index) => <article key={title}><span>{String(index+1).padStart(2,"0")}</span><div><h3>{title}</h3><p>{body}</p></div></article>)}</div></section>
 
