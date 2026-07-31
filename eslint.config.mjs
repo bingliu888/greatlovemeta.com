@@ -12,6 +12,9 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Published third-party swap bundles are immutable browser artifacts, not
+    // authored source. Their upstream minified output is validated separately.
+    "public/swap-assets/**",
   ]),
 ]);
 
