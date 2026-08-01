@@ -37,3 +37,16 @@ test("Guru launcher is icon-only and public", async () => {
   assert.doesNotMatch(floating, /<b>/);
   assert.doesNotMatch(page, /redirect\(/);
 });
+
+test("OpenAI text generation is pinned to GPT-5.6 Luna", async () => {
+  const [route, live, image] = await Promise.all([
+    readFile(new URL("../app/api/assistant/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/assistant/live/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../app/api/referral-media/route.ts", import.meta.url), "utf8"),
+  ]);
+  assert.match(route, /model:\s*"gpt-5\.6-luna"/);
+  assert.match(route, /reasoning:\s*\{\s*effort:\s*"low"\s*\}/);
+  assert.doesNotMatch(route, /OPENAI_(?:TEXT_)?MODEL/);
+  assert.match(live, /"gpt-realtime-2\.1-mini"/);
+  assert.match(image, /"gpt-image-1-mini"/);
+});
