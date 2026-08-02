@@ -1,0 +1,3 @@
+CREATE TABLE platform_user_roles(user_id text PRIMARY KEY NOT NULL,role text NOT NULL DEFAULT 'member' CHECK(role IN ('member','admin')),updated_by_user_id text,created_at integer NOT NULL,updated_at integer NOT NULL,FOREIGN KEY(user_id) REFERENCES users(id) ON DELETE CASCADE,FOREIGN KEY(updated_by_user_id) REFERENCES users(id) ON DELETE SET NULL);--> statement-breakpoint
+CREATE INDEX platform_user_roles_role_updated_idx ON platform_user_roles(role,updated_at);--> statement-breakpoint
+INSERT OR IGNORE INTO platform_user_roles(user_id,role,updated_by_user_id,created_at,updated_at) SELECT id,'admin',id,strftime('%s','now'),strftime('%s','now') FROM users WHERE lower(email)='bingliu@cybeye.com';
