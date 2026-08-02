@@ -25,7 +25,8 @@ test("homepage exposes the GreatLove welcome resources", async () => {
     source,
     /\/docs\/GreatLove-RWA-Whitepaper-CN-2026-07-v9\.pdf/,
   );
-  assert.match(source, /download>/);
+  assert.equal(source.match(/target="_blank" rel="noreferrer"/g)?.length, 2);
+  assert.doesNotMatch(source, /\.pdf" download/);
   assert.match(source, /href=\{`\/\$\{lang\}\/community`\}/);
   assert.match(source, /Forum · Live Chat · Member discussions/);
   assert.equal(source.match(/id="welcome"/g)?.length, 1);

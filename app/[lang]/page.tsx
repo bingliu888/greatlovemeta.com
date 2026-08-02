@@ -203,8 +203,8 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
           <div className="hero-actions"><Link className="primary-button" href={`/${lang}/auth/login`}>{t.start}<span>→</span></Link></div>
           <p className="glm-resource-kicker">{t.resourceKicker}</p>
           <div className="glm-hero-resources">
-            <a href="/docs/GreatLove-RWA-Whitepaper-EN-2026-07-v9.pdf" download><small>{t.englishWhitepaperMeta}</small><b>{t.englishWhitepaper}</b><i aria-hidden="true">↓</i></a>
-            <a href="/docs/GreatLove-RWA-Whitepaper-CN-2026-07-v9.pdf" download><small>{t.chineseWhitepaperMeta}</small><b>{t.chineseWhitepaper}</b><i aria-hidden="true">↓</i></a>
+            <a href="/docs/GreatLove-RWA-Whitepaper-EN-2026-07-v9.pdf" target="_blank" rel="noreferrer"><small>{t.englishWhitepaperMeta}</small><b>{t.englishWhitepaper}</b><i aria-hidden="true">↗</i></a>
+            <a href="/docs/GreatLove-RWA-Whitepaper-CN-2026-07-v9.pdf" target="_blank" rel="noreferrer"><small>{t.chineseWhitepaperMeta}</small><b>{t.chineseWhitepaper}</b><i aria-hidden="true">↗</i></a>
             <a href={`/${lang}/community`}><small>{t.communityMeta}</small><b>{t.communityLink}</b><i aria-hidden="true">→</i></a>
           </div>
           <div className="trust-row">{t.markers.map((item, index) => <div key={item}><span>{["AI", "RWA", "DAO"][index]}</span>{item}</div>)}</div>
