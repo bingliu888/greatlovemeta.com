@@ -11,12 +11,12 @@
   "keep_vars": true,
   "routes": [
     {
-      "pattern": "greatlovemeta.com",
-      "custom_domain": true
+      "pattern": "greatlovemeta.com/*",
+      "zone_name": "greatlovemeta.com"
     },
     {
-      "pattern": "www.greatlovemeta.com",
-      "custom_domain": true
+      "pattern": "www.greatlovemeta.com/*",
+      "zone_name": "greatlovemeta.com"
     }
   ],
   "vars": {
