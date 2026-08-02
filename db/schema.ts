@@ -202,3 +202,20 @@ export const gameRedemptions = sqliteTable("game_redemptions", {
   index("greatlovemeta_game_redemption_user_idx").on(table.userId, table.requestedAt),
   index("greatlovemeta_game_redemption_status_idx").on(table.status),
 ]);
+
+export const platformMemberAccess = sqliteTable("platform_member_access", {
+  userId: text("user_id").primaryKey().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("active"),
+  subscriberOverride: integer("subscriber_override").notNull().default(0),
+  updatedByUserId: text("updated_by_user_id").references(() => users.id, { onDelete: "set null" }),
+  createdAt: integer("created_at").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+}, (table) => [index("platform_member_access_status_idx").on(table.status, table.updatedAt)]);
+
+export const platformAdminAudit = sqliteTable("platform_admin_audit", {
+  id: text("id").primaryKey(),
+  adminUserId: text("admin_user_id").references(() => users.id, { onDelete: "set null" }),
+  targetUserId: text("target_user_id").references(() => users.id, { onDelete: "set null" }),
+  action: text("action").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, (table) => [index("platform_admin_audit_target_idx").on(table.targetUserId, table.createdAt)]);

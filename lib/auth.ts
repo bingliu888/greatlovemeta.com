@@ -126,7 +126,7 @@ export async function getSessionUser(request?: Request): Promise<SessionUser | n
     try {
       const now = Math.floor(Date.now() / 1000);
       user = await db().prepare(
-        "SELECT u.id, u.email, u.display_name AS displayName, u.preferred_language AS preferredLanguage FROM sessions s JOIN users u ON u.id = s.user_id WHERE s.id = ? AND s.expires_at > ? LIMIT 1",
+        "SELECT u.id, u.email, u.display_name AS displayName, u.preferred_language AS preferredLanguage FROM sessions s JOIN users u ON u.id = s.user_id LEFT JOIN platform_member_access a ON a.user_id = u.id WHERE s.id = ? AND COALESCE(a.status, 'active') = 'active' AND s.expires_at > ? LIMIT 1",
       ).bind(await sha256(token), now).first<SessionUser>();
     } catch {
       // A stale legacy session cookie must not turn a public page into an error page.
