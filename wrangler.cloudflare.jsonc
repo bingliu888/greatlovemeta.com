@@ -1,0 +1,68 @@
+{
+  "$schema": "./node_modules/wrangler/config-schema.json",
+  "name": "greatlovemeta-com",
+  "main": "./dist/server/index.js",
+  "compatibility_date": "2026-05-15",
+  "compatibility_flags": [
+    "nodejs_compat"
+  ],
+  "workers_dev": true,
+  "preview_urls": true,
+  "keep_vars": true,
+  "routes": [
+    {
+      "pattern": "greatlovemeta.com",
+      "custom_domain": true
+    },
+    {
+      "pattern": "www.greatlovemeta.com",
+      "custom_domain": true
+    }
+  ],
+  "vars": {
+    "CLERK_JWT_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr5SESHUhL/YqLXcy0KH1\nsV30TnmQ4Q5gn+8MR6F5mlapvPFDclAS6LjWkhYx65HJV5bV1ko6quASRnKTqlK8\n6DlFeJh5QT7NHzexdVvhoo2sJrGY3/F2bEN+8Fs0shg0kXxYp9NnsGgFzDFH4FqO\nbE7k3pVCwoYqyKiFBHSWRXOr+ejfVBcC0JUUREQFwIlBRqH2cvgEyMHqwJW9iLDh\nnnke+FaXJF4dQ0Zuj6JoBaO1FzoLNtI8tiuV7zjNbqFpDvD/c251O4OpjECbLmKn\n9rOebyRmxV8ADJuAvHrLI1yEdeG+gHyJ0lKtTOe+ROljfXuT9EX3aASRxH42ddVu\ntwIDAQAB\n-----END PUBLIC KEY-----",
+    "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuZ3JlYXRsb3ZlbWV0YS5jb20k",
+    "OPENAI_REALTIME_MODEL": "gpt-realtime-2.1-mini",
+    "OPENAI_TEXT_MODEL": "gpt-5-nano",
+    "GITHUB_REPOSITORY_URL": "https://github.com/bingliu888/greatlovemeta.com"
+  },
+  "no_bundle": true,
+  "find_additional_modules": true,
+  "rules": [
+    {
+      "type": "ESModule",
+      "globs": [
+        "**/*.js",
+        "**/*.mjs"
+      ]
+    }
+  ],
+  "assets": {
+    "directory": "./dist/client",
+    "binding": "ASSETS"
+  },
+  "images": {
+    "binding": "IMAGES"
+  },
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "greatlovemeta-com-cutover-20260801-d1",
+      "database_id": "bed525c8-692c-46aa-a0f6-fe6160a78b72",
+      "migrations_dir": "drizzle"
+    }
+  ],
+  "r2_buckets": [
+    {
+      "binding": "BUCKET",
+      "bucket_name": "greatlovemeta-com-cutover-20260801-media"
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  }
+}
