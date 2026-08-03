@@ -56,10 +56,11 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
   const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: requestHeaders.get("cookie") ?? "" } }));
   if (!user) redirect(`/${lang}/auth/login`);
   const t = copy[lang];
-  if (await isAdminUser(user)) return <main className="dashboard-page"><SiteHeader lang={lang}/><AdminDashboard lang={lang} user={user}/><SiteFooter lang={lang}/></main>;
+  const admin = await isAdminUser(user);
   return (
     <main className="dashboard-page">
       <SiteHeader lang={lang} />
+      {admin ? <AdminDashboard lang={lang} user={user}/> : <>
       <div className="dashboard-wrap">
         <div className="dashboard-title"><p className="section-kicker">{t.level}</p><h1>{t.welcome}, {user.displayName}.</h1><p>{t.subtitle}</p></div>
         <section className="dashboard-audio-panel" aria-labelledby="dashboard-audio-title">
@@ -74,6 +75,8 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
           <section className="coming-card"><div className="mini-table gc-mini-network" aria-hidden="true"><span>ID</span><span>∞</span><i>GC</i><span>AI</span><span>WE</span></div><div><p className="section-kicker">{lang === "zh" ? "即将推出" : "COMING NEXT"}</p><h2>{t.coming}</h2><p>{t.comingBody}</p></div></section>
         </div>
       </div>
+      </>}
+
       <SiteFooter lang={lang} />
     </main>
   );
