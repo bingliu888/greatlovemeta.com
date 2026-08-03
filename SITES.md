@@ -55,3 +55,5 @@ Changes must not cross task-family repositories unless a reusable pattern is int
 ## Current implementation baseline
 
 The initial codebase includes bilingual navigation and pages, passwordless email identity, user profiles, a responsive community, direct and group messages, persistent live chat, notifications, file attachments, Ask Guru text and live voice surfaces, D1 persistence, and R2 object storage.
+
+- Interactive text AI follows the portfolio provider policy: automatic mode prefers DeepSeek V4 Flash for Cloudflare country CN and GPT-5.6 Luna elsewhere; members can override this in Account. Keep DEEPSEEK_API_KEY server-only. Images, voice, moderation, embeddings, and other specialist routes remain on their compatible specialist models.

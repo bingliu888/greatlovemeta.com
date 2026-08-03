@@ -1,3 +1,4 @@
+import { textAiFetch } from "../../../lib/text-ai-provider";
 import { sha256 } from "../../../lib/auth";
 
 type ChatMessage = { role?: unknown; content?: unknown };
@@ -31,7 +32,7 @@ export async function POST(request: Request) {
   }) : [];
   if (!messages.length) return Response.json({ error: "A question is required." }, { status: 400 });
   const visitor = request.headers.get("cf-connecting-ip") || request.headers.get("x-forwarded-for")?.split(",")[0] || "anonymous";
-  const response = await fetch("https://api.openai.com/v1/responses", { method: "POST", headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json", "OpenAI-Safety-Identifier": await sha256(`greatlovemeta-public:${visitor}`) }, body: JSON.stringify({ model: "gpt-5.6-luna", instructions: `You are Guru, the bilingual public assistant for GreatLoveMeta.com. Answer in ${language === "zh" ? "Simplified Chinese" : "English"}. Be clear, neutral, concise, and practical. Help with the GreatLove ecosystem, AI agents, RWA concepts, NFTs, membership, Community, Live Chat, events, projects and site guidance. Distinguish facts from opinions, identify uncertainty, and never invent credentials, project status, legal rights, or event details.`, input: messages.join("\n"), reasoning: { effort: "low" }, text: { verbosity: "low" }, max_output_tokens: 1200 }) });
+  const response = await textAiFetch(request, { method: "POST", headers: { authorization: `Bearer ${apiKey}`, "content-type": "application/json", "OpenAI-Safety-Identifier": await sha256(`greatlovemeta-public:${visitor}`) }, body: JSON.stringify({ model: "gpt-5.6-luna", instructions: `You are Guru, the bilingual public assistant for GreatLoveMeta.com. Answer in ${language === "zh" ? "Simplified Chinese" : "English"}. Be clear, neutral, concise, and practical. Help with the GreatLove ecosystem, AI agents, RWA concepts, NFTs, membership, Community, Live Chat, events, projects and site guidance. Distinguish facts from opinions, identify uncertainty, and never invent credentials, project status, legal rights, or event details.`, input: messages.join("\n"), reasoning: { effort: "low" }, text: { verbosity: "low" }, max_output_tokens: 1200 }) });
   const data = await response.json().catch(() => ({})) as ResponseData;
   if (!response.ok) return Response.json({ error: data.error?.message || "The AI service could not answer." }, { status: 502 });
   const reply = outputText(data);
