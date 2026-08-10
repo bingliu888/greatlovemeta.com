@@ -20,8 +20,18 @@ test("classroom data and media resources are site isolated",()=>{
   assert.match(read("lib/class-runtime.ts"),/__CLASS_RUNTIME_ENV__/);
 });
 
-test("classroom publishing follows manager and eight-speaker controls",()=>{
-  assert.match(read("app/api/classes/[code]/media/route.ts"),/PUBLISHER_LIMIT/);
-  assert.match(read("app/api/classes/[code]/media/route.ts"),/>=8/);
-  assert.match(read("lib/classrooms.ts"),/isAdminUser/);
+test("classroom publishing honors group, webinar, and livestream contracts",()=>{
+  const rooms=read("lib/classrooms.ts");
+  const join=read("app/api/classes/[code]/join/route.ts");
+  const media=read("app/api/classes/[code]/media/route.ts");
+  const client=read("components/class-room-client.tsx");
+  assert.match(rooms,/group_call.*webinar.*livestream/);
+  assert.match(join,/participantLimit:room\.realtimeMode==="group_call"\?100:null/);
+  assert.match(join,/9-speaker stage is full/);
+  assert.match(join,/Raise your hand and wait for host approval/);
+  assert.match(join,/member email as a speaker/);
+  assert.match(media,/request-stage/);
+  assert.match(media,/add-speaker/);
+  assert.match(client,/LivestreamPlayer/);
+  assert.match(client,/setInterval\(\(\)=>void check\(\),3000\)/);
 });
