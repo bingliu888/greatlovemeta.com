@@ -6,6 +6,7 @@ import { GameDailyLog } from "../../../components/GameDailyLog";
 import { MembershipPanel } from "../../../components/MembershipPanel";
 import { TextSizeControl } from "../../../components/TextSizeControl";
 import { getSessionUser } from "../../../lib/auth";
+import { isAdminUser } from "../../../lib/admin-access";
 import { SiteHeader } from "../../../components/SiteHeader";
 import { SiteFooter } from "../../../components/SiteFooter";
 import "./dashboard-tuneup.css";
@@ -54,11 +55,13 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
   const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: requestHeaders.get("cookie") ?? "" } }));
   if (!user) redirect(`/${lang}/auth/login`);
   const t = copy[lang];
+  const canCreateClasses=await isAdminUser(user);
   return (
     <main className="dashboard-page">
       <SiteHeader lang={lang} />
       <div className="dashboard-wrap">
         <div className="dashboard-title"><p className="section-kicker">{t.level}</p><h1>{t.welcome}, {user.displayName}.</h1><p>{t.subtitle}</p></div>
+        {canCreateClasses && <Link className="dashboard-classes-link" href={`/${lang}/classes`}>{lang === "zh" ? "我的课程" : "My Classes"}<span>→</span></Link>}
         <section className="dashboard-audio-panel" aria-labelledby="dashboard-audio-title">
           <div><p className="section-kicker">{lang === "zh" ? "语音快捷入口" : "VOICE SHORTCUT"}</p><h2 id="dashboard-audio-title">{t.audioTitle}</h2><p>{t.audioBody}</p></div>
           <Link className="dashboard-audio-button" href={`/${lang}/assistant`}>{t.audioTitle}<span aria-hidden="true">→</span></Link>

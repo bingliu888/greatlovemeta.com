@@ -1,0 +1,9 @@
+import Link from "next/link";
+import { notFound,redirect } from "next/navigation";
+import { SiteHeader } from "@/components/SiteHeader";
+import { SiteFooter } from "@/components/SiteFooter";
+import { classAccess,classByCode } from "@/lib/classrooms";
+import { getSessionUser } from "@/lib/auth";
+import "../classes.css";
+export const dynamic="force-dynamic";
+export default async function ClassDetailPage({params}:{params:Promise<{lang:string;code:string}>}){const{lang:raw,code}=await params,lang=raw==="zh"?"zh":"en",zh=lang==="zh",room=await classByCode(code);if(!room)notFound();const access=await classAccess(room,await getSessionUser());if(!access.allowed)redirect(`/${lang}/auth/login?returnTo=/${lang}/classes/${code}`);return <main><SiteHeader lang={lang}/><section className="class-detail-page"><section className="class-detail-copy"><p>CLASS · {room.code}</p><h1>{room.title}</h1><span>{room.description||(zh?"老师尚未添加课程介绍。":"The teacher has not added a description.")}</span><dl><div><dt>{zh?"老师":"Teacher"}</dt><dd>{room.hostName}</dd></div><div><dt>{zh?"类型":"Type"}</dt><dd>{room.classType}</dd></div><div><dt>{zh?"直播":"Streaming"}</dt><dd>{room.streamingMode==="audio"?(zh?"音频":"Audio"):(zh?"音频与视频":"Audio / Video")}</dd></div><div><dt>{zh?"时间":"Schedule"}</dt><dd>{new Date(room.startsAt*1000).toLocaleString(zh?"zh-CN":"en-US")}</dd></div></dl><Link className="class-enter-room" href={`/${lang}/classes/${room.code}/room`}>{zh?"进入课堂":"Enter Classroom"} →</Link></section><aside><i className={room.streamActive?"live":""}/><h2>{room.streamActive?(zh?"课堂直播中":"Live classroom"):(zh?"课堂已准备":"Classroom ready")}</h2><p>{zh?"进入课堂不会请求麦克风或摄像头权限；已有直播时会自动以观众身份加入。":"Entering does not request microphone or camera permission. If streaming is live, you join as a viewer automatically."}</p></aside></section><SiteFooter lang={lang}/></main>}

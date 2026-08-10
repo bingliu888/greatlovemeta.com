@@ -20,6 +20,12 @@
     }
   ],
   "vars": {
+    "CLOUDFLARE_ACCOUNT_ID": "7222b9842bcee7196ba3aca03d45f4b7",
+    "REALTIMEKIT_APP_ID": "c8d137ee-863f-4913-9462-8cfd92bb7127",
+    "REALTIMEKIT_GUEST_PRESET": "group_call_guest",
+    "REALTIMEKIT_MEMBER_PRESET": "group_call_participant",
+    "REALTIMEKIT_HOST_PRESET": "group_call_host",
+    "REALTIMEKIT_VIEWER_PRESET": "group_call_guest",
     "CLERK_JWT_KEY": "-----BEGIN PUBLIC KEY-----\nMIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAr5SESHUhL/YqLXcy0KH1\nsV30TnmQ4Q5gn+8MR6F5mlapvPFDclAS6LjWkhYx65HJV5bV1ko6quASRnKTqlK8\n6DlFeJh5QT7NHzexdVvhoo2sJrGY3/F2bEN+8Fs0shg0kXxYp9NnsGgFzDFH4FqO\nbE7k3pVCwoYqyKiFBHSWRXOr+ejfVBcC0JUUREQFwIlBRqH2cvgEyMHqwJW9iLDh\nnnke+FaXJF4dQ0Zuj6JoBaO1FzoLNtI8tiuV7zjNbqFpDvD/c251O4OpjECbLmKn\n9rOebyRmxV8ADJuAvHrLI1yEdeG+gHyJ0lKtTOe+ROljfXuT9EX3aASRxH42ddVu\ntwIDAQAB\n-----END PUBLIC KEY-----",
     "NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY": "pk_live_Y2xlcmsuZ3JlYXRsb3ZlbWV0YS5jb20k",
     "OPENAI_REALTIME_MODEL": "gpt-realtime-2.1-mini",
@@ -52,7 +58,7 @@
       "migrations_dir": "drizzle"
     }
   ],
-  "r2_buckets": [
+  "r2_buckets": [{ "binding": "CLASS_FILES", "bucket_name": "greatlovemeta-com-class-files" },
     {
       "binding": "BUCKET",
       "bucket_name": "greatlovemeta-com-cutover-20260801-media"

@@ -5,6 +5,14 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  CLASS_FILES?: R2Bucket;
+  CLOUDFLARE_REALTIME_API_TOKEN?: string;
+  CLOUDFLARE_ACCOUNT_ID?: string;
+  REALTIMEKIT_APP_ID?: string;
+  REALTIMEKIT_GUEST_PRESET?: string;
+  REALTIMEKIT_MEMBER_PRESET?: string;
+  REALTIMEKIT_HOST_PRESET?: string;
+  REALTIMEKIT_VIEWER_PRESET?: string;
   BUCKET: R2Bucket;
   IMAGES: {
     input(stream: ReadableStream): {
@@ -28,6 +36,7 @@ interface ExecutionContext {
 
 const worker = {
   async fetch(request: Request, env: Env, ctx: ExecutionContext): Promise<Response> {
+    if (env) (globalThis as unknown as { __CLASS_RUNTIME_ENV__?: Env }).__CLASS_RUNTIME_ENV__ = env;
     (globalThis as unknown as { __GREATLOVEMETA_DB__?: D1Database; __GREATLOVEMETA_BUCKET__?: R2Bucket }).__GREATLOVEMETA_DB__ = env.DB;
     (globalThis as unknown as { __GREATLOVEMETA_BUCKET__?: R2Bucket }).__GREATLOVEMETA_BUCKET__ = env.BUCKET;
     const url = new URL(request.url);
