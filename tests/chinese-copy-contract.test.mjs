@@ -7,7 +7,7 @@ import test from "node:test";
 // remain in Chinese copy. Ordinary interface language must be translated.
 const allowedLatinTerms = Object.freeze([
   "GreatLove.art", "GreatLoveMeta.com", "GreatLoveDAO", "Guandan.Guru", "Guru",
-  "GitHub", "Sites", "iPad", "Safari", "Cloudflare", "Clerk", "PayPal",
+  "GitHub", "Sites", "iPad", "Safari", "Cloudflare", "RealtimeKit", "Clerk", "PayPal",
   "OpenAI", "ChatGPT", "Telegram", "Messenger", "Facebook", "MyClaw",
   "BingAcademy", "WhatsReal", "Android", "App Store", "AI", "AIGC", "NFT",
   "RWA", "DeFi", "SocialFi", "GameFi", "Web3", "GLC", "GLUSD", "USDT",
