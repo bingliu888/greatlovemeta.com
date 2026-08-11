@@ -436,7 +436,8 @@ export function ClassPlaylistBroadcaster({
       setStatus("error");
       setError(zh ? `无法读取播放列表视频（${detail}）。` : `Could not read playlist video (${detail}).`);
     };
-    setStatus("loading");
+    // A late media load event must not overwrite a broadcast that is already live.
+    setStatus(publishedRef.current ? "live" : "loading");
     video.muted = true;
     video.addEventListener("loadedmetadata", ready);
     video.addEventListener("loadeddata", ready, { once: true });

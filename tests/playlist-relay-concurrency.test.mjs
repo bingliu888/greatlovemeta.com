@@ -26,4 +26,6 @@ test("only the relay owner publishes and stops playlist delivery",()=>{
   assert.match(client,/asPlaylistRelay&&room\.realtimeMode!=="group_call"&&next\?\.stage/);
   assert.match(client,/next\.stage\.requestAccess\(\)/);
   assert.match(client,/next\.stage\.join\(\)/);
+  const broadcaster=fs.readFileSync(new URL("../components/ClassPlaylistBroadcaster.tsx",import.meta.url),"utf8");
+  assert.match(broadcaster,/setStatus\(publishedRef\.current \? "live" : "loading"\)/);
 });
