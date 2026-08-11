@@ -20,9 +20,17 @@ test("class playlist uses independent D1, R2, and RealtimeKit publishing", () =>
   assert.match(room, /ClassPlaylistManager/);
   assert.match(room, /ClassPlaylistBroadcaster/);
   assert.match(room, /__smartClassStopPlaylist/);
+  assert.match(room, /audioTrack\?\.stop\(\)/);
+  assert.match(room, /videoTrack\?\.stop\(\)/);
+  assert.match(room, /previous\.stop\(\)/);
+  assert.match(room, /CAMERA_TRACK_MISSING/);
+  const stylePath = ["app/classes/classes.css", "app/[lang]/classes/classes.css"].find((path) => fs.existsSync(new URL("../" + path, import.meta.url)));
+  assert.ok(stylePath);
+  const styles = read(stylePath);
+  assert.match(styles, /class-video-grid\[data-count="1"\]/);
+  assert.match(styles, /max-width:none/);
   assert.match(broadcaster, /captureStream\(30\)/);
   assert.match(broadcaster, /meeting\.self\.enableAudio\(audioTrack\)/);
   assert.match(broadcaster, /meeting\.self\.enableVideo\(videoTrack\)/);
   assert.match(broadcaster, /\(index \+ 1\) % items\.length/);
 });
-
