@@ -39,5 +39,8 @@ test("class playlist uses independent D1, R2, and RealtimeKit publishing", () =>
   assert.match(broadcaster, /captureStream\(30\)/);
   assert.match(broadcaster, /meeting\.self\.enableAudio\(audioTrack\)/);
   assert.match(broadcaster, /meeting\.self\.enableVideo\(videoTrack\)/);
+  assert.match(broadcaster, /meeting\.self\.audioEnabled/);
+  assert.match(broadcaster, /withTimeout\("AUDIO_RESET"/);
+  assert.match(broadcaster, /withTimeout\("VIDEO_RESET"/);
   assert.match(broadcaster, /\(index \+ 1\) % items\.length/);
 });

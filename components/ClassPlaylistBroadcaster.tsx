@@ -309,8 +309,12 @@ export function ClassPlaylistBroadcaster({
       // those tracks before publishing the playlist so the SDK never reuses a
       // stale camera/microphone producer for the new canvas/audio tracks.
       await Promise.allSettled([
-        meeting.self.disableAudio(),
-        meeting.self.disableVideo(),
+        meeting.self.audioEnabled
+          ? withTimeout("AUDIO_RESET", meeting.self.disableAudio(), 3000)
+          : Promise.resolve(),
+        meeting.self.videoEnabled
+          ? withTimeout("VIDEO_RESET", meeting.self.disableVideo(), 3000)
+          : Promise.resolve(),
       ]);
       // The room join path normally prepares the publisher stage. Keep this
       // defensive check here as reconnects may return a staged publisher to
