@@ -23,4 +23,7 @@ test("only the relay owner publishes and stops playlist delivery",()=>{
   assert.match(client,/playlistRelay\|\|Boolean\(client\?\.self\.audioEnabled\|\|client\?\.self\.videoEnabled\)/);
   assert.match(client,/manager&&!playlistEnabled/);
   assert.doesNotMatch(client,/if\(asPlaylistRelay&&room\.realtimeMode==="livestream"/);
+  assert.match(client,/asPlaylistRelay&&room\.realtimeMode!=="group_call"&&next\?\.stage/);
+  assert.match(client,/next\.stage\.requestAccess\(\)/);
+  assert.match(client,/next\.stage\.join\(\)/);
 });
