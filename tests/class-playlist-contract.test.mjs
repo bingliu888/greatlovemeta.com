@@ -11,6 +11,8 @@ test("class playlist uses independent D1, R2, and RealtimeKit publishing", () =>
   const route = read("app/api/classes/[code]/playlist/route.ts");
   const room = read("components/class-room-client.tsx");
   const broadcaster = read("components/ClassPlaylistBroadcaster.tsx");
+  const join = read("app/api/classes/[code]/join/route.ts");
+  const media = read("app/api/classes/[code]/media/route.ts");
   const config = read("wrangler.cloudflare.jsonc");
   assert.match(migration, /CREATE TABLE class_playlist_items/);
   assert.match(migration, /CREATE TABLE class_playlist_state/);
@@ -19,6 +21,11 @@ test("class playlist uses independent D1, R2, and RealtimeKit publishing", () =>
   assert.match(config, /"binding":\s*"CLASS_FILES"/);
   assert.match(room, /ClassPlaylistManager/);
   assert.match(room, /ClassPlaylistBroadcaster/);
+  assert.match(room, /asPlaylistRelay/);
+  assert.match(room, /active&&!mediaState\?\.streamActive/);
+  assert.match(join, /playlistRelay/);
+  assert.match(join, /class_playlist_state/);
+  assert.match(media, /Playlist relay is not active/);
   assert.match(room, /__smartClassStopPlaylist/);
   assert.match(room, /audioTrack\?\.stop\(\)/);
   assert.match(room, /videoTrack\?\.stop\(\)/);
