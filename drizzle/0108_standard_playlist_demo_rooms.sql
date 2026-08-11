@@ -8,7 +8,7 @@ UPDATE class_rooms SET
   description = 'Permanent public demo room with two audible loop videos.',
   subject = 'Live media demo',
   streaming_mode = 'video',
-  status = 'scheduled',
+  status = 'active',
   provider_meeting_id = NULL,
   stream_active = 0,
   updated_at = unixepoch()
