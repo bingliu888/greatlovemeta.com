@@ -56,8 +56,8 @@ export function ClassCreateForm({ lang }: { lang: "en" | "zh" }) {
         <label>{zh ? "时长（分钟）" : "Duration (minutes)"}<input name="durationMinutes" type="number" min={15} max={480} defaultValue={60} /></label>
       </div>
       <div>
-        <label>{zh ? "试听分钟" : "Trial minutes"}<input name="trialMinutes" type="number" min={5} max={1440} defaultValue={30} /></label>
-        <label>{zh ? "学费（美元）" : "Tuition (USD)"}<input name="tuition" type="number" min={1} step="0.01" defaultValue={99} /></label>
+        <label>{zh ? "试课期限" : "Trial period"}<input readOnly value={zh ? "7 天" : "7 days"} /></label>
+        <label>{zh ? "课程价格（美元）" : "Class price (USD)"}<input name="tuition" type="number" min={0} step="0.01" defaultValue={99} /></label>
       </div>
       <label>{zh ? "私课邀请邮箱" : "Private invitation emails"}<textarea name="invites" placeholder="name@example.com, another@example.com" /></label>
       {error && <p role="alert">{error}</p>}
