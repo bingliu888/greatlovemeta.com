@@ -39,20 +39,54 @@ test("class item exposes type badges, edit, co-hosts, and conditional subscriber
   const editor = source("../components/ClassEditDialog.tsx");
   assert.match(detail, /class-entry-badges/);
   assert.match(detail, /showSubscribers=\{room\.tuitionCents>0\}/);
-  assert.match(managers, /Co-directors/);
+  assert.match(managers, /Co-teachers/);
   assert.match(managers, /Subscribers/);
   assert.match(editor, /Price \(USD\)/);
   assert.match(editor, /Audio \/ Video \(AV\)/);
 });
 
-test("class creation authority is presented as Hosts", () => {
+test("class creation authority is presented as Teachers", () => {
   const candidates = ["../app/admin-dashboard.tsx", "../components/AdminDashboard.tsx", "../components/admin-dashboard.tsx"];
   const roleCandidates = ["../app/admin-role-editor.tsx", "../components/AdminMemberRoleEditor.tsx"];
   const dashboardPath = candidates.find(item => existsSync(new URL(item, import.meta.url)));
   const rolePath = roleCandidates.find(item => existsSync(new URL(item, import.meta.url)));
   assert.ok(dashboardPath);
   const dashboard = source(dashboardPath);
-  const roles = rolePath ? source(rolePath) : "Host";
-  assert.match(`${dashboard}\n${roles}`, /Hosts|主持人/);
+  const roles = rolePath ? source(rolePath) : "Teacher";
+  assert.match(`${dashboard}\n${roles}`, /Teachers|教师/);
   assert.doesNotMatch(dashboard, /Administrators|管理管理员/);
+});
+
+test("admin Users section exposes paid Teachers and add-teacher access", () => {
+  const pageCandidates = ["../app/admin/members/page.tsx", "../app/[lang]/admin/members/page.tsx"];
+  const pagePath = pageCandidates.find(item => existsSync(new URL(item, import.meta.url)));
+  assert.ok(pagePath);
+  const page = source(pagePath);
+  const actions = source("../components/AdminMemberActions.tsx");
+  const api = source("../app/api/admin/members/route.ts");
+  assert.match(page, /teachers/);
+  assert.match(page, /Teachers|教师/);
+  assert.match(page, /subscriber_override/);
+  assert.match(actions, /grant-teacher/);
+  assert.match(actions, /Add Teacher|添加教师/);
+  assert.match(api, /grant-teacher/);
+  assert.match(api, /subscriber_override=1/);
+  assert.doesNotMatch(api, /INSERT INTO platform_user_roles/);
+  assert.doesNotMatch(actions, /grant-admin/);
+});
+
+test("only Teachers and platform administrators can create classrooms", () => {
+  const routeCandidates = ["../app/api/classrooms/route.ts", "../app/api/classes/route.ts"];
+  const routePath = routeCandidates.find(item => existsSync(new URL(item, import.meta.url)));
+  assert.ok(routePath);
+  const route = source(routePath);
+  assert.match(route, /if\(!await isTeacherUser\(user\)\)/);
+  assert.match(route, /Teacher or administrator access required/);
+  const access = source("../lib/admin-access.ts");
+  assert.match(access, /isTeacherUser/);
+  assert.match(access, /subscriber_override/);
+});
+
+test("exports the classroom directory component", () => {
+  assert.match(source("../components/class-directory.tsx"), /export function ClassDirectory/);
 });
