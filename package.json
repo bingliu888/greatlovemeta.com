@@ -17,6 +17,7 @@
   },
   "dependencies": {
     "@clerk/nextjs": "^7.6.0",
+    "@cloudflare/realtimekit": "2.0.0",
     "@cloudflare/realtimekit-react": "2.0.0",
     "@cloudflare/realtimekit-react-ui": "2.0.0",
     "drizzle-orm": "0.45.2",
