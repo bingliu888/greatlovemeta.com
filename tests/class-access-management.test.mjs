@@ -39,7 +39,7 @@ test("class item exposes type badges, edit, co-hosts, and conditional subscriber
   const editor = source("../components/ClassEditDialog.tsx");
   assert.match(detail, /class-entry-badges/);
   assert.match(detail, /showSubscribers=\{room\.tuitionCents>0\}/);
-  assert.match(managers, /Co-hosts/);
+  assert.match(managers, /Co-directors/);
   assert.match(managers, /Subscribers/);
   assert.match(editor, /Price \(USD\)/);
   assert.match(editor, /Audio \/ Video \(AV\)/);

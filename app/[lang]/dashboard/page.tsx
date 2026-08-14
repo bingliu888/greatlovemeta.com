@@ -61,7 +61,7 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
       <SiteHeader lang={lang} />
       <div className="dashboard-wrap">
         <div className="dashboard-title"><p className="section-kicker">{t.level}</p><h1>{t.welcome}, {user.displayName}.</h1><p>{t.subtitle}</p></div>
-        {canCreateClasses && <Link className="dashboard-classes-link" href={`/${lang}/classes`}>{lang === "zh" ? "我的课程" : "My Classes"}<span>→</span></Link>}
+        {<Link className="dashboard-classes-link" href={`/${lang}/classes?view=mine`}>{lang === "zh" ? "我的课程" : "My Classes"}<span>→</span></Link>}
         <section className="dashboard-audio-panel" aria-labelledby="dashboard-audio-title">
           <div><p className="section-kicker">{lang === "zh" ? "语音快捷入口" : "VOICE SHORTCUT"}</p><h2 id="dashboard-audio-title">{t.audioTitle}</h2><p>{t.audioBody}</p></div>
           <Link className="dashboard-audio-button" href={`/${lang}/assistant`}>{t.audioTitle}<span aria-hidden="true">→</span></Link>
