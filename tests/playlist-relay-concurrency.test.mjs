@@ -6,6 +6,14 @@ const join=fs.readFileSync(new URL("../app/api/classes/[code]/join/route.ts",imp
 const media=fs.readFileSync(new URL("../app/api/classes/[code]/media/route.ts",import.meta.url),"utf8");
 const client=fs.readFileSync(new URL("../components/class-room-client.tsx",import.meta.url),"utf8");
 
+test("leaving waits for server cleanup and abandoned relay state self-recovers",()=>{
+  assert.match(client,/const leave=useCallback\(async\(\)=>\{await disconnect\(true\)/);
+  assert.match(client,/navigator\.sendBeacon/);
+  assert.match(media,/SELECT 1 AS active FROM (?:live_)?class_media_presence/);
+  assert.match(media,/updated_at<=\?/);
+  assert.match(media,/streamActive=false/);
+});
+
 test("an idle playlist relay uses a constraint-safe atomic claim",()=>{
   assert.match(join,/playlistRequested/);
   assert.match(join,/class_playlist_relay_claims/);
