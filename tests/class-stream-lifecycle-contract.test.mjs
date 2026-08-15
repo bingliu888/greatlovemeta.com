@@ -9,4 +9,7 @@ test("the final manager publisher closes streaming even while viewers remain", (
   assert.match(media, /activePublishers/);
   assert.match(media, /access\.manager&&Number\(activePublishers\?\.count\|\|0\)===0/);
   assert.match(client, /livestream\.stop\(\)/);
+  assert.match(client, /humanStreamSeen/);
+  assert.match(client, /enabled=\{playlistEnabled&&!humanStreamActive&&!humanStreamSeen\}/);
+  assert.match(client, /humanSourceActive/);
 });
