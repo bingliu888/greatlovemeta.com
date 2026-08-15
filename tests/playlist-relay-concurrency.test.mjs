@@ -2,42 +2,22 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import test from "node:test";
 
-const join=fs.readFileSync(new URL("../app/api/classes/[code]/join/route.ts",import.meta.url),"utf8");
-const media=fs.readFileSync(new URL("../app/api/classes/[code]/media/route.ts",import.meta.url),"utf8");
-const client=fs.readFileSync(new URL("../components/class-room-client.tsx",import.meta.url),"utf8");
+const read = (path) => fs.readFileSync(new URL("../" + path, import.meta.url), "utf8");
 
-test("leaving waits for server cleanup and abandoned relay state self-recovers",()=>{
-  assert.match(client,/const leave=useCallback\(async\(\)=>\{await disconnect\(true\)/);
-  assert.match(client,/navigator\.sendBeacon/);
-  assert.match(client,/participants\.subscribe\(ids,\["audio","video"\]\)/);
-  assert.match(client,/setViewMode\.call\(client\.participants,"MANUAL"\)/);
-  assert.match(client,/return <video ref=\{ref\} autoPlay playsInline hidden\/>/);
-  assert.match(client,/playlistEnabled&&!playlistRelay\?<PlaylistViewer/);
-  assert.match(media,/SELECT 1 AS active FROM (?:live_)?class_media_presence/);
-  assert.match(media,/updated_at<=\?/);
-  assert.match(media,/streamActive=false/);
+test("waiting playback never claims or publishes a realtime relay", () => {
+  const client = read("components/class-room-client.tsx");
+  const player = read("components/ClassPlaylistPlayer.tsx");
+
+  assert.match(client, /if\(mediaState\?\.streamActive&&!joined&&!joining\.current\)void connect\(\)/);
+  assert.doesNotMatch(client, /const mayRelay=active/);
+  assert.doesNotMatch(client, /playlistRelay&&playlistEnabled\?<ClassPlaylistBroadcaster/);
+  assert.match(client, /ClassPlaylistPlayer/);
+  assert.match(player, /<video/);
+  assert.doesNotMatch(player, /RealtimeKit|livestream|captureStream|enableAudio|enableVideo/);
 });
 
-test("an idle playlist relay uses a constraint-safe atomic claim",()=>{
-  assert.match(join,/playlistRequested/);
-  assert.match(join,/class_playlist_relay_claims/);
-  assert.match(join,/playlistRelay=Number\(claim\.meta\?\.changes\|\|0\)>0/);
-  assert.match(join,/!providerMeetingId&&playlistRequested&&!playlistRelay/);
-  assert.doesNotMatch(join,/stream_active=2/);
-  assert.match(media,/DELETE FROM class_playlist_relay_claims/);
-});
-
-test("only the relay owner publishes and stops playlist delivery",()=>{
-  assert.match(client,/playlistRelay&&playlistEnabled/);
-  assert.doesNotMatch(client,/\(manager\|\|playlistRelay\)&&playlistEnabled/);
-  assert.match(client,/onState=\{setPlaylistPublished\}/);
-  assert.match(client,/playlistPublished\|\|room\.realtimeMode!=="livestream"/);
-  assert.match(client,/playlistRelay\|\|Boolean\(client\?\.self\.audioEnabled\|\|client\?\.self\.videoEnabled\)/);
-  assert.match(client,/manager&&!playlistEnabled/);
-  assert.doesNotMatch(client,/if\(asPlaylistRelay&&room\.realtimeMode==="livestream"/);
-  assert.match(client,/asPlaylistRelay&&room\.realtimeMode!=="group_call"&&next\?\.stage/);
-  assert.match(client,/next\.stage\.requestAccess\(\)/);
-  assert.match(client,/next\.stage\.join\(\)/);
-  const broadcaster=fs.readFileSync(new URL("../components/ClassPlaylistBroadcaster.tsx",import.meta.url),"utf8");
-  assert.match(broadcaster,/setStatus\(publishedRef\.current \? "live" : "loading"\)/);
+test("local waiting state survives the idle-room timeout", () => {
+  const client = read("components/class-room-client.tsx");
+  assert.match(client, /if\(joined\|\|playlistEnabled\)\{idleSince\.current=null;return\}/);
+  assert.match(client, /navigator\.sendBeacon/);
 });
