@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 
@@ -189,7 +189,7 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 
 export default async function LanguageHome({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  if (lang !== "en" && lang !== "zh") notFound();
+  if (lang !== "en" && lang !== "zh") redirect("/");
   const t = content[lang];
   return <main>
     <div className="hero-shell">
