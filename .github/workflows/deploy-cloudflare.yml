@@ -27,6 +27,9 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Contract tests
+        run: node --test tests/subscription-crypto-contract.test.mjs
+
       - name: Ensure private class-media bucket
         run: npx wrangler r2 bucket create greatlovemeta-com-class-files --config wrangler.cloudflare.jsonc || true
         env:
@@ -60,3 +63,20 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           REALTIMEKIT_API_TOKEN: ${{ secrets.CLOUDFLARE_REALTIME_API_TOKEN }}
+
+      - name: Verify production subscription surfaces
+        run: |
+          curl --fail --silent --show-error --retry 8 --retry-delay 5 https://greatlovemeta.com/en/pricing | grep -F "GREATLOVEMETA.COM PREMIUM"
+          curl --fail --silent --show-error --retry 8 --retry-delay 5 https://greatlovemeta.com/en/pricing/crypto | grep -F "CRYPTO CHECKOUT"
+
+      - name: Record exact deployment report
+        run: |
+          node scripts/deployment-report-sql.mjs > deployment-report.sql
+          npx wrangler d1 execute greatlovemeta-com-cutover-20260801-d1 --remote --config wrangler.cloudflare.jsonc --file deployment-report.sql
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          RELEASE_TITLE: Seven-day sessions and GreatLoveMeta-isolated subscription checkout
+          RELEASE_TITLE_ZH: 七天登录会话与大爱元宇宙独立订阅结账
+          RELEASE_NOTES: Keep the Clerk bridge and compatibility session aligned to seven days|Preserve the existing GreatLoveMeta monthly and annual plans and publish them from every footer|Add GreatLoveMeta-isolated administrator crypto rails and WalletConnect checkout using the existing plan prices|Verify ERC-20 payments server-side and activate the local subscription|Verify the Clerk production application name is GreatLoveMeta.com after reload|Production subscription and crypto checkout verification passed|No realtime audio/video test was started
+          RELEASE_NOTES_ZH: 保持 Clerk 桥接与站内兼容会话为七天|保留大爱元宇宙现有月付与年付套餐并从页脚发布|新增使用现有套餐价格的大爱元宇宙独立管理员加密通道及 WalletConnect 结账|服务端验证 ERC-20 并激活本站订阅|重载确认 Clerk 生产应用名为 GreatLoveMeta.com|生产订阅及加密结账探针通过|未启动实时音视频测试

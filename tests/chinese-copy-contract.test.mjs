@@ -13,7 +13,8 @@ const allowedLatinTerms = Object.freeze([
   "RWA", "DeFi", "SocialFi", "GameFi", "Web3", "GLC", "GLUSD", "USDT",
   "USDC", "ETH", "BTC", "EVM", "D1", "R2", "PDF", "JPG", "PNG", "WebP",
   "MB", "ID", "URL", "SSL", "DNS", "Webhook", "API", "Polygon",
-  "iOS", "cz.cool",
+  "iOS", "cz.cool", "HLS", "DeepSeek", "Flash", "WalletConnect", "ERC-20",
+  "DOCX", "XLSX", "PPTX", "PDT",
 ]);
 
 const avoidableEnglish = [

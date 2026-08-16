@@ -2,7 +2,7 @@ import { currentUser } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "glm_session";
-const SESSION_SECONDS = 60 * 60 * 24 * 30;
+const SESSION_SECONDS = 60 * 60 * 24 * 7;
 const HASH_ITERATIONS = 210_000;
 
 type D1Result<T> = { results?: T[]; success: boolean };
