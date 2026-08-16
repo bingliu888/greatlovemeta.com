@@ -18,9 +18,20 @@ export type ProjectBuild = {
   commit: string;
 };
 
-export const projectStats = { editionDate: "2026-07-28", today: 2, total: 18 };
+export const projectStats = { editionDate: "2026-08-16", today: 1, total: 19 };
 
 export const projectBuilds: ProjectBuild[] = [
+  {
+    version: 19,
+    date: "2026-08-16",
+    title: { zh: "实时课堂媒体隔离发布 · 2026-08-16 10:18 PDT", en: "Realtime classroom media isolation release · 2026-08-16 10:18 PDT" },
+    completed: {
+      zh: ["删除旧候场播放列表广播运行时代码", "候场播放列表改为访客本地播放", "修复举手失败误报与设备权限切换时序", "保留幽灵主播、无人观看自动离开及无效网址回首页保护"],
+      en: ["Deleted obsolete waiting-playlist broadcast runtime code", "Moved waiting playlists to visitor-local playback", "Fixed false hand-raise success and device-permission connection timing", "Preserved ghost-publisher, no-viewer auto-leave, and unknown-URL home redirect safeguards"],
+    },
+    testable: { zh: ["运行实时课堂契约测试", "构建并验证生产版本"], en: ["Run realtime classroom contract tests", "Build and verify the production bundle"] },
+    commit: "greatlovemeta-realtime-media-isolation-2026-08-16",
+  },
   {
     version: 1,
     date: "2026-07-22",
@@ -181,6 +192,7 @@ export const projectTasks: ProjectTask[] = [
 ];
 
 export const projectReports = [
+  { date: "2026-08-16", title: { zh: "实时课堂媒体隔离发布 · 2026-08-16 10:18 PDT", en: "Realtime classroom media isolation release · 2026-08-16 10:18 PDT" }, beta: { zh: "查看发布说明", en: "View release notes" }, completed: 4 },
   {
     date: "2026-07-22",
     title: { zh: "大爱元宇宙建站、功能对齐与社区修复", en: "GreatLoveMeta.com launch, feature parity, and Community repair" },

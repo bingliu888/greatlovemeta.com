@@ -26,12 +26,12 @@ test("classroom publishing honors group, webinar, and livestream contracts",()=>
   const media=read("app/api/classes/[code]/media/route.ts");
   const client=read("components/class-room-client.tsx");
   assert.match(rooms,/group_call.*webinar.*livestream/);
-  assert.match(join,/participantLimit:room\.realtimeMode==="group_call"\?100:null/);
+  assert.match(join, /participantLimit:\s*room\.realtimeMode\s*===\s*"group_call"\s*\?\s*100\s*:\s*null/);
   assert.match(join,/9-speaker stage is full/);
   assert.match(join,/Raise your hand and wait for host approval/);
   assert.match(join,/member email as a speaker/);
   assert.match(media,/request-stage/);
   assert.match(media,/add-speaker/);
   assert.match(client,/LivestreamPlayer/);
-  assert.match(client,/setInterval\(\(\)=>void check\(\),3000\)/);
+  assert.match(client,/setInterval\(\s*\(\)\s*=>\s*void (?:check|load)\(\),\s*3000\s*\)/);
 });
