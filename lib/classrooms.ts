@@ -64,6 +64,11 @@ export async function verifyClassPassword(value: string, hash: string | null) {
   return !hash || await hashPassword(value) === hash;
 }
 
+export async function verifyClassEntryPassword(code: string, value: string) {
+  const row = await getDatabase().prepare("SELECT password_hash AS passwordHash FROM class_rooms WHERE code=? LIMIT 1").bind(code).first<{passwordHash:string|null}>();
+  return verifyClassPassword(value, row?.passwordHash ?? null);
+}
+
 export async function createClassRoom(user: SessionUser, input: Record<string,unknown>) {
   if (!await isTeacherUser(user)) throw new Error("TEACHER_REQUIRED");
   if (!isBootstrapAdminEmail(user.email)) {
