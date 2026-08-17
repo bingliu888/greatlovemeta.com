@@ -19,7 +19,7 @@ export async function POST(request: Request) {
     const session = await createSessionForClerkUser(
       userId,
       email,
-      payload.name || email.split("@")[0] || "GreatLove Meta",
+      email === "bingliu@cybeye.com" ? "Admin" : payload.name || email.split("@")[0] || "GreatLove Meta",
     );
     return Response.json({ ok: true }, { headers: { "Set-Cookie": session.cookie } });
   } catch (error) {
