@@ -20,8 +20,8 @@ test("footer and pricing publish one GreatLoveMeta-local plan source", async () 
 
 test("SmartMeeting-compatible crypto checkout and administrator controls are complete", async () => {
   const [flow, admin, dashboard, migration, verify] = await Promise.all([read("components/CryptoCheckout.tsx"), read("components/AdminCryptoSettings.tsx"), read("components/AdminDashboard.tsx"), read("drizzle/0118_crypto_payment_checkout.sql"), read("app/api/billing/crypto/verify/route.ts")]);
-  for (const marker of ["Connect wallet", "WalletConnect QR", "Confirm and send ERC-20", "Use direct transfer fallback", "Refresh balance", "Transaction hash \\(optional\\)"]) assert.match(flow, new RegExp(marker));
-  assert.match(flow, /@walletconnect\/ethereum-provider/);
+  for(const marker of ["GreatLoveAutoSwapOnboard","/wallet-assets/greatlove-onboard.js","Connect wallet","connectWallet","eth_sendTransaction","Use direct transfer fallback","Transaction hash (optional)"])assert.ok(flow.includes(marker),`missing ${marker}`);assert.doesNotMatch(flow,/WalletConnect QR|connectInjected|connectWalletConnect|wallet_switchEthereumChain|@walletconnect\/ethereum-provider/);
+
   assert.match(admin, /WalletConnect Project ID/);
   assert.match(dashboard, /AdminCryptoSettings/);
   assert.match(migration, /crypto_payment_settings/);
