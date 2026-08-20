@@ -1,7 +1,9 @@
-const titleEn = String(process.env.RELEASE_TITLE || "Production release").trim();
-const titleZh = String(process.env.RELEASE_TITLE_ZH || titleEn).trim();
-const notesEn = String(process.env.RELEASE_NOTES || titleEn).split("|").map((value) => value.trim()).filter(Boolean);
-const notesZh = String(process.env.RELEASE_NOTES_ZH || process.env.RELEASE_NOTES || titleZh).split("|").map((value) => value.trim()).filter(Boolean);
+import { loadReleaseManifest, releaseNotes } from "./release-manifest.mjs";
+const manifest = loadReleaseManifest();
+const titleEn = manifest.title.en;
+const titleZh = manifest.title.zh;
+const notesEn = releaseNotes(manifest, "en");
+const notesZh = releaseNotes(manifest, "zh");
 const commit = String(process.env.GITHUB_SHA || "unknown").slice(0, 12);
 const runId = String(process.env.GITHUB_RUN_ID || "unknown");
 const now = new Date();
@@ -10,7 +12,7 @@ const part = (type) => dateParts.find((item) => item.type === type)?.value || "0
 const editionDate = `${part("year")}-${part("month")}-${part("day")}`;
 const timestamp = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Los_Angeles", hour: "2-digit", minute: "2-digit", second: "2-digit", hour12: false, timeZoneName: "short" }).format(now);
 const report = { date: editionDate, title: { zh: `${titleZh} · ${timestamp}`, en: `${titleEn} · ${timestamp}` }, beta: { zh: "已发布", en: "Published" }, completed: Math.max(notesZh.length, notesEn.length) };
-const build = { version: 20, date: editionDate, title: report.title, completed: { zh: notesZh, en: notesEn }, testable: { zh: ["订阅套餐与页脚入口", "Connect wallet 与加密付款", `GitHub Actions ${runId}`], en: ["Subscription plans and footer entry", "Connect wallet and crypto checkout", `GitHub Actions ${runId}`] }, commit };
+const build = { version: 20, date: editionDate, title: report.title, completed: { zh: notesZh, en: notesEn }, testable: { zh: ["生产项目报告与部署历史", `GitHub Actions ${runId}`], en: ["Production Project report and deployment history", `GitHub Actions ${runId}`] }, commit };
 const document = { editionDate, today: 2, total: 20, reports: [report], builds: [build] };
 const sql = (value) => `'${String(value).replaceAll("'", "''")}'`;
 const reportJson = JSON.stringify(report);
