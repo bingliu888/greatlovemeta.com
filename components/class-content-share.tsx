@@ -211,7 +211,7 @@ export function ContentShareStudio({
       setMessage(
         error instanceof Error && error.message === "HTTPS_REQUIRED"
           ? zh
-            ? "请输入有效的 HTTPS 网页地址。"
+            ? "请输入有效的安全网页地址。"
             : "Enter a valid HTTPS web address."
           : zh
             ? "此网站不允许浏览器直接读取。请改用屏幕共享。"
