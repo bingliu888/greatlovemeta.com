@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "../components/header-menu.css";
 
 /* GreatLoveMeta.com brand layer */
 .gc-hero-shell{background:radial-gradient(circle at 82% 20%,rgba(52,205,194,.18),transparent 30%),linear-gradient(135deg,#f7fbfa 0%,#eef8f5 52%,#fbf5e9 100%)}
