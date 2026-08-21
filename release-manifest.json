@@ -1,75 +1,73 @@
 {
   "schemaVersion": 1,
-  "releaseId": "smartclass-header-menu-v1",
+  "releaseId": "shared-course-terminology-v1",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Unify the responsive header menu",
-    "zh": "统一响应式页眉菜单"
+    "en": "Unify Course and Course room terminology",
+    "zh": "统一课程与课程教室术语"
   },
   "purpose": {
-    "en": "Adopt the proven SmartClass hamburger interaction on greatlovemeta.com before and after login, with the common twelve text-only language choices on desktop and mobile.",
-    "zh": "在 greatlovemeta.com 登录前后采用已验证的 SmartClass 汉堡菜单交互，并在桌面和移动端提供共同的 12 种纯文字语言选项。"
+    "en": "Replace user-facing Class and Classroom wording on greatlovemeta.com with Course and Course room while retaining compatible internal routes and data identifiers.",
+    "zh": "将 greatlovemeta.com 面向用户的班级与课堂术语统一为课程与课程教室，同时保留兼容的内部路由和数据标识。"
   },
   "features": {
     "en": [
-      "One dark hamburger control changes into a close icon.",
-      "The full-width mobile drawer combines navigation, language, and account actions.",
-      "Anonymous visitors see Sign in or register; members see account navigation.",
-      "Desktop and mobile share one ordered twelve-language text list."
+      "Public, Referred course, and Private replace the previous course-type wording.",
+      "Course room replaces Classroom in visible navigation, cards, forms, sharing, and management."
     ],
     "zh": [
-      "一个深色汉堡按钮在打开后变为关闭图标。",
-      "全宽移动抽屉统一包含导航、语言和账户操作。",
-      "匿名访客看到“登录或注册”，会员看到账户导航。",
-      "桌面和移动端共用同一组有序的 12 语言纯文字列表。"
+      "课程类型统一为公开、推荐课程和私有。",
+      "导航、卡片、表单、分享和管理界面统一使用课程教室。"
     ]
   },
   "affected": {
     "en": [
-      "Public and signed-in shared header",
-      "Desktop language menu",
-      "Mobile navigation drawer",
+      "Course directories and detail pages",
+      "Creation and editing forms",
+      "Course room entry and sharing",
+      "Administrator and member surfaces",
       "Project release history"
     ],
     "zh": [
-      "登录前后共享页眉",
-      "桌面语言菜单",
-      "移动导航抽屉",
+      "课程目录与详情页",
+      "创建与编辑表单",
+      "课程教室进入与分享",
+      "管理员与会员界面",
       "项目发布历史"
     ]
   },
   "changes": {
     "en": [
-      "Replace the legacy narrow details menu with an accessible state-driven drawer.",
-      "Preserve the site-local brand and route map.",
-      "Store all twelve language preferences; existing bilingual content uses the documented English fallback for untranslated locales.",
-      "Add a regression contract for menu, account, and language behavior."
+      "Change only user-visible terminology; preserve legacy class routes, schema columns, CSS hooks, and storage keys.",
+      "Rename the former trial/join type label to Referred course.",
+      "Add an additive migration that updates reserved public demo titles to Course.",
+      "Update regression contracts for the shared vocabulary."
     ],
     "zh": [
-      "以具备无障碍状态的抽屉替换旧窄幅 details 菜单。",
-      "保留本站独立品牌和路由。",
-      "保存全部 12 种语言偏好；现有双语内容对尚未翻译的语言使用已注明的英文回退。",
-      "新增菜单、账户和语言行为回归门禁。"
+      "仅修改面向用户的术语，保留旧 class 路由、数据库字段、CSS hook 和存储键。",
+      "将原试学加入类型标签改为推荐课程。",
+      "新增可追加迁移，将保留的公共演示标题更新为课程。",
+      "更新共享词汇回归门禁。"
     ]
   },
   "validation": {
     "en": [
-      "Production build and Sites artifact validation passed.",
-      "Header contract verified the SmartClass drawer, both account states, and twelve text-only languages.",
-      "Responsive CSS prevents separate desktop controls and horizontal overflow in mobile mode."
+      "Shared site policy and architecture audits passed.",
+      "Cross-site terminology scan found no remaining visible Class or Classroom wording.",
+      "Site build and regression contracts passed before publication."
     ],
     "zh": [
-      "生产构建和 Sites 部署产物校验通过。",
-      "页眉契约已验证 SmartClass 抽屉、两种账户状态和 12 种纯文字语言。",
-      "响应式样式在移动模式隐藏独立桌面控件并防止横向溢出。"
+      "共享网站规则和架构审计通过。",
+      "跨站术语扫描未发现残留的可见 Class 或 Classroom 文案。",
+      "发布前通过本站构建与回归门禁。"
     ]
   },
   "deferred": {
     "en": [
-      "Full native translation beyond the site's existing localized content remains content work; untranslated selections fail safely to English instead of presenting mixed or fabricated translations."
+      "No terminology-related behavior is deferred."
     ],
     "zh": [
-      "超出本站现有本地化内容的完整母语翻译仍属于后续内容工作；尚未翻译的选择安全回退为英文，不呈现混杂或虚构译文。"
+      "本次术语一致性范围内没有延期项目。"
     ]
   },
   "siteAdaptations": {

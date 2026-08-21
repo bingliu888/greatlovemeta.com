@@ -9,8 +9,8 @@ const localizedCss = new URL("../app/[lang]/classes/classes.css", import.meta.ur
 const classroomCss = new URL("../app/[lang]/classrooms/classrooms.css", import.meta.url);
 const css = readFileSync(existsSync(standardCss) ? standardCss : existsSync(localizedCss) ? localizedCss : classroomCss, "utf8");
 
-test("class detail uses the SmartClass entry experience", () => {
-  for (const contract of ["class-entry-heading", "class-entry-stage", "class-entry-attendees", "Display name", "Create class image", "Online learners"]) assert.match(source, new RegExp(contract));
+test("course detail uses the SmartClass entry experience", () => {
+  for (const contract of ["class-entry-heading", "class-entry-stage", "class-entry-attendees", "Display name", "Create course image", "Online learners"]) assert.match(source, new RegExp(contract));
   assert.match(source, /fetch\(`\$\{mediaBase\}\/\$\{room\.code\}\/media`/);
   assert.match(source, /navigator\.share/);
   assert.match(source, /shareImageHref/);

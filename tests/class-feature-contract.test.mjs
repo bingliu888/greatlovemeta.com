@@ -7,8 +7,8 @@ const read=(path)=>fs.readFileSync(new URL(`../${path}`,import.meta.url),"utf8")
 test("classroom feature exposes bilingual directory and community entry points",()=>{
   assert.match(read("app/[lang]/classes/page.tsx"),/ClassDirectory/);
   assert.match(read("app/[lang]/page.tsx"),/home-community-classes/);
-  assert.match(read("app/[lang]/dashboard/page.tsx"),/My classes|我的课程/);
-  assert.match(read("components/CommunityClient.tsx"),/Enter classes|进入课堂/);
+  assert.match(read("app/[lang]/dashboard/page.tsx"),/My courses|我的课程/);
+  assert.match(read("components/CommunityClient.tsx"),/Enter courses|进入课程/);
 });
 
 test("classroom data and media resources are site isolated",()=>{

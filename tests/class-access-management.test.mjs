@@ -4,7 +4,7 @@ import { existsSync, readFileSync } from "node:fs";
 
 const source = path => readFileSync(new URL(path, import.meta.url), "utf8");
 
-test("class managers and paid subscribers have durable independent storage", () => {
+test("course managers and paid subscribers have durable independent storage", () => {
   const migration = source("../drizzle/0109_class_cohosts_subscribers.sql");
   assert.match(migration, /CREATE TABLE IF NOT EXISTS class_cohosts/);
   assert.match(migration, /PRIMARY KEY\s*\(room_id,\s*user_id\)/);
@@ -24,7 +24,7 @@ test("host, site host, and co-host share one class-management authority", () => 
   assert.doesNotMatch(source("../lib/classrooms.ts"), /if \(!user \|\| !await isAdminUser\(user\)\) return \[\]/);
 });
 
-test("paid trial classes enforce seven days and an active subscriber list", () => {
+test("paid trial courses enforce seven days and an active subscriber list", () => {
   const managers = source("../lib/class-managers.ts");
   const classrooms = source("../lib/classrooms.ts");
   assert.match(managers, /7 \* 24 \* 60 \* 60/);
@@ -33,7 +33,7 @@ test("paid trial classes enforce seven days and an active subscriber list", () =
   assert.match(classrooms, /paidClassAccess\(room,user,startTrial\)/);
 });
 
-test("class item exposes type badges, edit, co-hosts, and conditional subscribers", () => {
+test("course item exposes type badges, edit, co-hosts, and conditional subscribers", () => {
   const detail = source("../components/class-detail-experience.tsx");
   const managers = source("../components/ClassAccessManagers.tsx");
   const editor = source("../components/ClassEditDialog.tsx");
@@ -45,7 +45,7 @@ test("class item exposes type badges, edit, co-hosts, and conditional subscriber
   assert.match(editor, /Audio \/ Video \(AV\)/);
 });
 
-test("class creation authority is presented as Teachers", () => {
+test("course creation authority is presented as Teachers", () => {
   const candidates = ["../app/admin-dashboard.tsx", "../components/AdminDashboard.tsx", "../components/admin-dashboard.tsx"];
   const roleCandidates = ["../app/admin-role-editor.tsx", "../components/AdminMemberRoleEditor.tsx"];
   const dashboardPath = candidates.find(item => existsSync(new URL(item, import.meta.url)));

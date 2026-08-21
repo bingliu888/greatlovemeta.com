@@ -9,7 +9,7 @@ test("room entry tiles never turn into ended-session notices", () => {
   const roomPath = existing(["../components/class-detail-experience.tsx", "../components/MeetingRoom.tsx"]);
   assert.ok(roomPath, "room entry component is required");
   const room = read(roomPath);
-  assert.doesNotMatch(room, /ended=room\.startsAt|const ended=meetingStatus|本次课程已结束|Class session ended|会议已结束；|Meeting has ended|This meeting has ended\. The room/);
+  assert.doesNotMatch(room, /ended=room\.startsAt|const ended=meetingStatus|本次课程已结束|Course session ended|会议已结束；|Meeting has ended|This meeting has ended\. The room/);
 });
 
 test("admin member lists cannot delete or remove member accounts", () => {

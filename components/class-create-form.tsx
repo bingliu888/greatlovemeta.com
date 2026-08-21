@@ -33,9 +33,9 @@ export function ClassCreateForm({ lang }: { lang: "en" | "zh" }) {
         router.push(`/${lang}/classes/${result.code}`);
         return;
       }
-      setError(result.error || (zh ? "无法创建课程" : "Unable to create class"));
+      setError(result.error || (zh ? "无法创建课程" : "Unable to create course"));
     } catch {
-      setError(zh ? "无法创建课程" : "Unable to create class");
+      setError(zh ? "无法创建课程" : "Unable to create course");
     } finally {
       setBusy(false);
     }
@@ -43,11 +43,11 @@ export function ClassCreateForm({ lang }: { lang: "en" | "zh" }) {
 
   return (
     <form className="class-form" onSubmit={submit}>
-      <label>{zh ? "课程标题" : "Class title"}<input name="title" required minLength={3} maxLength={120} /></label>
+      <label>{zh ? "课程标题" : "Course title"}<input name="title" required minLength={3} maxLength={120} /></label>
       <label>{zh ? "主题" : "Subject"}<input name="subject" maxLength={80} /></label>
       <label>{zh ? "介绍" : "Description"}<textarea name="description" maxLength={2000} /></label>
       <div>
-        <label>{zh ? "课堂类型" : "Class type"}<select name="classType" defaultValue="public"><option value="public">{zh ? "公课" : "Public"}</option><option value="trial">{zh ? "试课" : "Trial"}</option><option value="private">{zh ? "私课" : "Private"}</option></select></label>
+        <label>{zh ? "课程类型" : "Course type"}<select name="classType" defaultValue="public"><option value="public">{zh ? "公课" : "Public"}</option><option value="trial">{zh ? "推荐课程" : "Referred course"}</option><option value="private">{zh ? "私课" : "Private"}</option></select></label>
         <label>{zh ? "媒体模式" : "Media"}<select name="streamingMode" defaultValue="video"><option value="video">{zh ? "音频与视频" : "Audio / Video"}</option><option value="audio">{zh ? "仅音频" : "Audio only"}</option></select></label>
         <label>{zh ? "互动模式" : "Interaction"}<select name="realtimeMode" defaultValue="group_call"><option value="group_call">{zh ? "群组通话 · 最多 100 人互动" : "Group call · up to 100 interactive participants"}</option><option value="webinar">{zh ? "网络研讨会 · 举手上台，最多 9 人" : "Webinar · viewers raise hand, 9 on stage"}</option><option value="livestream">{zh ? "直播 · 指定嘉宾，最多 9 人" : "Livestream · invited speakers, 9 on stage"}</option></select></label>
       </div>
@@ -57,11 +57,11 @@ export function ClassCreateForm({ lang }: { lang: "en" | "zh" }) {
       </div>
       <div>
         <label>{zh ? "试课期限" : "Trial period"}<input readOnly value={zh ? "7 天" : "7 days"} /></label>
-        <label>{zh ? "课程价格（美元）" : "Class price (USD)"}<input name="tuition" type="number" min={0} step="0.01" defaultValue={99} /></label>
+        <label>{zh ? "课程价格（美元）" : "Course price (USD)"}<input name="tuition" type="number" min={0} step="0.01" defaultValue={99} /></label>
       </div>
       <label>{zh ? "私课邀请邮箱" : "Private invitation emails"}<textarea name="invites" placeholder="name@example.com, another@example.com" /></label>
       {error && <p role="alert">{error}</p>}
-      <button disabled={busy}>{busy ? (zh ? "正在创建…" : "Creating…") : (zh ? "创建课程" : "Create class")}</button>
+      <button disabled={busy}>{busy ? (zh ? "正在创建…" : "Creating…") : (zh ? "创建课程" : "Create course")}</button>
     </form>
   );
 }

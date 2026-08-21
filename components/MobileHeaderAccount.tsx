@@ -14,7 +14,7 @@ export function MobileHeaderAccount({ lang, onNavigate }: { lang:"en"|"zh"; onNa
   if(!session.signedIn)return <nav className="mobile-account-nav"><Link href={`/${lang}/auth/login`} onClick={onNavigate}>{zh?"登录或注册":"Sign in or register"}<small>→</small></Link></nav>;
   const links:[[string,string],...[string,string][]]=[
     [zh?"用户面板":"Dashboard",`/${lang}/dashboard`],
-    [zh?"我的课程":"My classes",`/${lang}/classes?view=mine`],
+    [zh?"我的课程":"My courses",`/${lang}/classes?view=mine`],
     [zh?"个人资料":"Profile",`/${lang}/account`],
     [zh?"消息":"Messages",`/${lang}/messages`],
     [zh?"会员社区":"Community",`/${lang}/community`],
