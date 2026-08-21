@@ -1,81 +1,77 @@
 {
   "schemaVersion": 1,
-  "releaseId": "shared-course-terminology-v1",
+  "releaseId": "global-open-private-ui-v1",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Unify Course and Course room terminology",
-    "zh": "统一课程与课程教室术语"
+    "en": "Unify Open and Private access labels",
+    "zh": "统一 Open 与专属访问类型文案"
   },
   "purpose": {
-    "en": "Replace user-facing Class and Classroom wording on greatlovemeta.com with Course and Course room while retaining compatible internal routes and data identifiers.",
-    "zh": "将 greatlovemeta.com 面向用户的班级与课堂术语统一为课程与课程教室，同时保留兼容的内部路由和数据标识。"
+    "en": "Apply the shared access-type UI vocabulary on greatlovemeta.com: Open replaces visible Public product labels, while Private remains English and uses 专属 plus the product name in Chinese.",
+    "zh": "在 greatlovemeta.com 应用共享访问类型界面规范：英文产品标签以 Open 取代 Public；Private 英文保持不变，中文统一为“专属 + 产品名”。"
   },
   "features": {
     "en": [
-      "Public, Referred course, and Private replace the previous course-type wording.",
-      "Course room replaces Classroom in visible navigation, cards, forms, sharing, and management."
+      "Show Open for publicly discoverable product types and keep Private for invitation-only product types.",
+      "Use explicit product names such as Open course and Private course instead of ambiguous standalone access words."
     ],
     "zh": [
-      "课程类型统一为公开、推荐课程和私有。",
-      "导航、卡片、表单、分享和管理界面统一使用课程教室。"
+      "公开可发现的产品类型使用“公开 + 产品名”，仅限受邀的类型使用“专属 + 产品名”。",
+      "使用“公开课程”“专属课堂”等完整产品名称，避免单独且含义模糊的访问词。"
     ]
   },
   "affected": {
     "en": [
-      "Course directories and detail pages",
-      "Creation and editing forms",
-      "Course room entry and sharing",
-      "Administrator and member surfaces",
+      "Product access labels and descriptions",
+      "Course, channel, college, program, or meeting surfaces present on this site",
+      "Subscription benefit copy where applicable",
       "Project release history"
     ],
     "zh": [
-      "课程目录与详情页",
-      "创建与编辑表单",
-      "课程教室进入与分享",
-      "管理员与会员界面",
+      "产品访问类型标签与说明",
+      "本站现有的课程、频道、学院、节目或会议界面",
+      "适用的订阅权益文案",
       "项目发布历史"
     ]
   },
   "changes": {
     "en": [
-      "Change only user-visible terminology; preserve legacy class routes, schema columns, CSS hooks, and storage keys.",
-      "Rename the former trial/join type label to Referred course.",
-      "Add an additive migration that updates reserved public demo titles to Course.",
-      "Update regression contracts for the shared vocabulary."
+      "Change user-visible terminology without changing public/private policy enums, authorization checks, database values, or cloud boundaries.",
+      "Remove stale Chinese access labels such as 私有, 私密, 私立, and 私课 from product-type copy.",
+      "Add or update regression contracts for the shared vocabulary."
     ],
     "zh": [
-      "仅修改面向用户的术语，保留旧 class 路由、数据库字段、CSS hook 和存储键。",
-      "将原试学加入类型标签改为推荐课程。",
-      "新增可追加迁移，将保留的公共演示标题更新为课程。",
-      "更新共享词汇回归门禁。"
+      "仅修改面向用户的术语，不改变 public/private 策略枚举、权限判断、数据库值或云资源边界。",
+      "从产品类型文案中移除“私有、私密、私立、私课”等旧中文访问标签。",
+      "新增或更新共享词汇回归门禁。"
     ]
   },
   "validation": {
     "en": [
-      "Shared site policy and architecture audits passed.",
-      "Cross-site terminology scan found no remaining visible Class or Classroom wording.",
-      "Site build and regression contracts passed before publication."
+      "Shared site policy and portfolio architecture gates passed.",
+      "Access-label regression tests and production build passed before publication.",
+      "Production release and Project report are verified against the exact commit."
     ],
     "zh": [
-      "共享网站规则和架构审计通过。",
-      "跨站术语扫描未发现残留的可见 Class 或 Classroom 文案。",
-      "发布前通过本站构建与回归门禁。"
+      "共享网站规则与全站架构门禁通过。",
+      "发布前通过访问类型文案回归测试与本站生产构建。",
+      "正式部署与项目报告按精确 commit 完成验证。"
     ]
   },
   "deferred": {
     "en": [
-      "No terminology-related behavior is deferred."
+      "Cross-site interactive realtime browser testing remains intentionally out of scope for this UI terminology rollout."
     ],
     "zh": [
-      "本次术语一致性范围内没有延期项目。"
+      "本次界面术语迁移按规则不执行跨站实时互动浏览器测试。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Keep greatlovemeta.com identity, data, configuration, routes, and deployment resources independent."
+      "Preserve greatlovemeta.com branding, routes, independent data, and cloud resources."
     ],
     "zh": [
-      "保持 greatlovemeta.com 的身份、数据、配置、路由和部署资源完全独立。"
+      "保留 greatlovemeta.com 的品牌、路由、独立数据与云资源。"
     ]
   }
 }
