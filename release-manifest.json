@@ -1,77 +1,71 @@
 {
   "schemaVersion": 1,
-  "releaseId": "global-open-private-ui-v1",
+  "releaseId": "language-menu-width-20260821",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Unify Open and Private access labels",
-    "zh": "统一 Open 与专属访问类型文案"
+    "en": "Fix the iPad and desktop language menu",
+    "zh": "修复 iPad 与桌面语言菜单"
   },
   "purpose": {
-    "en": "Apply the shared access-type UI vocabulary on greatlovemeta.com: Open replaces visible Public product labels, while Private remains English and uses 专属 plus the product name in Chinese.",
-    "zh": "在 greatlovemeta.com 应用共享访问类型界面规范：英文产品标签以 Open 取代 Public；Private 英文保持不变，中文统一为“专属 + 产品名”。"
+    "en": "Prevent the GreatLoveMeta language dropdown from collapsing to its trigger width on iPad and desktop Safari while preserving site routing and branding.",
+    "zh": "防止 GreatLoveMeta 的语言下拉菜单在 iPad 与桌面 Safari 中被压缩为触发按钮宽度，同时保留本站路由与品牌。"
   },
   "features": {
     "en": [
-      "Show Open for publicly discoverable product types and keep Private for invitation-only product types.",
-      "Use explicit product names such as Open course and Private course instead of ambiguous standalone access words."
+      "Render the twelve-language desktop dropdown as a readable 330-pixel two-column overlay.",
+      "Keep the overlay bounded by the viewport and vertically scrollable on shorter screens."
     ],
     "zh": [
-      "公开可发现的产品类型使用“公开 + 产品名”，仅限受邀的类型使用“专属 + 产品名”。",
-      "使用“公开课程”“专属课堂”等完整产品名称，避免单独且含义模糊的访问词。"
+      "将含十二种语言的桌面下拉菜单呈现为可读的 330 像素双栏浮层。",
+      "使浮层始终受视口边界约束，并在较矮屏幕上支持纵向滚动。"
     ]
   },
   "affected": {
     "en": [
-      "Product access labels and descriptions",
-      "Course, channel, college, program, or meeting surfaces present on this site",
-      "Subscription benefit copy where applicable",
-      "Project release history"
+      "Shared public header language menu on localized public and member routes.",
+      "Deployment checks and Project release history."
     ],
     "zh": [
-      "产品访问类型标签与说明",
-      "本站现有的课程、频道、学院、节目或会议界面",
-      "适用的订阅权益文案",
-      "项目发布历史"
+      "本地化公共页面及会员路由所用的共享页头语言菜单。",
+      "部署检查与项目发布历史。"
     ]
   },
   "changes": {
     "en": [
-      "Change user-visible terminology without changing public/private policy enums, authorization checks, database values, or cloud boundaries.",
-      "Remove stale Chinese access labels such as 私有, 私密, 私立, and 私课 from product-type copy.",
-      "Add or update regression contracts for the shared vocabulary."
+      "Override the generic container width cap for the absolute-positioned language overlay.",
+      "Add regression, production-asset, and exact Project-evidence checks for this release."
     ],
     "zh": [
-      "仅修改面向用户的术语，不改变 public/private 策略枚举、权限判断、数据库值或云资源边界。",
-      "从产品类型文案中移除“私有、私密、私立、私课”等旧中文访问标签。",
-      "新增或更新共享词汇回归门禁。"
+      "为绝对定位的语言浮层覆盖通用容器宽度上限。",
+      "为本次发布加入回归、生产资源与精确项目证据检查。"
     ]
   },
   "validation": {
     "en": [
-      "Shared site policy and portfolio architecture gates passed.",
-      "Access-label regression tests and production build passed before publication.",
-      "Production release and Project report are verified against the exact commit."
+      "Language-menu layout regression and shared portfolio gates pass.",
+      "Production build and the complete repository test suite pass before publication.",
+      "Production serves the corrected CSS asset and Project evidence for the exact commit."
     ],
     "zh": [
-      "共享网站规则与全站架构门禁通过。",
-      "发布前通过访问类型文案回归测试与本站生产构建。",
-      "正式部署与项目报告按精确 commit 完成验证。"
+      "语言菜单布局回归与共享组合规门禁通过。",
+      "发布前通过生产构建和完整仓库测试套件。",
+      "生产环境提供修正后的 CSS 资源及精确 commit 的项目证据。"
     ]
   },
   "deferred": {
     "en": [
-      "Cross-site interactive realtime browser testing remains intentionally out of scope for this UI terminology rollout."
+      "Realtime audio/video tests are intentionally not started because this release changes only shared-header layout and release tooling."
     ],
     "zh": [
-      "本次界面术语迁移按规则不执行跨站实时互动浏览器测试。"
+      "本次发布只修改共享页头布局与发布工具，因此明确不启动实时音视频测试。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Preserve greatlovemeta.com branding, routes, independent data, and cloud resources."
+      "Preserve GreatLoveMeta branding, locale routes, independent data, and cloud resources while adopting the canonical overlay containment fix."
     ],
     "zh": [
-      "保留 greatlovemeta.com 的品牌、路由、独立数据与云资源。"
+      "采用规范浮层容纳修复时，保留 GreatLoveMeta 的品牌、本地化路由、独立数据与云资源。"
     ]
   }
 }

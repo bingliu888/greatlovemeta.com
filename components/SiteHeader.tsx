@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HeaderLanguageMenu } from "./HeaderLanguageMenu";
 import { HeaderAccount } from "./HeaderAccount";
-import { MobileHeaderAccount } from "./MobileHeaderAccount";
 
 const labels = {
   en: { academy: "BingAcademy", claw: "MyClaw", real: "WhatsReal" },
@@ -38,7 +37,7 @@ export function SiteHeader({ lang }: { lang: "en" | "zh" }) {
       </div>
       <HeaderLanguageMenu lang={lang}/>
       <button className={`hamburger-button${mobileOpen ? " open" : ""}`} type="button" aria-label={mobileOpen ? (lang==="zh"?"关闭菜单":"Close menu") : (lang==="zh"?"打开菜单":"Open menu")} aria-expanded={mobileOpen} aria-controls="mobile-header-menu" onClick={()=>setMobileOpen(value=>!value)}><span/><span/><span/></button>
-      {mobileOpen ? <div className="mobile-header-menu" id="mobile-header-menu"><nav aria-label={lang==="zh"?"主导航":"Primary navigation"} onClick={()=>setMobileOpen(false)}><GlobalLinks lang={lang}/></nav><HeaderLanguageMenu lang={lang} mobile onNavigate={()=>setMobileOpen(false)}/><div className="mobile-account"><MobileHeaderAccount lang={lang} onNavigate={()=>setMobileOpen(false)}/></div></div> : null}
+      {mobileOpen ? <div className="mobile-header-menu" id="mobile-header-menu"><nav aria-label={lang==="zh"?"主导航":"Primary navigation"} onClick={()=>setMobileOpen(false)}><GlobalLinks lang={lang}/></nav><HeaderLanguageMenu lang={lang} mobile onNavigate={()=>setMobileOpen(false)}/><div className="mobile-account"><HeaderAccount lang={lang}/></div></div> : null}
     </header>
   );
 }
