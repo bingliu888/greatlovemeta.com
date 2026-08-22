@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-true-twelve-language-home-v1",
+  "releaseId": "greatlovemeta-global-footer-v1",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Serve real twelve-language GreatLoveMeta pages",
-    "zh": "发布真实十二语言大爱元宇宙页面"
+    "en": "Adopt the global four-link footer",
+    "zh": "采用全站四链接页脚规范"
   },
   "purpose": {
-    "en": "Replace the non-Chinese-to-English fallback with real locale routes and statically translated public content.",
-    "zh": "移除非中文统一回退英文的问题，改为真实语言路由与静态翻译公共内容。"
+    "en": "Remove repeated subscription, GitHub, and language navigation from the footer and keep only About, Privacy, Terms, and Project in the global order.",
+    "zh": "从页脚移除重复的订阅、GitHub 与语言导航，并按全站顺序只保留 About、Privacy、Terms、Project。"
   },
   "features": {
     "en": [
-      "Japanese, Korean, Spanish, French, German, Russian, Italian, Portuguese, Arabic, and Hindi open their own final pages.",
-      "The public home, header, account entry, footer, document language and metadata follow the selected language."
+      "Keep interface-language switching in the header only.",
+      "Expose exactly four localized footer links in the order About, Privacy, Terms, Project."
     ],
     "zh": [
-      "日语、韩语、西班牙语、法语、德语、俄语、意大利语、葡萄牙语、阿拉伯语和印地语打开各自最终页面。",
-      "公共首页、页眉、账户入口、页脚、文档语言及元数据跟随所选语言。"
+      "界面语言切换仅保留在页眉。",
+      "页脚严格按 About、Privacy、Terms、Project 顺序显示四个本地化链接。"
     ]
   },
   "affected": {
