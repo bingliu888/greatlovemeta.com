@@ -3,6 +3,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
+import { LanguageSync } from "../../components/LanguageMemory";
+import { homeHeroTitles, interfaceText, isSiteLanguage, safeSiteLanguage, siteLanguages, translateInterface } from "../../lib/site-locale";
 
 const content = {
   en: {
@@ -10,7 +12,7 @@ const content = {
     announcement: "GreatLove AI Agent and RWA rewards are live.",
     readNews: "Read News",
     eyebrow: "Welcome to RWA · GreatLove Metaverse",
-    title: <>Welcome to RWA.<br />GreatLove Metaverse.</>,
+    title: ["Welcome to RWA.", "GreatLove Metaverse."],
     lead: "AI + DeFi + SocialFi + GameFi in one bilingual ecosystem connecting community, blockchain, real-world assets, NFTs and practical digital experiences.",
     start: "Join password-free",
     markers: ["AI-powered", "RWA connected", "Community governed"],
@@ -97,7 +99,7 @@ const content = {
     announcement: "大爱 AI 智能体与 RWA 奖励已上线。",
     readNews: "查看新闻",
     eyebrow: "RWA · AI · 社区",
-    title: <>欢迎来到大爱元宇宙。</>,
+    title: ["欢迎来到大爱元宇宙。"],
     lead: "AI + DeFi + SocialFi + GameFi，在中英双语生态中连接社区、区块链、现实资产、NFT 与实用数字体验。",
     start: "免密码加入",
     markers: ["AI 智能驱动", "连接现实资产", "社区共同治理"],
@@ -183,22 +185,24 @@ const content = {
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  const safeLang = lang === "zh" ? "zh" : "en";
-  return { title: { absolute: content[safeLang].metaTitle }, alternates: { languages: { en: "/en", "zh-CN": "/zh" } } };
+  const language=safeSiteLanguage(lang); const t=language==="zh"?content.zh:language==="en"?content.en:translateInterface(content.en,language);
+  return { title: { absolute: t.metaTitle }, alternates: { languages: Object.fromEntries(siteLanguages.map(([code])=>[code,`/${code}`])) } };
 }
 
 export default async function LanguageHome({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
-  if (lang !== "en" && lang !== "zh") redirect("/");
-  const t = content[lang];
+  if (!isSiteLanguage(lang)) redirect("/");
+  const t = lang === "zh" ? content.zh : lang === "en" ? content.en : translateInterface(content.en,lang);
+  const heroTitle=homeHeroTitles[lang];
   return <main>
+    <LanguageSync lang={lang}/>
     <div className="hero-shell">
       <a className="glm-source-announcement" href={`/${lang}/news`}><span>{t.announcement}</span><b>{t.readNews} →</b></a>
       <SiteHeader lang={lang}/>
       <section className="hero glm-welcome-hero" id="welcome" aria-labelledby="glm-welcome-title">
         <div className="hero-copy">
           <p className="eyebrow">{t.eyebrow}</p>
-          <h1 id="glm-welcome-title">{t.title}</h1>
+          <h1 id="glm-welcome-title">{heroTitle.map((line,index)=><span key={line}>{index ? <br/> : null}{line}</span>)}</h1>
           <p className="hero-lead">{t.lead}</p>
           <div className="hero-actions"><Link className="primary-button" href={`/${lang}/auth/login`}>{t.start}<span>→</span></Link></div>
           <p className="glm-resource-kicker">{t.resourceKicker}</p>
@@ -225,8 +229,8 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     <section className="glm-access-section">
       <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.accessKicker}</p><h2>{t.accessTitle}</h2><p>{t.accessBody}</p></div>
       <div className="glm-access-grid glm-membership-grid">
-        <a className="glm-access-card featured" href={`/${lang}/community`}><small>{lang === "zh" ? "社区" : "COMMUNITY"}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
-        <a className="glm-access-card" href={`/${lang}/members`}><small>{lang === "zh" ? "会员" : "MEMBERS"}</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
+        <a className="glm-access-card featured" href={`/${lang}/community`}><small>{interfaceText(lang,"COMMUNITY","社区")}</small><h3>{t.accessCommunityTitle}</h3><p>{t.accessCommunityBody}</p><b>{t.accessCommunityCta} →</b></a>
+        <a className="glm-access-card" href={`/${lang}/members`}><small>{interfaceText(lang,"MEMBERS","会员")}</small><h3>{t.officialCommunityTitle}</h3><p>{t.officialCommunityBody}</p><b>{t.officialCommunityCta} →</b></a>
       </div>
     </section>
 
@@ -245,13 +249,13 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
     <section className="glm-access-section glm-swap-section">
       <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.swapKicker}</p><h2>{t.swapTitle}</h2><p>{t.swapBody}</p></div>
       <div className="glm-access-grid glm-swap-grid">
-        {t.swaps.map(([label,href]) => <a className="glm-swap-card" href={href} key={label}>{label}</a>)}
+        {t.swaps.map(([label,href]) => <a className="glm-swap-card" href={href.replace(/^\/en/,`/${lang}`)} key={label}>{label}</a>)}
       </div>
     </section>
 
     <section className="glm-rwa-section" id="collections">
       <div className="section-heading" data-content-group="heading-description" data-layout-fill><p className="section-kicker">{t.rwaKicker}</p><h2>{t.rwaTitle}</h2><p>{t.rwaBody}</p></div>
-      <div className="glm-rwa-grid glm-rwa-visible">{t.rwaCards.map(([title,label,body,image,href]) => <a href={href} key={title}><img src={image} alt=""/><div><small>{label}</small><h3>{title}</h3><p>{body}</p><b>{lang === "zh" ? "了解更多" : "Learn more"} →</b></div></a>)}</div>
+      <div className="glm-rwa-grid glm-rwa-visible">{t.rwaCards.map(([title,label,body,image,href]) => <a href={href.replace(/^\/en/,`/${lang}`)} key={title}><img src={image} alt=""/><div><small>{label}</small><h3>{title}</h3><p>{body}</p><b>{interfaceText(lang,"Learn more","了解更多")} →</b></div></a>)}</div>
     </section>
 
     <section className="glm-partners-section"><div><p className="section-kicker">{t.partnersKicker}</p><h2>{t.partnersTitle}</h2><p>{t.partnersBody}</p></div><div className="glm-partner-grid">{t.partnerLabels.map((partner) => <span key={partner}>{partner}</span>)}</div></section>
@@ -262,9 +266,9 @@ export default async function LanguageHome({ params }: { params: Promise<{ lang:
 
     <section className="members-home-section"><div className="members-home-card"><div><p className="section-kicker">{t.membersKicker}</p><h2>{t.membersTitle}</h2><p>{t.membersBody}</p><a className="primary-button" href={`/${lang}/members`}>{t.membersCta}<span>→</span></a></div><div className="members-home-visual" aria-hidden="true"><span>AI</span><span>RWA</span><span>GLC</span><span>∞</span></div></div></section>
 
-    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{lang === "zh" ? "AI 学习" : "AI learning"} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{lang === "zh" ? "AI 智能体操作系统" : "AI Agent OS"} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{lang === "zh" ? "集体洞察" : "Collective insight"} →</span></a><a href={`https://greatlove.art/${lang}`}><b>GreatLove.Art</b><span>{lang === "zh" ? "大爱艺术世界" : "GreatLove art community"} →</span></a></div></section>
+    <section className="glm-ecosystem"><div><p className="section-kicker">{t.ecosystemKicker}</p><h2>{t.ecosystemTitle}</h2><p>{t.ecosystemBody}</p></div><div className="glm-app-grid"><a href="https://bingacademy.com"><b>BingAcademy</b><span>{interfaceText(lang,"AI learning","AI 学习")} →</span></a><a href="https://myclaw.one"><b>MyClaw</b><span>{interfaceText(lang,"AI Agent OS","AI 智能体操作系统")} →</span></a><a href="https://whatsreal.com"><b>WhatsReal</b><span>{interfaceText(lang,"Collective insight","集体洞察")} →</span></a><a href={`https://greatlove.art/${lang}`}><b>GreatLove.Art</b><span>{interfaceText(lang,"GreatLove art community","大爱艺术世界")} →</span></a></div></section>
 
-    <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a><Link data-testid="home-community-classes" className="secondary-button" href={`/${lang}/classes`}>{lang === "zh" ? "进入课程" : "Enter Courses"} →</Link><Link className="secondary-button" href={`/${lang}/classes?view=mine`}>{lang === "zh" ? "我的课程" : "My Courses"} →</Link></div><div className="four-seats gc-network" aria-hidden="true"><span>{lang === "zh" ? "成员" : "MEMBERS"}</span><span>{lang === "zh" ? "助手" : "GURU"}</span><strong>{lang === "zh" ? "您" : "YOU"}</strong><span>{lang === "zh" ? "聊天" : "CHAT"}</span><span>{lang === "zh" ? "共建" : "BUILD"}</span></div></div></section>
+    <section className="community-section"><div className="community-card"><div><p className="section-kicker">{t.communityKicker}</p><h2>{t.communityTitle}</h2><p>{t.communityBody}</p><a className="primary-button" href={`/${lang}/community`}>{t.communityCta}<span>→</span></a><Link data-testid="home-community-classes" className="secondary-button" href={`/${lang}/classes`}>{interfaceText(lang,"Enter Courses","进入课程")} →</Link><Link className="secondary-button" href={`/${lang}/classes?view=mine`}>{interfaceText(lang,"My Courses","我的课程")} →</Link></div><div className="four-seats gc-network" aria-hidden="true"><span>{interfaceText(lang,"MEMBERS","成员")}</span><span>{interfaceText(lang,"GURU","助手")}</span><strong>{interfaceText(lang,"YOU","您")}</strong><span>{interfaceText(lang,"CHAT","聊天")}</span><span>{interfaceText(lang,"BUILD","共建")}</span></div></div></section>
     <SiteFooter lang={lang}/>
   </main>;
 }

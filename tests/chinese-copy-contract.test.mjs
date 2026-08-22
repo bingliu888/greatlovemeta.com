@@ -94,6 +94,7 @@ test("Chinese UI copy contains no avoidable English interface phrases", () => {
 
   for (const file of files) {
     if (file.includes("/app/api/")) continue;
+    if (file.endsWith(".generated.ts")) continue;
     const source = readFileSync(file, "utf8");
     for (const match of quotedStrings(source)) {
       const value = match[1];

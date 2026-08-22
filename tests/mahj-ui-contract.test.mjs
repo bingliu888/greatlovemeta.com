@@ -5,10 +5,11 @@ import test from "node:test";
 const read = (path) => readFileSync(new URL(`../${path}`, import.meta.url), "utf8");
 
 test("Chinese shared chrome localizes navigation and assistant accessibility labels", () => {
-  assert.match(read("components/LanguageMemory.tsx"), /"切换网站语言为英文"/);
-  assert.match(read("components/SiteHeader.tsx"), /"主要导航"/);
-  assert.match(read("components/SiteFooter.tsx"), /"页脚导航"/);
-  assert.match(read("components/FloatingAssistant.tsx"), /"打开智能助手"/);
+  const locale=read("lib/site-locale.ts");
+  assert.match(read("components/LanguageMemory.tsx"), /interfaceText\(lang,"Switch website language","切换网站语言"\)/);
+  assert.match(locale, /"Primary navigation","主导航"/);
+  assert.match(locale, /"Footer navigation","页脚导航"/);
+  assert.match(locale, /"Open AI assistant","打开智能助手"/);
 });
 
 test("all primary GreatLoveMeta surfaces render the shared public header once", () => {

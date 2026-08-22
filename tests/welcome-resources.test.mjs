@@ -15,7 +15,8 @@ const chineseWhitepaperUrl = new URL(
 test("homepage exposes the GreatLove welcome resources", async () => {
   const source = await readFile(homeSourceUrl, "utf8");
 
-  assert.match(source, /Welcome to RWA\.<br \/>GreatLove Metaverse\./);
+  assert.match(source, /homeHeroTitles/);
+  assert.match(source, /\["Welcome to RWA\.", "GreatLove Metaverse\."\]/);
   assert.match(source, /GreatLove AI Agent and RWA rewards are live\./);
   assert.match(
     source,

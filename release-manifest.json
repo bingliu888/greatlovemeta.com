@@ -1,71 +1,69 @@
 {
   "schemaVersion": 1,
-  "releaseId": "language-menu-width-20260821",
+  "releaseId": "greatlovemeta-true-twelve-language-home-v1",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Fix the iPad and desktop language menu",
-    "zh": "修复 iPad 与桌面语言菜单"
+    "en": "Serve real twelve-language GreatLoveMeta pages",
+    "zh": "发布真实十二语言大爱元宇宙页面"
   },
   "purpose": {
-    "en": "Prevent the GreatLoveMeta language dropdown from collapsing to its trigger width on iPad and desktop Safari while preserving site routing and branding.",
-    "zh": "防止 GreatLoveMeta 的语言下拉菜单在 iPad 与桌面 Safari 中被压缩为触发按钮宽度，同时保留本站路由与品牌。"
+    "en": "Replace the non-Chinese-to-English fallback with real locale routes and statically translated public content.",
+    "zh": "移除非中文统一回退英文的问题，改为真实语言路由与静态翻译公共内容。"
   },
   "features": {
     "en": [
-      "Render the twelve-language desktop dropdown as a readable 330-pixel two-column overlay.",
-      "Keep the overlay bounded by the viewport and vertically scrollable on shorter screens."
+      "Japanese, Korean, Spanish, French, German, Russian, Italian, Portuguese, Arabic, and Hindi open their own final pages.",
+      "The public home, header, account entry, footer, document language and metadata follow the selected language."
     ],
     "zh": [
-      "将含十二种语言的桌面下拉菜单呈现为可读的 330 像素双栏浮层。",
-      "使浮层始终受视口边界约束，并在较矮屏幕上支持纵向滚动。"
+      "日语、韩语、西班牙语、法语、德语、俄语、意大利语、葡萄牙语、阿拉伯语和印地语打开各自最终页面。",
+      "公共首页、页眉、账户入口、页脚、文档语言及元数据跟随所选语言。"
     ]
   },
   "affected": {
     "en": [
-      "Shared public header language menu on localized public and member routes.",
+      "Public home language selector, content, shell, metadata, and saved-language redirect.",
       "Deployment checks and Project release history."
     ],
     "zh": [
-      "本地化公共页面及会员路由所用的共享页头语言菜单。",
+      "公共首页语言选择器、内容、外壳、元数据和语言记忆跳转。",
       "部署检查与项目发布历史。"
     ]
   },
   "changes": {
     "en": [
-      "Override the generic container width cap for the absolute-positioned language overlay.",
-      "Add regression, production-asset, and exact Project-evidence checks for this release."
+      "Use twelve true locale path segments and build-time static translation dictionaries with no runtime translation requests.",
+      "Keep GreatLoveMeta branding, links, independent data, and cloud resources intact."
     ],
     "zh": [
-      "为绝对定位的语言浮层覆盖通用容器宽度上限。",
-      "为本次发布加入回归、生产资源与精确项目证据检查。"
+      "使用十二个真实语言路径和构建期静态翻译词典，不发起运行时翻译请求。",
+      "保留大爱元宇宙品牌、链接、独立数据及云资源。"
     ]
   },
   "validation": {
     "en": [
-      "Language-menu layout regression and shared portfolio gates pass.",
-      "Production build and the complete repository test suite pass before publication.",
-      "Production serves the corrected CSS asset and Project evidence for the exact commit."
+      "Complete repository tests, production build, artifact and shared gates pass before publication.",
+      "Production Chrome click-through checks verify Japanese, Korean, and Spanish final pages, URL, HTML language, content, shell, selector count, and overflow."
     ],
     "zh": [
-      "语言菜单布局回归与共享组合规门禁通过。",
-      "发布前通过生产构建和完整仓库测试套件。",
-      "生产环境提供修正后的 CSS 资源及精确 commit 的项目证据。"
+      "发布前通过完整仓库测试、生产构建、制品及共享门禁。",
+      "生产 Chrome 实际点击检查日语、韩语和西班牙语最终页面、URL、HTML 语言、内容、外壳、语言数量和溢出。"
     ]
   },
   "deferred": {
     "en": [
-      "Realtime audio/video tests are intentionally not started because this release changes only shared-header layout and release tooling."
+      "Member-created ecosystem records remain in their original source language; this release localizes the public interface without rewriting user data."
     ],
     "zh": [
-      "本次发布只修改共享页头布局与发布工具，因此明确不启动实时音视频测试。"
+      "会员创建的生态记录仍保留原始源语言；本次本地化公共界面，不改写用户数据。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Preserve GreatLoveMeta branding, locale routes, independent data, and cloud resources while adopting the canonical overlay containment fix."
+      "Preserve GreatLoveMeta branding, ecosystem destinations, independent data, and cloud resources while adopting true locale routing."
     ],
     "zh": [
-      "采用规范浮层容纳修复时，保留 GreatLoveMeta 的品牌、本地化路由、独立数据与云资源。"
+      "采用真实语言路由时，保留 GreatLoveMeta 的品牌、生态目的地、独立数据与云资源。"
     ]
   }
 }
