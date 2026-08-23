@@ -3,14 +3,14 @@
     if (lang === 'en' || lang === 'zh') return;
 
     const source = {
-        corp: ['INTERSTELLAR MINING CORP.'],
+        corp: ['INTERSTELLAR MINING CORP.', 'Interstellar Mining Corp.'],
         brief1: ['Year 3047, Deep-Space Mining Sector Seven...', '公元 3047 年，深空第七矿区...'],
         brief2: ["Guide the mining ship's claw system to capture drifting minerals.", '你操控采矿飞船的钩爪系统，精准捕获漂浮矿物。'],
         brief3: ['Mission: take 3 shots. Hits earn rewards; a miss earns 0.', '任务：每局发射 3 次。命中获得奖励，未命中为 0。'],
         available: ['Available shots', '可用抓取次数'],
         autoStart: ['Game starts automatically in 6 seconds', '6 秒后自动进入游戏'],
         minerId: ['矿工编号'],
-        total: ['TOTAL REWARDS 总奖励', 'Total rewards', '总奖励'],
+        total: ['TOTAL REWARDS 总奖励', 'Total Rewards 总奖励', 'Total rewards', '总奖励'],
         remaining: ['剩余抓取次数', 'Spins left', '剩余次数'],
         shoot: ['点击画面发射钩爪！瞄准矿物！'],
         log: ['采集记录'],
@@ -45,6 +45,22 @@
     if (!values) return;
     const translations = new Map();
     keys.forEach((key, index) => source[key].forEach((text) => translations.set(text, values[index])));
+    const footerCopy = {
+        es: ['© 2026 RUEDA DE LA SUERTE GLC •', '• Fortuna en cada giro'],
+        ja: ['© 2026 GLC ラッキーホイール •', '• 回すたびに幸運を'],
+        ko: ['© 2026 GLC 행운의 룰렛 •', '• 돌릴 때마다 행운을'],
+        fr: ['© 2026 ROUE DE LA CHANCE GLC •', '• La chance à chaque tour'],
+        de: ['© 2026 GLC GLÜCKSRAD •', '• Glück bei jeder Drehung'],
+        ru: ['© 2026 КОЛЕСО УДАЧИ GLC •', '• Удача в каждом вращении'],
+        it: ['© 2026 RUOTA DELLA FORTUNA GLC •', '• Fortuna a ogni giro'],
+        pt: ['© 2026 RODA DA SORTE GLC •', '• Sorte em cada giro'],
+        ar: ['© 2026 عجلة الحظ GLC •', '• الحظ مع كل دورة'],
+        hi: ['© 2026 GLC भाग्य चक्र •', '• हर घुमाव में सौभाग्य'],
+    }[lang];
+    if (footerCopy) {
+        translations.set('© 2026 GLC Lucky Wheel •', footerCopy[0]);
+        translations.set('• Fortune in every spin', footerCopy[1]);
+    }
 
     function translateText(node) {
         const original = node.nodeValue || '';
