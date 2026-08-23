@@ -22,7 +22,7 @@ function render(value: string, dictionary: Record<string, string>) {
 
 function localize(root: Node, dictionary: Record<string, string>) {
   const base = root instanceof Document ? root.documentElement : root;
-  if (base instanceof Element && base.closest("script,style,textarea,[data-no-auto-localize],[data-no-translate]")) return;
+  if (base instanceof Element && base.closest("script,style,[data-no-auto-localize],[data-no-translate]")) return;
   const walker = document.createTreeWalker(base, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
   let node: Node | null = base;
   while (node) {

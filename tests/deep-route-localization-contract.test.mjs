@@ -25,4 +25,7 @@ test("the locale runtime preserves native language names and rewrites internal r
   for (const name of ["中文", "English", "Español", "日本語", "한국어", "Français", "Deutsch", "Русский", "Italiano", "Português", "العربية", "हिन्दी"]) assert.match(runtime, new RegExp(name));
   assert.match(runtime, /rewrite\(document, locale\)/);
   assert.match(runtime, /homeInterfaceTranslations\[locale\]/);
+  assert.match(runtime, /parentElement\?\.closest\("script,style,textarea,\[data-no-auto-localize\],\[data-no-translate\]"\)/);
+  assert.doesNotMatch(runtime, /base\.closest\("script,style,textarea,/);
+  assert.match(runtime, /\["aria-label", "title", "placeholder", "alt"\]/);
 });
