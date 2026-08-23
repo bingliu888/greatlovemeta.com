@@ -2,14 +2,23 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "../../../components/SiteHeader";
 import { getSessionUser } from "../../../lib/auth";
-import { safeSiteLanguage } from "../../../lib/site-locale";
+import { interfaceText, safeSiteLanguage, type SiteLanguage } from "../../../lib/site-locale";
 
 export const dynamic = "force-dynamic";
+
+const modeLabels: Record<SiteLanguage, { game: string; trial: string }> = {
+  zh: { game: "正式游戏", trial: "试玩" }, en: { game: "game", trial: "trial" },
+  es: { game: "juego", trial: "prueba" }, ja: { game: "ゲーム", trial: "体験版" },
+  ko: { game: "게임", trial: "체험판" }, fr: { game: "jeu", trial: "essai" },
+  de: { game: "Spiel", trial: "Testversion" }, ru: { game: "игра", trial: "пробная версия" },
+  it: { game: "gioco", trial: "prova" }, pt: { game: "jogo", trial: "teste" },
+  ar: { game: "لعبة", trial: "نسخة تجريبية" }, hi: { game: "खेल", trial: "परीक्षण" },
+};
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang: raw } = await params;
   const lang = safeSiteLanguage(raw);
-  return { title: lang === "zh" ? "幸运轮盘" : "Lucky Wheel" };
+  return { title: interfaceText(lang, "Lucky Wheel", "幸运轮盘") };
 }
 
 export default async function LuckyWheelPage({
@@ -31,10 +40,8 @@ export default async function LuckyWheelPage({
     }
   }
 
-  const gameTitle = contentLang === "zh" ? "幸运轮盘" : "Lucky Wheel";
-  const frameTitle = contentLang === "zh"
-    ? `${gameTitle}${mode === "play" ? "正式游戏" : "试玩"}`
-    : `${gameTitle} ${mode === "play" ? "game" : "trial"}`;
+  const gameTitle = interfaceText(lang, "Lucky Wheel", "幸运轮盘");
+  const frameTitle = `${gameTitle} ${modeLabels[lang][mode === "play" ? "game" : "trial"]}`;
   const frameSrc = `/games/monopoly.html?mode=${mode}&lang=${contentLang}`;
 
   return <>
