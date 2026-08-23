@@ -1,3 +1,3 @@
-import { notFound } from "next/navigation";
 import { LegalPage } from "../../../components/LegalPage";
-export default async function TermsPage({params}:{params:Promise<{lang:string}>}){const{lang}=await params;if(lang!=="en"&&lang!=="zh")notFound();return <LegalPage lang={lang} kind="terms"/>}
+import { safeSiteLanguage } from "../../../lib/site-locale";
+export default async function TermsPage({params}:{params:Promise<{lang:string}>}){const{lang:raw}=await params;return <LegalPage lang={safeSiteLanguage(raw)} kind="terms"/>}

@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import { redirect, notFound } from "next/navigation";
+import { redirect } from "next/navigation";
 import { LogoutButton } from "../../../components/LogoutButton";
 import { GameDailyLog } from "../../../components/GameDailyLog";
 import { MembershipPanel } from "../../../components/MembershipPanel";
@@ -10,6 +10,7 @@ import { isAdminUser } from "../../../lib/admin-access";
 import { SiteHeader } from "../../../components/SiteHeader";
 import { SiteFooter } from "../../../components/SiteFooter";
 import "./dashboard-tuneup.css";
+import { safeSiteLanguage } from "../../../lib/site-locale";
 
 export const dynamic = "force-dynamic";
 
@@ -49,12 +50,12 @@ const copy = {
 };
 
 export default async function Dashboard({ params }: { params: Promise<{ lang: string }> }) {
-  const { lang } = await params;
-  if (lang !== "en" && lang !== "zh") notFound();
+  const { lang: raw } = await params;
+  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
   const requestHeaders = await headers();
   const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: requestHeaders.get("cookie") ?? "" } }));
   if (!user) redirect(`/${lang}/auth/login`);
-  const t = copy[lang];
+  const t = copy[contentLang];
   const canCreateClasses=await isAdminUser(user);
   return (
     <main className="dashboard-page">
@@ -66,11 +67,11 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
           <div><p className="section-kicker">{lang === "zh" ? "语音快捷入口" : "VOICE SHORTCUT"}</p><h2 id="dashboard-audio-title">{t.audioTitle}</h2><p>{t.audioBody}</p></div>
           <Link className="dashboard-audio-button" href={`/${lang}/assistant`}>{t.audioTitle}<span aria-hidden="true">→</span></Link>
         </section>
-        <MembershipPanel lang={lang} />
-        <GameDailyLog lang={lang} compact />
+        <MembershipPanel lang={contentLang} />
+        <GameDailyLog lang={contentLang} compact />
         <div className="dashboard-grid">
           <section className="progress-card"><div className="card-top"><span>{t.progress}</span><strong>20%</strong></div><div className="progress-track"><i style={{ width: "20%" }} /></div><div className="lesson-preview"><span>ID</span><div><h2>{t.next}</h2><p>{t.nextBody}</p><a className="primary-button" href={`/${lang}/account`}>{t.action} <span>→</span></a></div></div></section>
-          <aside className="account-card" id="account"><h2>{t.account}</h2><dl><div><dt>{lang === "zh" ? "邮箱" : "Email"}</dt><dd>{user.email}</dd></div><div><dt>{t.language}</dt><dd>{lang === "zh" ? "中文" : "English"}</dd></div></dl><TextSizeControl lang={lang} /><LogoutButton lang={lang} label={t.signOut} /></aside>
+          <aside className="account-card" id="account"><h2>{t.account}</h2><dl><div><dt>{lang === "zh" ? "邮箱" : "Email"}</dt><dd>{user.email}</dd></div><div><dt>{t.language}</dt><dd>{lang === "zh" ? "中文" : "English"}</dd></div></dl><TextSizeControl lang={contentLang} /><LogoutButton lang={lang} label={t.signOut} /></aside>
           <section className="coming-card"><div className="mini-table gc-mini-network" aria-hidden="true"><span>ID</span><span>∞</span><i>GC</i><span>AI</span><span>WE</span></div><div><p className="section-kicker">{lang === "zh" ? "即将推出" : "COMING NEXT"}</p><h2>{t.coming}</h2><p>{t.comingBody}</p></div></section>
         </div>
       </div>

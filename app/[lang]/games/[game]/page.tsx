@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { SiteHeader } from "../../../../components/SiteHeader";
 import { getSessionUser } from "../../../../lib/auth";
+import { safeSiteLanguage } from "../../../../lib/site-locale";
 
 export const dynamic = "force-dynamic";
 
@@ -13,9 +14,10 @@ const games = {
 type GameKey = keyof typeof games;
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string; game: string }> }): Promise<Metadata> {
-  const { lang, game } = await params;
-  if ((lang !== "en" && lang !== "zh") || !(game in games)) return {};
-  return { title: `${games[game as GameKey][lang]} Games` };
+  const { lang: raw, game } = await params;
+  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
+  if (!(game in games)) return {};
+  return { title: `${games[game as GameKey][contentLang]} Games` };
 }
 
 export default async function GamePage({
@@ -25,9 +27,10 @@ export default async function GamePage({
   params: Promise<{ lang: string; game: string }>;
   searchParams: Promise<{ mode?: string }>;
 }) {
-  const { lang, game } = await params;
+  const { lang: raw, game } = await params;
+  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
   const query = await searchParams;
-  if ((lang !== "en" && lang !== "zh") || !(game in games)) notFound();
+  if (!(game in games)) notFound();
   const mode = query.mode === "play" ? "play" : "trial";
   if (game === "monopoly") redirect(`/${lang}/lucky-wheel?mode=${mode}`);
   if (mode === "play") {
@@ -38,11 +41,11 @@ export default async function GamePage({
     }
   }
 
-  const gameTitle = games[game as GameKey][lang];
-  const frameTitle = lang === "zh"
+  const gameTitle = games[game as GameKey][contentLang];
+  const frameTitle = contentLang === "zh"
     ? `${gameTitle}${mode === "play" ? "正式游戏" : "试玩"}`
     : `${gameTitle} ${mode === "play" ? "game" : "trial"}`;
-  const frameSrc = `/games/${game}.html?mode=${mode}&lang=${lang}`;
+  const frameSrc = `/games/${game}.html?mode=${mode}&lang=${contentLang}`;
 
   return <>
     <SiteHeader lang={lang}/>

@@ -3,13 +3,15 @@ import { SiteHeader } from "./SiteHeader";
 import { SiteFooter } from "./SiteFooter";
 import { projectTasks } from "../lib/project-status";
 import { getProjectRuntime } from "../lib/project-runtime";
+import type { SiteLanguage } from "../lib/site-locale";
 
-export async function ProjectDashboard({ lang, month }: { lang: "en" | "zh"; month?: string }) {
+export async function ProjectDashboard({ lang, month }: { lang: SiteLanguage; month?: string }) {
   const runtime = await getProjectRuntime();
   const projectReports = runtime.reports;
   const latest = projectReports.at(-1)!;
   const latestBuild = runtime.builds.at(-1)!;
   const zh = lang === "zh";
+  const contentLang = zh ? "zh" : "en";
   const done = projectTasks.filter(task => task.status === "done").length;
   const blocked = projectTasks.filter(task => task.status === "blocked").length;
   const reports = new Map(projectReports.map(report => [report.date, report]));
@@ -47,7 +49,7 @@ export async function ProjectDashboard({ lang, month }: { lang: "en" | "zh"; mon
     <section className="gg-kpis"><article><b>{projectTasks.length}</b><span>{zh ? "任务总数" : "Total tasks"}</span></article><article><b>{done}</b><span>{zh ? "已完成" : "Completed"}</span></article><article><b>{projectTasks.length - done - blocked}</b><span>{zh ? "已计划" : "Planned"}</span></article><article className="risk"><b>{blocked}</b><span>{zh ? "受阻" : "Blocked"}</span></article></section>
     <div className="gg-legend"><span><i className="complete"/>{zh ? "已完成交付" : "Completed delivery"}</span><span><i className="planned"/>{zh ? "计划交付" : "Planned delivery"}</span><span><i className="risk"/>{zh ? "依赖存在风险" : "Dependency at risk"}</span></div>
     <div className="gg-calendar-stack">{calendar(Number(selectedMonth.slice(0, 4)), Number(selectedMonth.slice(5, 7)))}</div>
-    <section className="gg-history gg-build-history"><header><p className="section-kicker">{zh ? "构建历史" : "BUILD HISTORY"}</p><h2>{zh ? "每次部署的完成内容" : "What changed in every deployment"}</h2></header>{[...runtime.builds].reverse().map(build => <article key={build.version}><time>v{build.version}</time><div><h3>{build.title[lang]}</h3><p>{build.date} · {zh ? `完成 ${build.completed[lang].length} 项` : `${build.completed[lang].length} completed items`}</p></div><Link href={`/${lang}/project/build/${build.version}`}>{zh ? "查看报告" : "View report"} →</Link></article>)}</section>
-    <section className="gg-history"><header><p className="section-kicker">{zh ? "每日检查点" : "DAILY CHECKPOINTS"}</p><h2>{zh ? "每日进度与回滚记录" : "Daily reports and rollback trail"}</h2></header>{[...projectReports].reverse().map(report => <article key={report.date}><time>{report.date}</time><div><h3>{report.title[lang]}</h3><p>{zh ? `已完成 ${report.completed} 项里程碑 · 已记录回滚点` : `${report.completed} milestones completed · rollback recorded`}</p></div><Link href={`/${lang}/project/report/${report.date}`}>{report.beta[lang]} →</Link></article>)}</section>
+    <section className="gg-history gg-build-history"><header><p className="section-kicker">{zh ? "构建历史" : "BUILD HISTORY"}</p><h2>{zh ? "每次部署的完成内容" : "What changed in every deployment"}</h2></header>{[...runtime.builds].reverse().map(build => <article key={build.version}><time>v{build.version}</time><div><h3>{build.title[contentLang]}</h3><p>{build.date} · {zh ? `完成 ${build.completed[contentLang].length} 项` : `${build.completed[contentLang].length} completed items`}</p></div><Link href={`/${lang}/project/build/${build.version}`}>{zh ? "查看报告" : "View report"} →</Link></article>)}</section>
+    <section className="gg-history"><header><p className="section-kicker">{zh ? "每日检查点" : "DAILY CHECKPOINTS"}</p><h2>{zh ? "每日进度与回滚记录" : "Daily reports and rollback trail"}</h2></header>{[...projectReports].reverse().map(report => <article key={report.date}><time>{report.date}</time><div><h3>{report.title[contentLang]}</h3><p>{zh ? `已完成 ${report.completed} 项里程碑 · 已记录回滚点` : `${report.completed} milestones completed · rollback recorded`}</p></div><Link href={`/${lang}/project/report/${report.date}`}>{report.beta[contentLang]} →</Link></article>)}</section>
   </div><SiteFooter lang={lang}/></main>;
 }

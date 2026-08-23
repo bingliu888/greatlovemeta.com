@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
 import { SiteFooter } from "../../../../components/SiteFooter";
 import { SiteHeader } from "../../../../components/SiteHeader";
 import { SwapAssetLoader } from "../../../../components/SwapAssetLoader";
+import { safeSiteLanguage } from "../../../../lib/site-locale";
 
 const copy = {
   en: {
@@ -70,9 +70,9 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 }
 
 export default async function StableSwapPage({ params }: { params: Promise<{ lang: string }> }) {
-  const { lang } = await params;
-  if (lang !== "en" && lang !== "zh") notFound();
-  const t = copy[lang];
+  const { lang: raw } = await params;
+  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
+  const t = copy[contentLang];
 
   return <main className="local-swap-page">
     <SiteHeader lang={lang}/>

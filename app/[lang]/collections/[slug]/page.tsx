@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "../../../../components/SiteFooter";
 import { SiteHeader } from "../../../../components/SiteHeader";
+import { safeSiteLanguage } from "../../../../lib/site-locale";
 
 type Language = "en" | "zh";
 
@@ -174,10 +175,6 @@ type CollectionSlug = keyof typeof collections;
 
 const relatedOrder: readonly CollectionSlug[] = ["eight-horses", "rwa-nft", "professional"];
 
-function isLanguage(value: string): value is Language {
-  return value === "en" || value === "zh";
-}
-
 function isCollectionSlug(value: string): value is CollectionSlug {
   return value in collections;
 }
@@ -187,9 +184,10 @@ export async function generateMetadata({
 }: {
   params: Promise<{ lang: string; slug: string }>;
 }): Promise<Metadata> {
-  const { lang, slug } = await params;
-  if (!isLanguage(lang) || !isCollectionSlug(slug)) return {};
-  const copy = collections[slug][lang];
+  const { lang: raw, slug } = await params;
+  const lang = safeSiteLanguage(raw), contentLang: Language = lang === "zh" ? "zh" : "en";
+  if (!isCollectionSlug(slug)) return {};
+  const copy = collections[slug][contentLang];
   return {
     title: { absolute: `${copy.title} | ${lang === "zh" ? "大爱元宇宙" : "GreatLoveMeta.com"}` },
     description: copy.summary,
@@ -207,11 +205,12 @@ export default async function CollectionPage({
 }: {
   params: Promise<{ lang: string; slug: string }>;
 }) {
-  const { lang, slug } = await params;
-  if (!isLanguage(lang) || !isCollectionSlug(slug)) notFound();
+  const { lang: raw, slug } = await params;
+  const lang = safeSiteLanguage(raw), contentLang: Language = lang === "zh" ? "zh" : "en";
+  if (!isCollectionSlug(slug)) notFound();
 
   const collection = collections[slug];
-  const copy = collection[lang];
+  const copy = collection[contentLang];
   const related = relatedOrder.filter((item) => item !== slug);
 
   return (

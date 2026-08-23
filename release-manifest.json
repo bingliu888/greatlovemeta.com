@@ -1,61 +1,61 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-twelve-language-auth-shell-v1",
+  "releaseId": "greatlovemeta-complete-twelve-language-deep-routes-v2",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Complete twelve-language authentication and header consistency",
-    "zh": "完成十二语言登录与页眉一致性修复"
+    "en": "Complete twelve-language coverage across public and protected routes",
+    "zh": "完成公开与受保护页面的十二语言覆盖"
   },
   "purpose": {
-    "en": "Remove the English-only authentication fallback and align GreatLoveMeta's language and account controls with the shared SmartClass shell contract.",
-    "zh": "移除登录页回退英文的问题，并按共享 SmartClass 外壳规范统一大爱元宇宙的语言与账户控件。"
+    "en": "Remove the remaining English-only deep-route fallbacks so the selected locale survives navigation through every GreatLoveMeta page family.",
+    "zh": "移除残留的深层页面英文回退，让所选语言贯穿大爱元宇宙的全部页面类型。"
   },
   "features": {
     "en": [
-      "Render the sign-in page and complete email-code form in every one of the twelve selectable interface languages.",
-      "Place the native-language text control before the account icon, use a solid down chevron, and remove the mobile globe icon."
+      "Keep all public, member, course, game, swap, payment, admin, and Project routes on the selected one of twelve locales.",
+      "Translate late-rendered interface text while protecting the twelve native language names from accidental translation."
     ],
     "zh": [
-      "十二种可选界面语言都完整呈现登录页及邮箱验证码表单。",
-      "语言文字控件位于账户图标之前，使用实心下箭头，并移除移动菜单中的地球图标。"
+      "公开、会员、课程、游戏、兑换、支付、管理及 Project 页面均保留所选的十二语言路由。",
+      "翻译后加载的界面文字，同时保护十二个语言母语名称不被错误翻译。"
     ]
   },
   "affected": {
     "en": [
-      "Twelve localized /[lang]/auth/login routes and their authentication controls.",
-      "Desktop and hamburger language controls, deployment checks, and Project release history."
+      "Every app/[lang] page family, shared header and footer, internal links, and protected-page redirects.",
+      "Desktop and hamburger language controls, late client-rendered content, deployment checks, and Project release history."
     ],
     "zh": [
-      "十二个本地化 /[lang]/auth/login 路由及其登录控件。",
-      "桌面与汉堡菜单语言控件、部署检查和项目发布历史。"
+      "全部 app/[lang] 页面类型、共享页眉页脚、内部链接及受保护页面跳转。",
+      "桌面与汉堡菜单语言控件、客户端后加载内容、部署检查和 Project 发布历史。"
     ]
   },
   "changes": {
     "en": [
-      "Add site-owned static authentication copy for all twelve locale paths without runtime translation calls.",
-      "Preserve GreatLoveMeta branding, Clerk flow, independent data, and cloud resources."
+      "Replace two-language route guards with validated twelve-language routing and preserve the actual locale in the shared shell.",
+      "Add a site-local locale runtime and complete static dictionaries for dynamic interface text and same-origin links."
     ],
     "zh": [
-      "为十二个语言路径新增站点自有的静态登录文案，不进行运行时翻译请求。",
-      "保留大爱元宇宙品牌、Clerk 登录流程、独立数据及云资源。"
+      "以十二语言校验替换中英文路由限制，并让共享外壳保留真实语言。",
+      "新增站点本地语言运行层及完整静态词典，处理动态界面文字和站内链接。"
     ]
   },
   "validation": {
     "en": [
-      "Complete repository tests, production build, artifact and shared gates pass before publication.",
-      "Production Chrome click-through checks verify Japanese and Korean sign-in titles, headings, fields, actions, locale URLs, and responsive shell behavior."
+      "Complete repository tests, the deep-route localization contract, production build, artifact and shared gates pass before publication.",
+      "Production Chrome click-through checks cover Japanese and Korean home, sign-in, pricing, legal, editorial, course, game, and protected redirect flows."
     ],
     "zh": [
-      "发布前通过完整仓库测试、生产构建、制品及共享门禁。",
-      "生产 Chrome 实际点击检查日语与韩语登录标题、页面标题、字段、操作、语言 URL 和响应式外壳行为。"
+      "发布前通过完整仓库测试、深层路由语言契约、生产构建、制品及共享门禁。",
+      "生产 Chrome 实际点击覆盖日语与韩语首页、登录、定价、法律、编辑、课程、游戏及受保护页面跳转。"
     ]
   },
   "deferred": {
     "en": [
-      "Clerk-delivered verification email content remains controlled by the site-owned Clerk application; this release localizes the website flow."
+      "User-created course titles, community posts, and other member content remain in their authored language rather than being machine-translated."
     ],
     "zh": [
-      "验证码邮件正文仍由站点自有 Clerk 应用控制；本次发布本地化网站登录流程。"
+      "用户创建的课程标题、社区帖子及其他会员内容保留原始语言，不进行机器翻译。"
     ]
   },
   "siteAdaptations": {

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { LanguageSync } from "../../components/LanguageMemory";
+import { LocaleRuntime } from "../../components/LocaleRuntime";
 import { safeSiteLanguage } from "../../lib/site-locale";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
@@ -18,5 +19,5 @@ export async function generateMetadata({ params }: { params: Promise<{ lang: str
 export default async function LanguageLayout({ children, params }: Readonly<{ children: React.ReactNode; params: Promise<{ lang: string }> }>) {
   const { lang } = await params;
   const safeLanguage = safeSiteLanguage(lang);
-  return <><LanguageSync lang={safeLanguage}/>{children}</>;
+  return <><LanguageSync lang={safeLanguage}/><LocaleRuntime locale={safeLanguage}/>{children}</>;
 }

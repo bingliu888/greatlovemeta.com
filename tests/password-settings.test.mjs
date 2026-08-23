@@ -12,7 +12,7 @@ test("account supports setting and updating a Clerk password", async () => {
   assert.doesNotMatch(form, /currentPassword/);
   assert.match(form, /recent email-code verification/);
   assert.match(form, /newPassword/);
-  assert.match(account, /<PasswordSettings lang=\{lang\}\/>/);
+  assert.match(account, /<PasswordSettings lang=\{contentLang\}\/>/);
   assert.match(menu, /Account \| Set password/);
 });
 

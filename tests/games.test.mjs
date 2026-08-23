@@ -100,10 +100,10 @@ test("game pages keep the shared header and expose a clean Lucky Wheel route", a
 
   assert.equal((gamePage.match(/<SiteHeader\b/g) || []).length, 1);
   assert.equal((luckyWheelPage.match(/<SiteHeader\b/g) || []).length, 1);
-  assert.match(gamePage, /const frameSrc = `\/games\/\$\{game\}\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
+  assert.match(gamePage, /const frameSrc = `\/games\/\$\{game\}\.html\?mode=\$\{mode\}&lang=\$\{contentLang\}`/);
   assert.match(gamePage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(gamePage, /game === "monopoly".*\/lucky-wheel\?mode=/);
-  assert.match(luckyWheelPage, /const frameSrc = `\/games\/monopoly\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
+  assert.match(luckyWheelPage, /const frameSrc = `\/games\/monopoly\.html\?mode=\$\{mode\}&lang=\$\{contentLang\}`/);
   assert.match(luckyWheelPage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(luckyWheelPage, /Lucky Wheel/);
   assert.match(luckyWheelPage, /幸运轮盘/);

@@ -1,8 +1,9 @@
 "use client";
 
 import { useClerk } from "@clerk/nextjs";
+import type { SiteLanguage } from "../lib/site-locale";
 
-export function LogoutButton({ lang, label }: { lang: "en" | "zh"; label: string }) {
+export function LogoutButton({ lang, label }: { lang: SiteLanguage; label: string }) {
   const clerk = useClerk();
 
   async function logout() {
