@@ -1,61 +1,61 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-global-footer-v1",
+  "releaseId": "greatlovemeta-twelve-language-auth-shell-v1",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Adopt the global four-link footer",
-    "zh": "采用全站四链接页脚规范"
+    "en": "Complete twelve-language authentication and header consistency",
+    "zh": "完成十二语言登录与页眉一致性修复"
   },
   "purpose": {
-    "en": "Remove repeated subscription, GitHub, and language navigation from the footer and keep only About, Privacy, Terms, and Project in the global order.",
-    "zh": "从页脚移除重复的订阅、GitHub 与语言导航，并按全站顺序只保留 About、Privacy、Terms、Project。"
+    "en": "Remove the English-only authentication fallback and align GreatLoveMeta's language and account controls with the shared SmartClass shell contract.",
+    "zh": "移除登录页回退英文的问题，并按共享 SmartClass 外壳规范统一大爱元宇宙的语言与账户控件。"
   },
   "features": {
     "en": [
-      "Keep interface-language switching in the header only.",
-      "Expose exactly four localized footer links in the order About, Privacy, Terms, Project."
+      "Render the sign-in page and complete email-code form in every one of the twelve selectable interface languages.",
+      "Place the native-language text control before the account icon, use a solid down chevron, and remove the mobile globe icon."
     ],
     "zh": [
-      "界面语言切换仅保留在页眉。",
-      "页脚严格按 About、Privacy、Terms、Project 顺序显示四个本地化链接。"
+      "十二种可选界面语言都完整呈现登录页及邮箱验证码表单。",
+      "语言文字控件位于账户图标之前，使用实心下箭头，并移除移动菜单中的地球图标。"
     ]
   },
   "affected": {
     "en": [
-      "Public home language selector, content, shell, metadata, and saved-language redirect.",
-      "Deployment checks and Project release history."
+      "Twelve localized /[lang]/auth/login routes and their authentication controls.",
+      "Desktop and hamburger language controls, deployment checks, and Project release history."
     ],
     "zh": [
-      "公共首页语言选择器、内容、外壳、元数据和语言记忆跳转。",
-      "部署检查与项目发布历史。"
+      "十二个本地化 /[lang]/auth/login 路由及其登录控件。",
+      "桌面与汉堡菜单语言控件、部署检查和项目发布历史。"
     ]
   },
   "changes": {
     "en": [
-      "Use twelve true locale path segments and build-time static translation dictionaries with no runtime translation requests.",
-      "Keep GreatLoveMeta branding, links, independent data, and cloud resources intact."
+      "Add site-owned static authentication copy for all twelve locale paths without runtime translation calls.",
+      "Preserve GreatLoveMeta branding, Clerk flow, independent data, and cloud resources."
     ],
     "zh": [
-      "使用十二个真实语言路径和构建期静态翻译词典，不发起运行时翻译请求。",
-      "保留大爱元宇宙品牌、链接、独立数据及云资源。"
+      "为十二个语言路径新增站点自有的静态登录文案，不进行运行时翻译请求。",
+      "保留大爱元宇宙品牌、Clerk 登录流程、独立数据及云资源。"
     ]
   },
   "validation": {
     "en": [
       "Complete repository tests, production build, artifact and shared gates pass before publication.",
-      "Production Chrome click-through checks verify Japanese, Korean, and Spanish final pages, URL, HTML language, content, shell, selector count, and overflow."
+      "Production Chrome click-through checks verify Japanese and Korean sign-in titles, headings, fields, actions, locale URLs, and responsive shell behavior."
     ],
     "zh": [
       "发布前通过完整仓库测试、生产构建、制品及共享门禁。",
-      "生产 Chrome 实际点击检查日语、韩语和西班牙语最终页面、URL、HTML 语言、内容、外壳、语言数量和溢出。"
+      "生产 Chrome 实际点击检查日语与韩语登录标题、页面标题、字段、操作、语言 URL 和响应式外壳行为。"
     ]
   },
   "deferred": {
     "en": [
-      "Member-created ecosystem records remain in their original source language; this release localizes the public interface without rewriting user data."
+      "Clerk-delivered verification email content remains controlled by the site-owned Clerk application; this release localizes the website flow."
     ],
     "zh": [
-      "会员创建的生态记录仍保留原始源语言；本次本地化公共界面，不改写用户数据。"
+      "验证码邮件正文仍由站点自有 Clerk 应用控制；本次发布本地化网站登录流程。"
     ]
   },
   "siteAdaptations": {

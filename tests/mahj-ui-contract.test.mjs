@@ -71,15 +71,16 @@ test("new messages and replies both provide a working bilingual Guru polish acti
 
 test("email-code authentication switches to an explicit verification state", () => {
   const clerk = read("components/ClerkAuthForm.tsx");
+  const localized = read("lib/auth-interface-copy.ts");
   assert.match(clerk, /setStep\("code"\)/);
   assert.match(clerk, /`Code sent to \$\{identifier\}`/);
   assert.match(clerk, /`验证码已发送至 \$\{identifier\}`/);
   assert.match(clerk, /autoComplete="one-time-code"/);
-  assert.match(clerk, /"Verify & continue"/);
-  assert.match(clerk, /"验证并继续"/);
-  assert.match(clerk, /"Use another email"/);
-  assert.match(clerk, /"更换邮箱"/);
-  assert.match(clerk, /step === "code" \? \(zh \? "验证并继续" : "Verify & continue"\)/);
+  assert.match(localized, /verify:"Verify & continue"/);
+  assert.match(localized, /verify:"验证并继续"/);
+  assert.match(localized, /anotherEmail:"Use another email"/);
+  assert.match(localized, /anotherEmail:"更换邮箱"/);
+  assert.match(clerk, /step === "code" \? a\.verify/);
 
   const fallback = read("components/AuthForm.tsx");
   assert.match(fallback, /sent: "Code sent to"/);

@@ -34,10 +34,10 @@ export function SiteHeader({ lang }: { lang: SiteLanguage }) {
       <nav className="desktop-nav" aria-label={shell.primaryNav}>
         <GlobalLinks lang={lang}/>
       </nav>
+      <HeaderLanguageMenu lang={lang}/>
       <div className="header-actions">
         <HeaderAccount lang={lang}/>
       </div>
-      <HeaderLanguageMenu lang={lang}/>
       <button className={`hamburger-button${mobileOpen ? " open" : ""}`} type="button" aria-label={mobileOpen ? shell.closeMenu : shell.openMenu} aria-expanded={mobileOpen} aria-controls="mobile-header-menu" onClick={()=>setMobileOpen(value=>!value)}><span/><span/><span/></button>
       {mobileOpen ? <div className="mobile-header-menu" id="mobile-header-menu"><nav aria-label={shell.primaryNav} onClick={()=>setMobileOpen(false)}><GlobalLinks lang={lang}/></nav><HeaderLanguageMenu lang={lang} mobile onNavigate={()=>setMobileOpen(false)}/><div className="mobile-account"><HeaderAccount lang={lang}/></div></div> : null}
     </header>

@@ -34,7 +34,7 @@ test("names unsupported Clerk requirements instead of showing a generic dead end
 test("verified sign-up completes a session or safely collects a required password", async () => {
   const form = await read("../components/ClerkAuthForm.tsx");
   assert.match(form, /result\.status === "complete" && result\.createdSessionId/);
-  assert.match(form, /resolveSignUpRequirements\(result\.missingFields, lang\)/);
+  assert.match(form, /resolveSignUpRequirements\(result\.missingFields, zh \? "zh" : "en"\)/);
   assert.match(form, /setStep\("password-required"\)/);
   assert.match(form, /signUp\.update\(\{ password \}\)/);
   assert.match(form, /setActiveSignUp\(\{ session: result\.createdSessionId \}\)/);

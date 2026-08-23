@@ -29,8 +29,6 @@ export function HeaderLanguageMenu({ lang, mobile = false, onNavigate }: { lang:
     window.location.assign(url.pathname + url.search + url.hash);
   }
   const options = HEADER_LANGUAGES.map(([code,label]) => <button key={code} type="button" aria-pressed={selected===code} className={selected===code?"active":""} onClick={() => choose(code)}>{label}</button>);
-  if (mobile) return <section className="mobile-language-options" aria-label={t.chooseLanguage}><strong><GlobeIcon/>{t.language}</strong><div>{options}</div></section>;
-  return <details ref={menuRef} className="header-language-menu"><summary aria-label={t.chooseLanguage}>{HEADER_LANGUAGES.find(([code])=>code===selected)?.[1] || "English"}<span aria-hidden="true">⌄</span></summary><div className="header-language-options"><strong>{t.language}</strong>{options}</div></details>;
+  if (mobile) return <section className="mobile-language-options" aria-label={t.chooseLanguage}><strong>{t.language}</strong><div>{options}</div></section>;
+  return <details ref={menuRef} className="header-language-menu"><summary aria-label={t.chooseLanguage}>{HEADER_LANGUAGES.find(([code])=>code===selected)?.[1] || "English"}<span aria-hidden="true">▾</span></summary><div className="header-language-options"><strong>{t.language}</strong>{options}</div></details>;
 }
-
-function GlobeIcon(){return <svg aria-hidden="true" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8.25"/><path d="M3.9 12h16.2M12 3.75c2.05 2.27 3.1 5.02 3.1 8.25S14.05 17.98 12 20.25C9.95 17.98 8.9 15.23 8.9 12S9.95 6.02 12 3.75Z"/></svg>}

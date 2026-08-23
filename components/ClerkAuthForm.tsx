@@ -5,6 +5,8 @@ import { useAuth, useUser } from "@clerk/nextjs";
 import { useSignIn, useSignUp } from "@clerk/nextjs/legacy";
 import { FormEvent, useEffect, useState } from "react";
 import { resolveSignUpRequirements } from "../lib/clerk-auth-requirements";
+import { authInterfaceCopyFor } from "../lib/auth-interface-copy";
+import type { SiteLanguage } from "../lib/site-locale";
 
 type SignUpResult = {
   status: string | null;
@@ -12,8 +14,9 @@ type SignUpResult = {
   missingFields?: readonly string[];
 };
 
-export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang: "en" | "zh"; returnTo?: string }) {
+export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang: SiteLanguage; returnTo?: string }) {
   const zh = lang === "zh";
+  const a = authInterfaceCopyFor(lang);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -57,7 +60,7 @@ export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang:
       return;
     }
     if (result.status === "missing_requirements") {
-      const resolution = resolveSignUpRequirements(result.missingFields, lang);
+      const resolution = resolveSignUpRequirements(result.missingFields, zh ? "zh" : "en");
       if (resolution.kind === "password") {
         setStep("password-required");
         setCode("");
@@ -123,16 +126,16 @@ export function ClerkAuthForm({ lang, returnTo = `/${lang}/dashboard` }: { lang:
 
   function reset(next = method) { setMethod(next); setStep("credentials"); setFlow(null); setCode(""); setPassword(""); setPasswordConfirmation(""); setError(""); setMessage(""); }
 
-  if ((userLoaded && isSignedIn) || userId) return <p className="form-message success" role="status">{error || (zh ? "正在完成安全登录…" : "Completing secure sign-in…")}</p>;
+  if ((userLoaded && isSignedIn) || userId) return <p className="form-message success" role="status">{error || a.completing}</p>;
   return <form className="auth-form" onSubmit={submit}>
-    <label>{zh ? "电子邮箱" : "Email address"}<input type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} disabled={step !== "credentials"} required /></label>
-    {((method === "password" && step === "credentials") || step === "password-required") && <label>{step === "password-required" ? (zh ? "创建密码" : "Create password") : (zh ? "密码" : "Password")}<input type="password" autoComplete={step === "password-required" ? "new-password" : "current-password"} minLength={8} value={password} onChange={event => setPassword(event.target.value)} required /></label>}
-    {step === "password-required" && <label>{zh ? "确认密码" : "Confirm password"}<input type="password" autoComplete="new-password" minLength={8} value={passwordConfirmation} onChange={event => setPasswordConfirmation(event.target.value)} required /></label>}
-    {step === "code" && <label>{zh ? "一次性验证码" : "One-time code"}<input type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={code} onChange={event => setCode(event.target.value.replace(/\D/g, ""))} required /></label>}
+    <label>{a.email}<input type="email" autoComplete="email" value={email} onChange={event => setEmail(event.target.value)} disabled={step !== "credentials"} required /></label>
+    {((method === "password" && step === "credentials") || step === "password-required") && <label>{step === "password-required" ? a.createPassword : a.password}<input type="password" autoComplete={step === "password-required" ? "new-password" : "current-password"} minLength={8} value={password} onChange={event => setPassword(event.target.value)} required /></label>}
+    {step === "password-required" && <label>{a.confirmPassword}<input type="password" autoComplete="new-password" minLength={8} value={passwordConfirmation} onChange={event => setPasswordConfirmation(event.target.value)} required /></label>}
+    {step === "code" && <label>{a.code}<input type="text" inputMode="numeric" autoComplete="one-time-code" pattern="[0-9]{6}" maxLength={6} value={code} onChange={event => setCode(event.target.value.replace(/\D/g, ""))} required /></label>}
     {error && <p className="form-message error" role="alert">{error}</p>}{message && <p className="form-message success" role="status">{message}</p>}
-    {step === "code" && <p className="form-message">{zh ? "如果收件箱中没有看到验证码邮件，请检查垃圾邮件或广告邮件文件夹。" : "If you don't see the code email in your inbox, check your Spam or Junk folder."}</p>}
+    {step === "code" && <p className="form-message">{a.spam}</p>}
     <div id="clerk-captcha" />
-    <button className="primary-button full" disabled={loading || !signInLoaded || !signUpLoaded}>{loading ? (zh ? "请稍候…" : "Please wait…") : step === "code" ? (zh ? "验证并继续" : "Verify & continue") : step === "password-required" ? (zh ? "设置密码并登录" : "Create password & sign in") : method === "code" ? (zh ? "发送安全验证码" : "Send secure code") : (zh ? "使用密码继续" : "Continue with password")}</button>
-    {step === "code" || step === "password-required" ? <button className="form-link" type="button" onClick={() => reset()}>{zh ? "更换邮箱" : "Use another email"}</button> : <button className="form-link" type="button" onClick={() => reset(method === "code" ? "password" : "code")}>{method === "code" ? (zh ? "改用密码" : "Use password instead") : (zh ? "改用邮箱验证码" : "Use an email code instead")}</button>}
+    <button className="primary-button full" disabled={loading || !signInLoaded || !signUpLoaded}>{loading ? a.wait : step === "code" ? a.verify : step === "password-required" ? a.createAndSignIn : method === "code" ? a.sendCode : a.continuePassword}</button>
+    {step === "code" || step === "password-required" ? <button className="form-link" type="button" onClick={() => reset()}>{a.anotherEmail}</button> : <button className="form-link" type="button" onClick={() => reset(method === "code" ? "password" : "code")}>{method === "code" ? a.usePassword : a.useCode}</button>}
   </form>;
 }
