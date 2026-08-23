@@ -43,6 +43,23 @@ test("both full-page games report completed sessions directly through the shared
   assert.match(runtime, /navigate\(gameLogRoute\(\)\)/);
 });
 
+test("embedded games localize their live interface in every supported route language", async () => {
+  const [miner, monopoly, runtime, localeRuntime] = await Promise.all([
+    readFile(new URL("../public/games/miner.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/games/monopoly.html", import.meta.url), "utf8"),
+    readFile(new URL("../public/games/greatlove-game-runtime.js", import.meta.url), "utf8"),
+    readFile(new URL("../public/games/greatlove-game-locale.js", import.meta.url), "utf8"),
+  ]);
+  assert.match(miner, /greatlove-game-locale\.js/);
+  assert.match(monopoly, /greatlove-game-locale\.js/);
+  assert.match(runtime, /\['zh', 'en', 'es', 'ja', 'ko', 'fr', 'de', 'ru', 'it', 'pt', 'ar', 'hi'\]/);
+  for (const locale of ["es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi"]) {
+    assert.match(localeRuntime, new RegExp(`\\b${locale}: \\[`, "u"));
+  }
+  assert.match(localeRuntime, /MutationObserver/);
+  assert.match(localeRuntime, /document\.documentElement\.dir = lang === 'ar'/);
+});
+
 test("game result writes use the new reward rate and enforce one daily play per game", async () => {
   const [route, rules, schema, runtime] = await Promise.all([
     readFile(new URL("../app/api/game-results/route.ts", import.meta.url), "utf8"),
@@ -100,10 +117,10 @@ test("game pages keep the shared header and expose a clean Lucky Wheel route", a
 
   assert.equal((gamePage.match(/<SiteHeader\b/g) || []).length, 1);
   assert.equal((luckyWheelPage.match(/<SiteHeader\b/g) || []).length, 1);
-  assert.match(gamePage, /const frameSrc = `\/games\/\$\{game\}\.html\?mode=\$\{mode\}&lang=\$\{contentLang\}`/);
+  assert.match(gamePage, /const frameSrc = `\/games\/\$\{game\}\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
   assert.match(gamePage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(gamePage, /game === "monopoly".*\/lucky-wheel\?mode=/);
-  assert.match(luckyWheelPage, /const frameSrc = `\/games\/monopoly\.html\?mode=\$\{mode\}&lang=\$\{contentLang\}`/);
+  assert.match(luckyWheelPage, /const frameSrc = `\/games\/monopoly\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
   assert.match(luckyWheelPage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(luckyWheelPage, /Lucky Wheel/);
   assert.match(gamePage, /modeLabels: Record<SiteLanguage/);

@@ -495,7 +495,7 @@
         })();
 
         // ===== 游戏逻辑 =====
-        const GAME_LANG = new URLSearchParams(window.location.search).get('lang') === 'en' ? 'en' : 'zh';
+        const GAME_LANG = new URLSearchParams(window.location.search).get('lang') || 'en';
         const IS_ZH = GAME_LANG === 'zh';
         const GAME_COPY = {
             zh: {
@@ -537,7 +537,7 @@
                 footer: '© 2026 GLC Lucky Wheel • <a href="/" target="_top" class="hover:text-[#FFD700] transition-colors">GreatLoveMeta</a> • Fortune in every spin',
             },
         };
-        const copy = GAME_COPY[GAME_LANG];
+        const copy = GAME_COPY[GAME_LANG] || GAME_COPY.en;
         const WHEEL_DATA = [
             { emoji: '💎', name: { zh: '璀璨钻石', en: 'Brilliant Diamond' }, points: 12 },
             { emoji: '👑', name: { zh: '幸运皇冠', en: 'Lucky Crown' }, points: 10 },
@@ -710,7 +710,7 @@
                 scoreEl.innerHTML = formatReward(totalScore);
                 spinsLeftEl.innerText = spinsLeft.toString();
                 winEmoji.innerText = win.emoji;
-                winText.innerHTML = copy.win(win.name[GAME_LANG], formatReward(win.points));
+                winText.innerHTML = copy.win(win.name[GAME_LANG] || win.name.en, formatReward(win.points));
                 winDisplay.classList.remove('invisible');
                 spinBtnText.classList.remove('dice-bounce');
 
@@ -735,6 +735,7 @@
         initWheel();
         window.GreatLoveGameRuntime.guard('monopoly');
     </script>
+    <script src="/games/greatlove-game-locale.js"></script>
 </body>
 
 </html>

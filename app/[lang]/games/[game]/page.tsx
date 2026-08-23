@@ -37,7 +37,7 @@ export default async function GamePage({
   searchParams: Promise<{ mode?: string }>;
 }) {
   const { lang: raw, game } = await params;
-  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
+  const lang = safeSiteLanguage(raw);
   const query = await searchParams;
   if (!(game in games)) notFound();
   const mode = query.mode === "play" ? "play" : "trial";
@@ -52,7 +52,7 @@ export default async function GamePage({
 
   const gameTitle = interfaceText(lang, games[game as GameKey].en, games[game as GameKey].zh);
   const frameTitle = `${gameTitle} ${modeLabels[lang][mode === "play" ? "game" : "trial"]}`;
-  const frameSrc = `/games/${game}.html?mode=${mode}&lang=${contentLang}`;
+  const frameSrc = `/games/${game}.html?mode=${mode}&lang=${lang}`;
 
   return <>
     <SiteHeader lang={lang}/>

@@ -603,7 +603,7 @@
 
         // ========== 开场简报 ==========
         const launchParams = new URLSearchParams(window.location.search);
-        const currentLang = launchParams.get('lang') === 'en' ? 'en' : 'zh';
+        const currentLang = launchParams.get('lang') || 'en';
         const BRIEFING_SECONDS = 6;
         const BRIEFING_COPY = {
             zh: [
@@ -619,7 +619,7 @@
         };
 
         function playBriefing() {
-            const copy = BRIEFING_COPY[currentLang];
+            const copy = BRIEFING_COPY[currentLang] || BRIEFING_COPY.en;
             copy.forEach((text, index) => {
                 const element = document.getElementById(`briefing-text-${index + 1}`);
                 if (element) element.textContent = text;
@@ -1206,6 +1206,7 @@
             playBriefing();
         });
     </script>
+    <script src="/games/greatlove-game-locale.js"></script>
 </body>
 
 </html>

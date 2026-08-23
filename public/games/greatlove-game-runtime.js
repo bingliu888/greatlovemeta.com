@@ -1,7 +1,9 @@
 (function () {
     const params = new URLSearchParams(window.location.search);
     const mode = params.get('mode') === 'play' ? 'play' : 'trial';
-    const lang = params.get('lang') === 'en' ? 'en' : 'zh';
+    const supported = ['zh', 'en', 'es', 'ja', 'ko', 'fr', 'de', 'ru', 'it', 'pt', 'ar', 'hi'];
+    const requestedLang = params.get('lang') || 'en';
+    const lang = supported.includes(requestedLang) ? requestedLang : 'en';
 
     function localDate() {
         const now = new Date();

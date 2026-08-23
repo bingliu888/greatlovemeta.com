@@ -29,7 +29,7 @@ export default async function LuckyWheelPage({
   searchParams: Promise<{ mode?: string }>;
 }) {
   const { lang: raw } = await params;
-  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
+  const lang = safeSiteLanguage(raw);
   const query = await searchParams;
   const mode = query.mode === "play" ? "play" : "trial";
   if (mode === "play") {
@@ -42,7 +42,7 @@ export default async function LuckyWheelPage({
 
   const gameTitle = interfaceText(lang, "Lucky Wheel", "幸运轮盘");
   const frameTitle = `${gameTitle} ${modeLabels[lang][mode === "play" ? "game" : "trial"]}`;
-  const frameSrc = `/games/monopoly.html?mode=${mode}&lang=${contentLang}`;
+  const frameSrc = `/games/monopoly.html?mode=${mode}&lang=${lang}`;
 
   return <>
     <SiteHeader lang={lang}/>
