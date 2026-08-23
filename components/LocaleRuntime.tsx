@@ -9,10 +9,10 @@ const textState = new WeakMap<Text, State>();
 const attributeState = new WeakMap<Element, Map<string, State>>();
 const nativeNames = new Set(["中文", "English", "Español", "日本語", "한국어", "Français", "Deutsch", "Русский", "Italiano", "Português", "العربية", "हिन्दी"]);
 
-function render(value: string, dictionary: Record<string, string>) {
+function render(value: string, dictionary: Record<string, string>, protectedValues: Set<string>) {
   const trimmed = value.trim();
   const normalized = trimmed.replace(/\s+/g, " ");
-  if (!trimmed || nativeNames.has(normalized)) return value;
+  if (!trimmed || nativeNames.has(normalized) || protectedValues.has(normalized)) return value;
   const numbered = normalized.match(/^(\d+)\s+(.+)$/);
   const replacement = dictionary[value] ?? dictionary[trimmed] ?? dictionary[normalized] ?? (numbered && dictionary[numbered[2]] ? `${numbered[1]} ${dictionary[numbered[2]]}` : undefined);
   if (!replacement) return value;
@@ -20,7 +20,7 @@ function render(value: string, dictionary: Record<string, string>) {
   return `${value.slice(0, start)}${replacement}${value.slice(start + trimmed.length)}`;
 }
 
-function localize(root: Node, dictionary: Record<string, string>) {
+function localize(root: Node, dictionary: Record<string, string>, protectedValues: Set<string>) {
   const base = root instanceof Document ? root.documentElement : root;
   if (base instanceof Element && base.closest("script,style,[data-no-auto-localize],[data-no-translate]")) return;
   const walker = document.createTreeWalker(base, NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT);
@@ -30,7 +30,7 @@ function localize(root: Node, dictionary: Record<string, string>) {
       let state = textState.get(node);
       if (!state) state = { source: node.data, rendered: node.data };
       else if (node.data !== state.rendered && node.data !== state.source) state = { source: node.data, rendered: node.data };
-      const next = render(state.source, dictionary);
+      const next = render(state.source, dictionary, protectedValues);
       state.rendered = next;
       textState.set(node, state);
       if (node.data !== next) node.data = next;
@@ -43,7 +43,7 @@ function localize(root: Node, dictionary: Record<string, string>) {
         let state = states.get(name);
         if (!state) state = { source: value, rendered: value };
         else if (value !== state.rendered && value !== state.source) state = { source: value, rendered: value };
-        const next = render(state.source, dictionary);
+        const next = render(state.source, dictionary, protectedValues);
         state.rendered = next;
         states.set(name, state);
         if (value !== next) node.setAttribute(name, next);
@@ -79,10 +79,11 @@ export function LocaleRuntime({ locale }: { locale: SiteLanguage }) {
       .then(shared => {
         if (cancelled) return;
         const dictionary = { ...shared, ...(homeInterfaceTranslations[locale] ?? {}) };
-        localize(document, dictionary);
+        const protectedValues = new Set(Object.values(homeInterfaceTranslations[locale] ?? {}));
+        localize(document, dictionary, protectedValues);
         observer = new MutationObserver(records => records.forEach(record => {
-          record.addedNodes.forEach(node => localize(node, dictionary));
-          if (record.type === "characterData" || record.type === "attributes") localize(record.target, dictionary);
+          record.addedNodes.forEach(node => localize(node, dictionary, protectedValues));
+          if (record.type === "characterData" || record.type === "attributes") localize(record.target, dictionary, protectedValues);
         }));
         observer.observe(document.body, { childList: true, subtree: true, characterData: true, attributes: true, attributeFilter: ["aria-label", "title", "placeholder", "alt"] });
       }).catch(() => undefined);

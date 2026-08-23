@@ -28,4 +28,6 @@ test("the locale runtime preserves native language names and rewrites internal r
   assert.match(runtime, /parentElement\?\.closest\("script,style,textarea,\[data-no-auto-localize\],\[data-no-translate\]"\)/);
   assert.doesNotMatch(runtime, /base\.closest\("script,style,textarea,/);
   assert.match(runtime, /\["aria-label", "title", "placeholder", "alt"\]/);
+  assert.match(runtime, /protectedValues\.has\(normalized\)/);
+  assert.match(runtime, /new Set\(Object\.values\(homeInterfaceTranslations\[locale\] \?\? \{\}\)\)/);
 });
