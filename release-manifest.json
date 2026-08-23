@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-complete-twelve-language-deep-routes-v2",
+  "releaseId": "greatlovemeta-twelve-language-deep-route-browser-fixes-v3",
   "site": "greatlovemeta.com",
   "title": {
     "en": "Complete twelve-language coverage across public and protected routes",
@@ -13,11 +13,13 @@
   "features": {
     "en": [
       "Keep all public, member, course, game, swap, payment, admin, and Project routes on the selected one of twelve locales.",
-      "Translate late-rendered interface text while protecting the twelve native language names from accidental translation."
+      "Translate late-rendered interface text while protecting the twelve native language names from accidental translation.",
+      "Emit every local cultural-collection detail route for all twelve locales instead of falling through to the homepage."
     ],
     "zh": [
       "公开、会员、课程、游戏、兑换、支付、管理及 Project 页面均保留所选的十二语言路由。",
-      "翻译后加载的界面文字，同时保护十二个语言母语名称不被错误翻译。"
+      "翻译后加载的界面文字，同时保护十二个语言母语名称不被错误翻译。",
+      "为十二种语言完整生成本站文化收藏详情路由，不再错误返回首页。"
     ]
   },
   "affected": {
@@ -33,11 +35,13 @@
   "changes": {
     "en": [
       "Replace two-language route guards with validated twelve-language routing and preserve the actual locale in the shared shell.",
-      "Add a site-local locale runtime and complete static dictionaries for dynamic interface text and same-origin links."
+      "Add a site-local locale runtime and complete static dictionaries for dynamic interface text and same-origin links.",
+      "Merge the verified deep-page public dictionary, build the twelve-language collection route matrix, and keep related collection cards on the bilingual content source."
     ],
     "zh": [
       "以十二语言校验替换中英文路由限制，并让共享外壳保留真实语言。",
-      "新增站点本地语言运行层及完整静态词典，处理动态界面文字和站内链接。"
+      "新增站点本地语言运行层及完整静态词典，处理动态界面文字和站内链接。",
+      "合并已验证的深层页面公共词典，构建十二语言收藏路由矩阵，并让相关收藏卡片正确使用中英内容源。"
     ]
   },
   "validation": {

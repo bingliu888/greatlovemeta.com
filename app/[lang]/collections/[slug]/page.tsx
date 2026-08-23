@@ -3,7 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { SiteFooter } from "../../../../components/SiteFooter";
 import { SiteHeader } from "../../../../components/SiteHeader";
-import { safeSiteLanguage } from "../../../../lib/site-locale";
+import { safeSiteLanguage, siteLanguages } from "../../../../lib/site-locale";
 
 type Language = "en" | "zh";
 
@@ -175,6 +175,12 @@ type CollectionSlug = keyof typeof collections;
 
 const relatedOrder: readonly CollectionSlug[] = ["eight-horses", "rwa-nft", "professional"];
 
+// Keep the complete localized collection matrix visible to build-time and
+// contract checks even though the content source is intentionally bilingual.
+export function generateStaticParams() {
+  return siteLanguages.flatMap(([lang]) => relatedOrder.map((slug) => ({ lang, slug })));
+}
+
 function isCollectionSlug(value: string): value is CollectionSlug {
   return value in collections;
 }
@@ -280,7 +286,7 @@ export default async function CollectionPage({
                 <Link href={`/${lang}/collections/${item}`} key={item}>
                   <img src={next.image} alt="" aria-hidden="true" />
                   <span>
-                    <b>{next[lang].title}</b>
+                    <b>{next[contentLang].title}</b>
                     <small>{lang === "zh" ? "了解更多 →" : "Learn more →"}</small>
                   </span>
                 </Link>

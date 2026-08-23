@@ -102,3 +102,28 @@ test("English and Chinese Eight Horses pages render locally", async () => {
   assert.match(chinese, /\/zh#collections/);
   assert.doesNotMatch(chinese, /greatlovedao\.com/i);
 });
+
+test("all twelve locale collection URLs resolve to the collection page", async () => {
+  const workerUrl = new URL("../dist/server/index.js", import.meta.url);
+  workerUrl.searchParams.set("test", `all-local-collections-${process.pid}-${Date.now()}`);
+  const { default: worker } = await import(workerUrl.href);
+  for (const lang of ["zh", "en", "es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi"]) {
+    const response = await worker.fetch(
+      new Request(`http://localhost/${lang}/collections/eight-horses`, { headers: { accept: "text/html" } }),
+      testEnv,
+      { waitUntil() {}, passThroughOnException() {} },
+    );
+    assert.equal(response.status, 200, `${lang} collection response`);
+    const html = await response.text();
+    assert.match(html, /Lang Shining Eight Horses RWA Digital Collection NFT|郎士宁八骏图 RWA数字藏品NFT/, `${lang} collection body`);
+  }
+});
+
+test("collection routes are emitted for every supported locale", async () => {
+  const collection = await readFile(collectionSourceUrl, "utf8");
+  assert.match(collection, /generateStaticParams/);
+  assert.match(collection, /siteLanguages\.flatMap/);
+  assert.match(collection, /relatedOrder\.map/);
+  assert.match(collection, /next\[contentLang\]\.title/);
+  assert.doesNotMatch(collection, /next\[lang\]\.title/);
+});
