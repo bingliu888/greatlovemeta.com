@@ -8,7 +8,7 @@ import test from "node:test";
 const allowedLatinTerms = Object.freeze([
   "GreatLove.art", "GreatLoveMeta.com", "GreatLoveDAO", "Guandan.Guru", "Guru",
   "GitHub", "Sites", "iPad", "Safari", "Cloudflare", "RealtimeKit", "Clerk", "PayPal",
-  "OpenAI", "ChatGPT", "Telegram", "Messenger", "Facebook", "MyClaw",
+  "OpenAI", "ChatGPT", "Telegram", "Messenger", "Facebook", "TikTok", "MyClaw",
   "BingAcademy", "WhatsReal", "Android", "App Store", "AI", "AIGC", "NFT",
   "RWA", "DeFi", "SocialFi", "GameFi", "Web3", "GLC", "GLUSD", "USDT",
   "USDC", "ETH", "BTC", "EVM", "D1", "R2", "PDF", "JPG", "PNG", "WebP",

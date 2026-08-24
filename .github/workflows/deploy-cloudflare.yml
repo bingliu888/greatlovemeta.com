@@ -63,7 +63,8 @@ jobs:
               && grep -Eq 'All payments are final and non-refundable|所有付款均为最终付款且不可退款' disclaimer.html \
               && grep -Fq 'Facebook' disclaimer.html \
               && grep -Fq 'TikTok' disclaimer.html \
-              && grep -Fq '/disclaimer' disclaimer.html; then
+              && grep -Fq '/disclaimer' disclaimer.html \
+              && grep -Fq '/zh/pricing' disclaimer.html; then
               exit 0
             fi
             sleep 5

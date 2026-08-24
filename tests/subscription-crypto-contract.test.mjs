@@ -14,7 +14,8 @@ test("footer and pricing publish one GreatLoveMeta-local plan source", async () 
   for (const marker of ["fallbackAmountCents: 500", "fallbackAmountCents: 800", "7 天免费试用", "内置专属小组音视频与沟通中心", "公开网络研讨会与 HLS 广播", "DeepSeek V4 Flash 默认，可选 OpenAI"]) assert.match(plans, new RegExp(marker));
   assert.doesNotMatch(pricing, /\$100|\$500|\$800/);
   for (const path of ["about", "privacy", "terms", "project"]) assert.match(footer, new RegExp(path));
-  assert.doesNotMatch(footer, /LanguageLink|pricing|github/iu);
+  assert.match(footer, /pricing/);
+  assert.doesNotMatch(footer, /LanguageLink|github/iu);
   for (const source of [pricing, checkout]) assert.match(source, /SUBSCRIPTION_PLANS/);
   assert.match(admin, /getPublishedPrices/);
 });

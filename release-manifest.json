@@ -1,59 +1,63 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-localized-disclaimer-20260824",
+  "releaseId": "greatlovemeta-com-disclaimer-subscription-20260824",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Publish the localized site disclaimer",
-    "zh": "发布本地化站点免责声明"
+    "en": "Publish localized Disclaimer and public Subscription footer access",
+    "zh": "发布本地化免责声明与公开订阅页脚入口"
   },
   "purpose": {
-    "en": "Give every interface language supported by this site a clear disclaimer covering AI-assisted content, possible accuracy and pricing errors, third-party platforms, crypto risk, and final non-refundable payments.",
-    "zh": "为本站支持的每种界面语言提供清晰免责声明，涵盖 AI 辅助内容、准确性与定价错误、第三方平台、加密资产风险以及最终且不可退款的付款。"
+    "en": "Give every supported interface language a reviewed Disclaimer and a public footer path to subscription or plan information while requiring sign-in only when a user starts payment.",
+    "zh": "为每种受支持的界面语言提供经审阅的免责声明，并从公共页脚开放订阅或套餐信息；仅在用户开始付款时要求登录。"
   },
   "features": {
     "en": [
-      "Add a localized Disclaimer link between Terms and Project in the public footer.",
-      "Publish a dedicated disclaimer page using reviewed static copy for every supported interface language."
+      "Expose six localized footer links in the required About, Privacy, Terms, Disclaimer, Subscription, Project order.",
+      "Keep the subscription, pricing, membership, plan, or course catalog readable without sign-in and preserve sign-in enforcement on payment actions.",
+      "Publish the generic localized Disclaimer covering AI-assisted inaccuracies, pricing errors, third-party platforms, crypto risk, and final non-refundable payments."
     ],
     "zh": [
-      "在公共页脚的条款与项目链接之间新增本地化免责声明链接。",
-      "以经过审阅的静态文案，为每种受支持的界面语言发布独立免责声明页面。"
+      "按关于、隐私、条款、免责声明、订阅、项目的规定顺序公开六个本地化页脚链接。",
+      "订阅、定价、会员、套餐或课程目录无需登录即可阅读，并保留付款动作的登录要求。",
+      "发布通用本地化免责声明，涵盖 AI 辅助内容不准确、定价错误、第三方平台、加密资产风险以及最终且不可退款的付款。"
     ]
   },
   "affected": {
     "en": [
-      "Public footer, disclaimer route, and Project release history"
+      "Public footer, Disclaimer route, public subscription catalog, deployment verification, and Project release history"
     ],
     "zh": [
-      "公共页脚、免责声明路由与 Project 发布历史"
+      "公共页脚、免责声明路由、公开订阅目录、部署验证与 Project 发布历史"
     ]
   },
   "changes": {
     "en": [
-      "Cover AI-generated inaccuracies and pricing errors, X, Facebook, TikTok, wallet apps, and crypto exchanges.",
+      "Add localized Subscription labels for all 21 shared locales and route each site to its existing public catalog.",
+      "Cover X, Facebook, TikTok, wallet applications, and crypto exchanges in the localized Disclaimer.",
       "State that all payments are final and non-refundable except where applicable law requires otherwise."
     ],
     "zh": [
-      "覆盖 AI 生成内容不准确与定价错误，以及 X、Facebook、TikTok、钱包应用和加密资产交易平台。",
+      "为共享的 21 种语言新增本地化订阅标签，并将每个站点链接到其现有公开目录。",
+      "在本地化免责声明中覆盖 X、Facebook、TikTok、钱包应用及加密货币交易所。",
       "明确除适用法律另有强制要求外，所有付款均为最终付款且不可退款。"
     ]
   },
   "validation": {
     "en": [
-      "Run the disclaimer contract test and production build.",
-      "Deploy through GitHub Actions and Cloudflare, verify the production footer and disclaimer content, and confirm the exact Project record."
+      "Run shared footer, Disclaimer, public-catalog, and payment-boundary contract tests plus the production build.",
+      "Deploy through GitHub Actions and Cloudflare, verify production Disclaimer and Subscription access, and confirm the exact Project record."
     ],
     "zh": [
-      "执行免责声明契约测试与生产构建。",
-      "通过 GitHub Actions 与 Cloudflare 发布，验证生产页脚与免责声明内容，并确认 Project 精确记录。"
+      "执行共享页脚、免责声明、公开目录与付款边界契约测试及生产构建。",
+      "通过 GitHub Actions 与 Cloudflare 发布，验证生产免责声明和订阅访问，并确认精确的 Project 记录。"
     ]
   },
   "deferred": {
     "en": [
-      "SmartLingo and GeniusWallet remain outside this migration while their active development tasks are unfinished."
+      "This release adds no new plan, price, payment rail, entitlement, refund workflow, or account requirement."
     ],
     "zh": [
-      "SmartLingo 与 GeniusWallet 的开发任务尚未完成，因此暂不纳入本轮迁移。"
+      "本次发布不新增套餐、价格、支付通道、权益、退款流程或账户要求。"
     ]
   },
   "siteAdaptations": {
