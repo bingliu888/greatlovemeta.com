@@ -1,61 +1,59 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-editable-locale-attributes-v7",
+  "releaseId": "greatlovemeta-com-localized-disclaimer-20260824",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Localize editable-control labels without changing user input",
-    "zh": "本地化输入控件标签且不改动用户输入"
+    "en": "Publish the localized site disclaimer",
+    "zh": "发布本地化站点免责声明"
   },
   "purpose": {
-    "en": "Ensure Japanese, Korean, and other runtime locales translate textarea placeholders and accessible labels while preserving typed text.",
-    "zh": "确保日语、韩语及其他运行时语言会翻译文本框占位符和无障碍标签，同时保留用户输入。"
+    "en": "Give every interface language supported by this site a clear disclaimer covering AI-assisted content, possible accuracy and pricing errors, third-party platforms, crypto risk, and final non-refundable payments.",
+    "zh": "为本站支持的每种界面语言提供清晰免责声明，涵盖 AI 辅助内容、准确性与定价错误、第三方平台、加密资产风险以及最终且不可退款的付款。"
   },
   "features": {
     "en": [
-      "Translate placeholder, aria-label, title, and alt attributes on textarea controls inserted after page load.",
-      "Keep editable textarea text and the twelve native language names excluded from automatic translation."
+      "Add a localized Disclaimer link between Terms and Project in the public footer.",
+      "Publish a dedicated disclaimer page using reviewed static copy for every supported interface language."
     ],
     "zh": [
-      "翻译页面载入后动态插入文本框的 placeholder、aria-label、title 和 alt 属性。",
-      "继续禁止自动翻译文本框文字和十二个语言母语名称。"
+      "在公共页脚的条款与项目链接之间新增本地化免责声明链接。",
+      "以经过审阅的静态文案，为每种受支持的界面语言发布独立免责声明页面。"
     ]
   },
   "affected": {
     "en": [
-      "Runtime-localized textareas on public, menu-linked, authentication, messaging, course, and game pages.",
-      "GreatLoveMeta Project release history and deployment verification."
+      "Public footer, disclaimer route, and Project release history"
     ],
     "zh": [
-      "公开页、菜单链接页、登录、消息、课程和游戏页面中的运行时本地化文本框。",
-      "GreatLoveMeta Project 发布历史和部署验证。"
+      "公共页脚、免责声明路由与 Project 发布历史"
     ]
   },
   "changes": {
     "en": [
-      "Separate editable text protection from control-attribute localization in the existing locale runtime.",
-      "Preserve GreatLoveMeta branding, native language names, user values, data, and cloud resources."
+      "Cover AI-generated inaccuracies and pricing errors, X, Facebook, TikTok, wallet apps, and crypto exchanges.",
+      "State that all payments are final and non-refundable except where applicable law requires otherwise."
     ],
     "zh": [
-      "在现有语言运行时中分离可编辑文字保护与控件属性本地化。",
-      "保留 GreatLoveMeta 品牌、语言本名、用户输入值、数据和云资源。"
+      "覆盖 AI 生成内容不准确与定价错误，以及 X、Facebook、TikTok、钱包应用和加密资产交易平台。",
+      "明确除适用法律另有强制要求外，所有付款均为最终付款且不可退款。"
     ]
   },
   "validation": {
     "en": [
-      "Run the locale-input audit, targeted localization contracts, complete repository tests, production build, artifact checks, and shared gates.",
-      "Use one real Chrome tab to check Japanese and Korean home, language menu, authentication, and textarea input behavior."
+      "Run the disclaimer contract test and production build.",
+      "Deploy through GitHub Actions and Cloudflare, verify the production footer and disclaimer content, and confirm the exact Project record."
     ],
     "zh": [
-      "执行输入本地化审计、定向本地化契约、完整仓库测试、生产构建、制品及共享门禁。",
-      "用一个真实 Chrome 标签检查日语与韩语首页、语言菜单、登录和文本框输入行为。"
+      "执行免责声明契约测试与生产构建。",
+      "通过 GitHub Actions 与 Cloudflare 发布，验证生产页脚与免责声明内容，并确认 Project 精确记录。"
     ]
   },
   "deferred": {
     "en": [
-      "Full sign-in, games, swaps, and end-to-end course workflows are intentionally outside this fast migration check."
+      "SmartLingo and GeniusWallet remain outside this migration while their active development tasks are unfinished."
     ],
     "zh": [
-      "完整登录、游戏、兑换和端到端课程流程按快速迁移范围有意延后。"
+      "SmartLingo 与 GeniusWallet 的开发任务尚未完成，因此暂不纳入本轮迁移。"
     ]
   },
   "siteAdaptations": {

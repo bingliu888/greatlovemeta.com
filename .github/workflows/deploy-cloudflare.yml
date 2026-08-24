@@ -54,6 +54,23 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
+      - name: Verify production disclaimer release
+        shell: bash
+        run: |
+          set -euo pipefail
+          for attempt in {1..12}; do
+            if curl --fail --silent --show-error "https://greatlovemeta.com/zh/disclaimer" -o disclaimer.html \
+              && grep -Eq 'All payments are final and non-refundable|所有付款均为最终付款且不可退款' disclaimer.html \
+              && grep -Fq 'Facebook' disclaimer.html \
+              && grep -Fq 'TikTok' disclaimer.html \
+              && grep -Fq '/disclaimer' disclaimer.html; then
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "Localized production disclaimer verification failed." >&2
+          exit 1
+
       - name: Configure classroom runtime secret
         shell: bash
         run: |
