@@ -1,71 +1,71 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-disclaimer-subscription-20260824",
+  "releaseId": "greatlovemeta-class-timezone-eslint-zero-20260825",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Publish localized Disclaimer and public Subscription footer access",
-    "zh": "发布本地化免责声明与公开订阅页脚入口"
+    "en": "Stabilize classroom share timestamps and enforce clean authored source",
+    "zh": "稳定课堂共享时间并强制业务源码零告警"
   },
   "purpose": {
-    "en": "Give every supported interface language a reviewed Disclaimer and a public footer path to subscription or plan information while requiring sign-in only when a user starts payment.",
-    "zh": "为每种受支持的界面语言提供经审阅的免责声明，并从公共页脚开放订阅或套餐信息；仅在用户开始付款时要求登录。"
+    "en": "Prevent classroom share-card timestamps from changing between Cloudflare server rendering and the visitor browser, while removing dead classroom code and making zero-error, zero-warning ESLint a permanent production gate.",
+    "zh": "防止课堂共享卡片时间在 Cloudflare 服务端渲染与访客浏览器之间发生变化，同时删除课堂死代码，并将 ESLint 零错误、零警告设为永久生产门禁。"
   },
   "features": {
     "en": [
-      "Expose six localized footer links in the required About, Privacy, Terms, Disclaimer, Subscription, Project order.",
-      "Keep the subscription, pricing, membership, plan, or course catalog readable without sign-in and preserve sign-in enforcement on payment actions.",
-      "Publish the generic localized Disclaimer covering AI-assisted inaccuracies, pricing errors, third-party platforms, crypto risk, and final non-refundable payments."
+      "Render classroom share-card dates in the same explicit America/Los_Angeles timezone already used by classroom directory and detail views.",
+      "Remove the unused legacy PlaylistViewer and clean stale imports, hook effects, dynamic-media lint contracts, and cleanup refs.",
+      "Run authored-source ESLint with max warnings set to zero on every production deployment."
     ],
     "zh": [
-      "按关于、隐私、条款、免责声明、订阅、项目的规定顺序公开六个本地化页脚链接。",
-      "订阅、定价、会员、套餐或课程目录无需登录即可阅读，并保留付款动作的登录要求。",
-      "发布通用本地化免责声明，涵盖 AI 辅助内容不准确、定价错误、第三方平台、加密资产风险以及最终且不可退款的付款。"
+      "课堂共享卡片使用与课堂目录和详情页相同的明确 America/Los_Angeles 时区渲染日期。",
+      "删除未使用的旧 PlaylistViewer，并清理失效导入、Hook effect、动态媒体 lint 契约及清理引用。",
+      "每次生产发布均以最大警告数为零执行业务源码 ESLint。"
     ]
   },
   "affected": {
     "en": [
-      "Public footer, Disclaimer route, public subscription catalog, deployment verification, and Project release history"
+      "Classroom share images, classroom playback and screen-share components, authored-source lint policy, deployment workflow, and Project release history"
     ],
     "zh": [
-      "公共页脚、免责声明路由、公开订阅目录、部署验证与 Project 发布历史"
+      "课堂分享图片、课堂播放与屏幕共享组件、业务源码 lint 策略、发布工作流及 Project 发布历史"
     ]
   },
   "changes": {
     "en": [
-      "Add localized Subscription labels for all 21 shared locales and route each site to its existing public catalog.",
-      "Cover X, Facebook, TikTok, wallet applications, and crypto exchanges in the localized Disclaimer.",
-      "State that all payments are final and non-refundable except where applicable law requires otherwise."
+      "Pin localized share-image time formatting to America/Los_Angeles to eliminate server/browser hydration drift.",
+      "Replace synchronous effect state changes with deferred callbacks or derived state, and stabilize media element cleanup references.",
+      "Exclude only documented generated build output and pinned third-party browser bundles while continuing to lint app, components, and library source."
     ],
     "zh": [
-      "为共享的 21 种语言新增本地化订阅标签，并将每个站点链接到其现有公开目录。",
-      "在本地化免责声明中覆盖 X、Facebook、TikTok、钱包应用及加密货币交易所。",
-      "明确除适用法律另有强制要求外，所有付款均为最终付款且不可退款。"
+      "将本地化分享图片时间格式固定到 America/Los_Angeles，消除服务端与浏览器水合偏差。",
+      "用延迟回调或派生状态替代 effect 中的同步状态修改，并稳定媒体元素清理引用。",
+      "仅排除已记录的生成构建输出和固定版本第三方浏览器包，继续检查 app、components 与 lib 业务源码。"
     ]
   },
   "validation": {
     "en": [
-      "Run shared footer, Disclaimer, public-catalog, and payment-boundary contract tests plus the production build.",
-      "Deploy through GitHub Actions and Cloudflare, verify production Disclaimer and Subscription access, and confirm the exact Project record."
+      "Require ESLint to complete with exactly zero errors and zero warnings, then run the full site tests, shared classroom contracts, protected-navigation check, production build, and artifact validation.",
+      "Deploy the exact validated Git commit through GitHub Actions and Cloudflare and verify its detailed Project release record."
     ],
     "zh": [
-      "执行共享页脚、免责声明、公开目录与付款边界契约测试及生产构建。",
-      "通过 GitHub Actions 与 Cloudflare 发布，验证生产免责声明和订阅访问，并确认精确的 Project 记录。"
+      "要求 ESLint 精确达到零错误、零警告，再执行整站测试、共享课堂契约、受保护导航检查、生产构建及产物验证。",
+      "通过 GitHub Actions 与 Cloudflare 发布完全相同且已验证的 Git 提交，并核对其详细 Project 发布记录。"
     ]
   },
   "deferred": {
     "en": [
-      "This release adds no new plan, price, payment rail, entitlement, refund workflow, or account requirement."
+      "This portfolio migration does not change classroom pricing, permissions, realtime participant limits, wallet contracts, game rewards, or payment behavior."
     ],
     "zh": [
-      "本次发布不新增套餐、价格、支付通道、权益、退款流程或账户要求。"
+      "本轮组合迁移不改变课堂定价、权限、实时参与人数限制、钱包合约、游戏奖励或付款行为。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Preserve GreatLoveMeta branding, ecosystem destinations, independent data, and cloud resources while adopting true locale routing."
+      "Preserve GreatLoveMeta branding, games, reward logs, swap bundles, wallet integration, independent data, and Cloudflare resources; retain its documented generated swap-assets exclusion."
     ],
     "zh": [
-      "采用真实语言路由时，保留 GreatLoveMeta 的品牌、生态目的地、独立数据与云资源。"
+      "保留 GreatLoveMeta 品牌、游戏、奖励日志、Swap 资源、钱包集成、独立数据与 Cloudflare 资源，并保留其已记录的生成 swap-assets 排除规则。"
     ]
   }
 }

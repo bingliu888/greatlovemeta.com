@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Account avatars use arbitrary user-controlled URLs and intentionally bypass the framework image proxy. */
+
 import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { AdminMenuLink } from "./AdminMenuLink";

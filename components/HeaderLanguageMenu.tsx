@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import { shellCopyFor, siteLanguages, type SiteLanguage } from "../lib/site-locale";
 
 export const HEADER_LANGUAGES = siteLanguages;
@@ -10,10 +10,9 @@ const codes = new Set<string>(HEADER_LANGUAGES.map(([code]) => code));
 const preferenceKey = "site-interface-language";
 
 export function HeaderLanguageMenu({ lang, mobile = false, onNavigate }: { lang: SiteLanguage; mobile?: boolean; onNavigate?: () => void }) {
-  const [selected, setSelected] = useState<LanguageCode>(lang);
+  const selected: LanguageCode = lang;
   const menuRef = useRef<HTMLDetailsElement>(null);
   const t=shellCopyFor(lang);
-  useEffect(() => { setSelected(lang); }, [lang]);
   useEffect(() => {
     function dismiss(event: PointerEvent) { if (menuRef.current?.open && !menuRef.current.contains(event.target as Node)) menuRef.current.open = false; }
     function escape(event: KeyboardEvent) { if (event.key === "Escape" && menuRef.current) menuRef.current.open = false; }

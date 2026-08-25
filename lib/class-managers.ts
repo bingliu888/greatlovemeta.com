@@ -1,5 +1,5 @@
 import { isAdminUser } from "@/lib/admin-access";
-import { createId, getDatabase, type SessionUser } from "@/lib/auth";
+import { getDatabase, type SessionUser } from "@/lib/auth";
 import type { ClassRoom } from "@/lib/classrooms";
 
 export const CLASS_TRIAL_SECONDS = 7 * 24 * 60 * 60;

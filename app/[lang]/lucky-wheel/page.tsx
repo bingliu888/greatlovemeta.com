@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, redirect } from "next/navigation";
+import { redirect } from "next/navigation";
 import { SiteHeader } from "../../../components/SiteHeader";
 import { getSessionUser } from "../../../lib/auth";
 import { interfaceText, safeSiteLanguage, type SiteLanguage } from "../../../lib/site-locale";

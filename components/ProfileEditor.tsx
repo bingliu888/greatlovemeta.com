@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- The editable avatar preview is a user-controlled URL and intentionally bypasses the framework image proxy. */
+
 import { useEffect, useState } from "react";
 import { prepareAvatarUpload } from "./avatar-image";
 import { TextSizeControl } from "./TextSizeControl";

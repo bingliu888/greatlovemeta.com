@@ -16,6 +16,7 @@ test("course detail uses the SmartClass entry experience", () => {
   assert.match(source, /shareImageHref/);
   assert.match(source, /\/share/);
   assert.match(shareStudio, /toBlob/);
+  assert.match(shareStudio, /timeZone:\s*"America\/Los_Angeles"/);
   assert.match(css, /\.class-entry-layout\{display:grid/);
   assert.match(css, /@media\(max-width:900px\).*class-entry-layout\{grid-template-columns:1fr\}/s);
 });

@@ -30,7 +30,6 @@ function sizeLabel(bytes: number) {
 export function ClassPlaylistManager({
   code,
   locale,
-  realtimeMode,
 }: {
   code: string;
   locale: Locale;

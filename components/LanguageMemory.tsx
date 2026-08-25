@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import { interfaceText, isSiteLanguage, languageHtmlTags, siteLanguages, type SiteLanguage } from "../lib/site-locale";
+import { interfaceText, isSiteLanguage, languageHtmlTags, type SiteLanguage } from "../lib/site-locale";
 
 const storageKey = "greatlovemeta-language";
 

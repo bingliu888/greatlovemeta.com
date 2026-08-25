@@ -47,7 +47,11 @@ export function ClassShareStudio({ meeting, locale, shareUrl, onClose, embedded=
     context.fillStyle = "#2de3aa"; context.font = "800 30px system-ui"; context.fillText("COURSE STUDIO", 68, 88);
     context.fillStyle = "#ffffff"; context.font = "900 84px system-ui"; const titleBottom = wrapText(context, meeting.title, 68, 500, 880, 92, 3);
     context.fillStyle = "#b9d4d6"; context.font = "500 30px system-ui"; const description = meeting.description || (zh ? "欢迎加入这门课程。" : "You are invited to this class."); const descBottom = wrapText(context, description, 70, Math.min(titleBottom + 22, 770), 875, 43, 2);
-    const date = new Date(meeting.startsAt * 1000).toLocaleString(locale, { dateStyle: "medium", timeStyle: "short" });
+    const date = new Date(meeting.startsAt * 1000).toLocaleString(locale, {
+      dateStyle: "medium",
+      timeStyle: "short",
+      timeZone: "America/Los_Angeles",
+    });
     context.fillStyle = "#ffffff"; context.font = "700 30px system-ui"; context.fillText(`${date}  ·  ${meeting.durationMinutes} ${zh ? "分钟" : "min"}`, 70, Math.min(descBottom + 32, 888));
     context.fillStyle = "#2de3aa"; context.font = "900 46px ui-monospace, monospace"; context.fillText(`${zh ? "课程号" : "COURSE ID"}  ${meeting.code}`, 70, 942);
     context.fillStyle = "#ffffff"; context.font = "700 24px system-ui"; context.textAlign = "right"; context.fillText(shareUrl.replace(/^https?:\/\//, ""), 956, 986); context.textAlign = "left";

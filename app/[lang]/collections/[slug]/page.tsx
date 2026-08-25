@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Collection artwork is user-managed media with arbitrary external URLs and intentionally bypasses the framework image proxy. */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";

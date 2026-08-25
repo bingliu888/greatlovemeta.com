@@ -9,12 +9,18 @@ const eslintConfig = defineConfig([
   globalIgnores([
     // Default ignores of eslint-config-next:
     ".next/**",
+    "dist/**",
+    ".wrangler/**",
     "out/**",
     "build/**",
     "next-env.d.ts",
     // Published third-party swap bundles are immutable browser artifacts, not
     // authored source. Their upstream minified output is validated separately.
     "public/swap-assets/**",
+    // Browser copies generated from pinned third-party packages are prepared
+    // and validated by the build; lint the integration code, not vendor output.
+    "public/pdf.worker.min.mjs",
+    "public/wallet-assets/greatlove-onboard.js",
   ]),
 ]);
 

@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Live-chat avatars and attachments use arbitrary user-controlled URLs and intentionally bypass the framework image proxy. */
+
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 

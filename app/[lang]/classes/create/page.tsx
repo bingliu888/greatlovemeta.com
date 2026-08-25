@@ -3,7 +3,7 @@ import { SiteHeader } from "@/components/SiteHeader";
 import { SiteFooter } from "@/components/SiteFooter";
 import { ClassCreateForm } from "@/components/class-create-form";
 import { getSessionUser } from "@/lib/auth";
-import { isAdminUser, isTeacherUser } from "@/lib/admin-access";
+import { isTeacherUser } from "@/lib/admin-access";
 import { safeSiteLanguage } from "@/lib/site-locale";
 import "../classes.css";
 export const dynamic="force-dynamic";

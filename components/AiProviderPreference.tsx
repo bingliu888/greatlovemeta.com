@@ -9,13 +9,16 @@ export function AiProviderPreference() {
   const [zh, setZh] = useState(false);
 
   useEffect(() => {
-    setZh(document.documentElement.lang.toLowerCase().startsWith("zh") || location.pathname.startsWith("/zh"));
+    const languageTimer = window.setTimeout(() => {
+      setZh(document.documentElement.lang.toLowerCase().startsWith("zh") || location.pathname.startsWith("/zh"));
+    }, 0);
     fetch("/api/ai-provider", { cache: "no-store" })
       .then(response => response.json())
       .then(data => {
         if (data.preference === "openai" || data.preference === "deepseek") setPreference(data.preference);
       })
       .catch(() => undefined);
+    return () => window.clearTimeout(languageTimer);
   }, []);
 
   async function update(value: TextAiProviderPreference) {
@@ -60,4 +63,3 @@ export function AiProviderPreference() {
     <p role="status" aria-live="polite" style={{ minHeight: "1.4em", margin: ".75rem 0 0" }}>{saved ? (zh ? "已保存。" : "Saved.") : ""}</p>
   </section>;
 }
-

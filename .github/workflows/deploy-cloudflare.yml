@@ -33,6 +33,9 @@ jobs:
       - name: Contract tests
         run: node --test tests/subscription-crypto-contract.test.mjs
 
+      - name: Lint authored source with zero-warning policy
+        run: npm run lint
+
       - name: Ensure private class-media bucket
         run: npx wrangler r2 bucket create greatlovemeta-com-class-files --config wrangler.cloudflare.jsonc || true
         env:

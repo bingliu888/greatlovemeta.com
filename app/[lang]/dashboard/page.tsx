@@ -6,7 +6,6 @@ import { GameDailyLog } from "../../../components/GameDailyLog";
 import { MembershipPanel } from "../../../components/MembershipPanel";
 import { TextSizeControl } from "../../../components/TextSizeControl";
 import { getSessionUser } from "../../../lib/auth";
-import { isAdminUser } from "../../../lib/admin-access";
 import { SiteHeader } from "../../../components/SiteHeader";
 import { SiteFooter } from "../../../components/SiteFooter";
 import "./dashboard-tuneup.css";
@@ -56,7 +55,6 @@ export default async function Dashboard({ params }: { params: Promise<{ lang: st
   const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: requestHeaders.get("cookie") ?? "" } }));
   if (!user) redirect(`/${lang}/auth/login`);
   const t = copy[contentLang];
-  const canCreateClasses=await isAdminUser(user);
   return (
     <main className="dashboard-page">
       <SiteHeader lang={lang} />

@@ -1,5 +1,7 @@
 "use client";
 
+/* eslint-disable @next/next/no-img-element -- Member avatars use arbitrary user-controlled URLs and intentionally bypass the framework image proxy. */
+
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 

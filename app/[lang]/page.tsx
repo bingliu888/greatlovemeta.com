@@ -1,3 +1,4 @@
+/* eslint-disable @next/next/no-img-element -- Community artwork is dynamic user-managed media with arbitrary URLs and intentionally bypasses the framework image proxy. */
 import type { Metadata } from "next";
 import Link from "next/link";
 import { redirect } from "next/navigation";
