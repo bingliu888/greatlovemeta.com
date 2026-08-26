@@ -32,21 +32,22 @@ function normalizeLocale(value: string | undefined) {
 }
 
 export function AuthPolicyIntro({ locale: localeProp, className }: { locale?: string; className?: string }) {
-  const [locale, setLocale] = useState(() => normalizeLocale(localeProp));
+  const [detectedLocale, setDetectedLocale] = useState("en");
 
   useEffect(() => {
-    if (localeProp) {
-      setLocale(normalizeLocale(localeProp));
-      return;
-    }
+    if (localeProp) return;
     const root = document.documentElement;
-    const sync = () => setLocale(normalizeLocale(root.lang));
-    sync();
+    const sync = () => setDetectedLocale(normalizeLocale(root.lang));
+    const frame = window.requestAnimationFrame(sync);
     const observer = new MutationObserver(sync);
     observer.observe(root, { attributes: true, attributeFilter: ["lang"] });
-    return () => observer.disconnect();
+    return () => {
+      window.cancelAnimationFrame(frame);
+      observer.disconnect();
+    };
   }, [localeProp]);
 
+  const locale = normalizeLocale(localeProp || detectedLocale);
   return <p className={className}>{policyCopy[locale]}</p>;
 }
 

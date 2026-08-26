@@ -3,7 +3,7 @@
 import { useAuth } from "@clerk/nextjs";
 import { isClerkAPIResponseError } from "@clerk/nextjs/errors";
 import { useSignIn, useSignUp } from "@clerk/nextjs/legacy";
-import { FormEvent, useEffect, useRef, useState } from "react";
+import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import { portfolioAuthText } from "./auth-copy.generated";
 import { PasswordField } from "./PasswordField";
 
@@ -32,7 +32,7 @@ export function ClerkDualAuthForm({
 }: ClerkDualAuthFormProps) {
   const [detectedLocale, setDetectedLocale] = useState(localeProp || "en");
   const locale = localeProp || detectedLocale;
-  const t = (english: string) => portfolioAuthText(locale, english);
+  const t = useCallback((english: string) => portfolioAuthText(locale, english), [locale]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
@@ -87,7 +87,7 @@ export function ClerkDualAuthForm({
         setError(issue instanceof Error ? issue.message : t("Unable to connect your secure session."));
       }
     })();
-  }, [authLoaded, bridgeEndpoint, completionPath, getToken, returnTo, userId]);
+  }, [authLoaded, bridgeEndpoint, completionPath, getToken, returnTo, t, userId]);
 
   function activationTarget() {
     if (completionPath) return completionPath;
