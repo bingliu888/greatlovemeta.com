@@ -14,7 +14,9 @@ const allowedLatinTerms = Object.freeze([
   "USDC", "ETH", "BTC", "EVM", "D1", "R2", "PDF", "JPG", "PNG", "WebP",
   "MB", "ID", "URL", "SSL", "DNS", "Webhook", "API", "Polygon",
   "iOS", "cz.cool", "HLS", "DeepSeek", "Flash", "WalletConnect", "ERC-20",
-  "DOCX", "XLSX", "PPTX", "PDT",
+  "DOCX", "XLSX", "PPTX", "PDT", "GreatLoveMeta",
+  "RefID", "Gas", "TransactionID", "SmartPay3", "Owner", "W1", "W2", "W3", "W4", "W5",
+  "TP", "Solidity", "PolygonScan", "Sourcify", "Worker", "ABI", "ERC", "Standard", "JSON",
 ]);
 
 const avoidableEnglish = [

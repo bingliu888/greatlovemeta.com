@@ -1,5 +1,94 @@
-import { getDatabase } from "@/lib/auth";
-import { getSessionUser } from "@/lib/auth";
-import { cryptoPaymentSettingById,cryptoPlan,tokenAmountFor,tokenAmountToAtomic } from "@/lib/crypto-payments";
-import { addressTopic,cryptoRpc,cryptoRpcUrl,TRANSFER_TOPIC } from "@/lib/crypto-rpc";
-export async function POST(request:Request){try{const user=await getSessionUser();if(!user)return Response.json({error:"Sign in required"},{status:401});const body=await request.json().catch(()=>null) as {settingId?:string;plan?:string}|null;const setting=await cryptoPaymentSettingById(String(body?.settingId||"")),plan=cryptoPlan(body?.plan),db=getDatabase(),account=await db.prepare("SELECT wallet_address AS wallet FROM users WHERE id=?").bind(user.id).first<{wallet:string|null}>();if(!setting||!plan||!account?.wallet)return Response.json({error:"Select a plan, rail, and saved payer wallet"},{status:400});const url=await cryptoRpcUrl(setting.chainId);if(!url)return Response.json({error:"Blockchain RPC is not configured"},{status:503});const latest=BigInt(await cryptoRpc(url,"eth_blockNumber",[]) as string),depth=setting.chainId===137?100000n:25000n,from=latest>depth?latest-depth:0n;const logs=await cryptoRpc(url,"eth_getLogs",[{address:setting.tokenContract,fromBlock:`0x${from.toString(16)}`,toBlock:"latest",topics:[TRANSFER_TOPIC,addressTopic(account.wallet),addressTopic(setting.receiverWallet)]}]) as Array<{transactionHash?:string;data?:string}>;const expected=tokenAmountToAtomic(tokenAmountFor(setting,plan.id),setting.tokenDecimals);for(const log of [...logs].reverse()){const hash=String(log.transactionHash||"").toLowerCase();if(!/^0x[a-f0-9]{64}$/.test(hash)||!log.data||BigInt(log.data)<expected)continue;if(!await db.prepare("SELECT id FROM crypto_payment_claims WHERE tx_hash=?").bind(hash).first())return Response.json({txHash:hash});}return Response.json({error:"No unclaimed matching recent ERC-20 transfer was found"},{status:404});}catch{return Response.json({error:"Recent-payment lookup is temporarily unavailable"},{status:502});}}
+import { NextResponse } from "next/server";
+import { isAddress, type Address } from "viem";
+import { cryptoRpcUrl } from "../../../../../lib/crypto-rpc";
+import { activeCryptoSettings, cryptoSettingById } from "../../../../../lib/crypto-settings";
+import { database } from "../../../../../lib/db";
+import { isPermanentAdmin, requireMember } from "../../../../../lib/member";
+import { cryptoSubscriptionIdsForPlan } from "../../../../../lib/crypto-subscription";
+import { ensureReferralCode, normalizeReferralCode } from "../../../../../lib/referrals";
+import { smartPay3LatestTransactions, verifySmartPay3Identity } from "../../../../../lib/smartpay3-server";
+import { smartPay3ExpectedTokenPair } from "../../../../../lib/smartpay3-presets";
+import { smartPayRecipientMatches } from "../../../../../lib/smartpay-reconciliation";
+
+export const dynamic = "force-dynamic";
+export async function POST(request: Request) {
+  try {
+    const actor = await requireMember();
+    const input = await request.json().catch(() => null) as {
+      plan?: string;
+      settingId?: string;
+      memberId?: string;
+      includeClaimed?: boolean;
+    } | null;
+    const requestedMemberId = String(input?.memberId || actor.id);
+    let member: { id:string; payerWalletAddress:string|null } = actor;
+    if (requestedMemberId !== actor.id) {
+      if (!isPermanentAdmin(actor)) return NextResponse.json({ error: "Only the permanent administrator can check another member" }, { status: 403 });
+      const target = await database().prepare("SELECT id,wallet_address AS payerWalletAddress FROM users WHERE id=? LIMIT 1")
+        .bind(requestedMemberId).first<{ id:string; payerWalletAddress:string|null }>();
+      if (!target) return NextResponse.json({ error: "Member not found" }, { status: 404 });
+      member = target;
+    }
+    if (!member.payerWalletAddress || !isAddress(member.payerWalletAddress)) {
+      return NextResponse.json({ error: "The member must save a payer wallet first" }, { status: 409 });
+    }
+    const setting = await cryptoSettingById(String(input?.settingId || ""));
+    if (!setting) return NextResponse.json({ error: "Select an active crypto payment setting" }, { status: 400 });
+    if (!setting.smartPay3Contract || !isAddress(setting.smartPay3Contract)) {
+      return NextResponse.json({ error: "On-chain subscription payment is not configured for this token" }, { status: 409 });
+    }
+    const billingPlan = input?.plan === "annual" ? "annual" : "monthly";
+    const rpcUrl = await cryptoRpcUrl(setting.chainId);
+    if (!rpcUrl) return NextResponse.json({ error: "Blockchain RPC is not configured for this network" }, { status: 503 });
+    const payer = member.payerWalletAddress.toLowerCase() as Address;
+    const memberRefId = (await ensureReferralCode(member.id)).code;
+    const contract = setting.smartPay3Contract as Address;
+    const ids = cryptoSubscriptionIdsForPlan(billingPlan);
+    await verifySmartPay3Identity(rpcUrl, contract);
+    const { transactions: payments } = await smartPay3LatestTransactions({ rpcUrl, contract, wallet: payer, maxCount: 100 });
+    const tokenPair = smartPay3ExpectedTokenPair(await activeCryptoSettings(), setting);
+    if (!tokenPair) return NextResponse.json({ error: "This token pair is not available for on-chain payment" }, { status: 409 });
+    for (const payment of payments) {
+      if (normalizeReferralCode(payment.refId) !== memberRefId
+        || !smartPayRecipientMatches(payment, payer, memberRefId)) continue;
+      if (payment.mainId !== ids.mainId || payment.secondId !== ids.secondId) continue;
+      if (payment.primaryTokenAddress.toLowerCase() !== setting.tokenContract.toLowerCase()
+        || payment.secondaryTokenAddress.toLowerCase() !== tokenPair.secondaryTokenAddress) continue;
+      const claimed = await database().prepare(`SELECT id,user_id AS memberId,entitlement_status AS status,
+          transaction_id AS txHash,current_period_ends_at AS currentPeriodEnd
+        FROM smartpay3_payment_claims
+        WHERE lower(contract_address)=lower(?) AND lower(transaction_id)=lower(?) LIMIT 1`)
+        .bind(contract, payment.transactionId)
+        .first<{ id:string; memberId:string; status:string; txHash:string; currentPeriodEnd:number | null }>();
+      if (!claimed) return NextResponse.json({
+        txHash: payment.transactionId,
+        paymentMode: "smartpay3",
+        paymentId: payment.transactionId,
+        claimed: false,
+        timestamp: Number(payment.timestamp),
+        tokenAmount: payment.primaryTokenAmount.toString()
+      });
+      if (input?.includeClaimed === true && claimed.memberId === member.id) {
+        return NextResponse.json({
+          txHash: claimed.txHash || payment.transactionId,
+          paymentMode: "smartpay3",
+          paymentId: payment.transactionId,
+          claimed: true,
+          verified: claimed.status === "synced",
+          timestamp: Number(payment.timestamp),
+          tokenAmount: payment.primaryTokenAmount.toString(),
+          currentPeriodEnd: claimed.currentPeriodEnd
+        });
+      }
+    }
+    return NextResponse.json({
+      error: input?.includeClaimed === true
+        ? "No matching payment was found in recent on-chain activity"
+        : "No unclaimed matching payment was found in recent on-chain activity"
+    }, { status: 404 });
+  } catch (error) {
+    if (error instanceof Response) return error;
+    console.warn("Crypto payment lookup failed", error instanceof Error ? error.message.slice(0, 160) : "unknown");
+    return NextResponse.json({ error: "Blockchain lookup is temporarily unavailable" }, { status: 502 });
+  }
+}

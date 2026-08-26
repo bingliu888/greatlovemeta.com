@@ -1,12 +1,3 @@
-import CryptoCheckout from "../../../../components/CryptoCheckout";
-import type { CryptoPlanId } from "../../../../lib/crypto-contract";
-import { safeSiteLanguage } from "../../../../lib/site-locale";
-
-export const dynamic = "force-dynamic";
-
-export default async function CryptoPage({ params, searchParams }: { params: Promise<{ lang: string }>; searchParams: Promise<{ plan?: string }> }) {
-  const [{ lang: raw }, { plan }] = await Promise.all([params, searchParams]);
-  const lang = safeSiteLanguage(raw), contentLang = lang === "zh" ? "zh" : "en";
-  const initialPlan: CryptoPlanId = plan === "annual" ? plan : "monthly";
-  return <main><CryptoCheckout language={contentLang} initialPlan={initialPlan}/></main>;
-}
+import{SiteHeader}from"../../../../components/SiteHeader";import{SiteFooter}from"../../../../components/SiteFooter";import{CryptoCheckout}from"../../../../components/CryptoCheckout";import type{SubscriptionPlanId}from"../../../../lib/subscription-plans";import{safeSiteLanguage}from"../../../../lib/site-locale";
+export const dynamic="force-dynamic";
+export default async function Page({params,searchParams}:{params:Promise<{lang:string}>;searchParams:Promise<{plan?:string}>}){const[{lang:raw},{plan}]=await Promise.all([params,searchParams]),lang=safeSiteLanguage(raw);const initialPlan:SubscriptionPlanId=plan==="annual"?"annual":"monthly";return <main className="dashboard-page"><SiteHeader lang={lang}/><CryptoCheckout lang={lang} initialPlan={initialPlan}/><SiteFooter lang={lang}/></main>}

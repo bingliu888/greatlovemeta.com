@@ -1,5 +1,6 @@
 import { currentUser } from "@clerk/nextjs/server";
 import { cookies } from "next/headers";
+import type { SiteLanguage } from "./site-locale";
 
 const COOKIE_NAME = "glm_session";
 const SESSION_SECONDS = 60 * 60 * 24 * 7;
@@ -9,15 +10,19 @@ type D1Result<T> = { results?: T[]; success: boolean };
 type Statement = {
   bind: (...values: unknown[]) => Statement;
   first: <T>() => Promise<T | null>;
+  all: <T>() => Promise<D1Result<T>>;
   run: <T = Record<string, unknown>>() => Promise<D1Result<T>>;
 };
-type Database = { prepare: (query: string) => Statement };
+type Database = {
+  prepare: (query: string) => Statement;
+  batch: <T = unknown>(statements: Statement[]) => Promise<T[]>;
+};
 
 export type SessionUser = {
   id: string;
   email: string;
   displayName: string;
-  preferredLanguage: "en" | "zh";
+  preferredLanguage: SiteLanguage;
 };
 
 function db(): Database {

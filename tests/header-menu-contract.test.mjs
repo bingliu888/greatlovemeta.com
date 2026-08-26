@@ -10,7 +10,7 @@ test("shared header uses the SmartClass hamburger drawer and twelve text languag
  assert.ok(header.indexOf("<HeaderLanguageMenu lang={lang}/>") < header.indexOf("<HeaderAccount lang={lang}/>") , "desktop language control must precede account");
  const locale=await read("../lib/site-locale.ts");
  for(const label of ["中文","English","Español","日本語","한국어","Français","Deutsch","Русский","Italiano","Português","العربية","हिन्दी"])assert.match(locale,new RegExp(label));
- assert.match(account,/Sign in or register/); assert.match(account,/session\.signedIn/);
+ assert.match(account,/shellCopyFor\(lang\)/); assert.match(account,/session\.signedIn/); assert.match(locale,/signIn:interfaceText/);
  assert.match(css,/\.hamburger-button\.open span:nth-child\(1\)/); assert.match(css,/\.mobile-header-menu/); assert.match(css,/\.mobile-language-options/);
  assert.doesNotMatch(languages,/🇨🇳|🇺🇸|🇪🇸/);
  assert.doesNotMatch(languages,/routeLanguage|searchParams\.set\("uiLocale"/);assert.match(languages,/parts\[1\] = code/);

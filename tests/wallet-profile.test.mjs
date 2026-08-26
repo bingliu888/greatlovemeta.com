@@ -3,9 +3,10 @@ import { readdir, readFile } from "node:fs/promises";
 import test from "node:test";
 
 test("account profile can display, validate, save, and update an EVM wallet", async () => {
-  const [editor, route, schema, migrationNames] = await Promise.all([
+  const [editor, route, walletBinding, schema, migrationNames] = await Promise.all([
     readFile(new URL("../components/ProfileEditor.tsx", import.meta.url), "utf8"),
     readFile(new URL("../app/api/profile/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../lib/wallet-binding.ts", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readdir(new URL("../drizzle", import.meta.url)),
   ]);
@@ -19,7 +20,9 @@ test("account profile can display, validate, save, and update an EVM wallet", as
   assert.match(editor, /walletEditing/);
   assert.match(editor, /walletAddress: normalizedWallet/);
   assert.match(route, /wallet_address AS walletAddress/);
-  assert.match(route, /UPDATE users SET wallet_address/);
+  assert.match(route, /saveMemberWallet/);
+  assert.match(walletBinding, /UPDATE users SET wallet_address/);
+  assert.match(walletBinding, /WALLET_ALREADY_IN_USE/);
   assert.match(route, /\^0x\[a-fA-F0-9\]\{40\}\$/);
   assert.match(schema, /walletAddress: text\("wallet_address"\)/);
   assert.match(migrationSources.join("\n"), /ALTER TABLE `users` ADD `wallet_address` text/);

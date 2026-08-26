@@ -33,6 +33,18 @@ export const shellCopyFor=(language:SiteLanguage)=>({
   project:interfaceText(language,"Project","项目"),
   footerTag:interfaceText(language,"Great Love · Intelligence · Sustainability","大爱 · 智慧 · 永续"),
   assistant:interfaceText(language,"Open AI assistant","打开智能助手"),
+  account:interfaceText(language,"My account","我的账户"),
+  accountMenu:interfaceText(language,"Account menu","账户菜单"),
+  signIn:interfaceText(language,"Sign in or register","登录或注册"),
+  dashboard:interfaceText(language,"Dashboard","用户面板"),
+  myCourses:interfaceText(language,"My Courses","我的课程"),
+  messages:interfaceText(language,"Messages","消息中心"),
+  settings:interfaceText(language,"Account | Set password","账户 | 设置密码"),
+  memberCommunity:interfaceText(language,"Member community","会员社区"),
+  projects:interfaceText(language,"Ecosystem projects","共建项目"),
+  membership:interfaceText(language,"Membership","会员方案"),
+  signOut:interfaceText(language,"Sign out","退出登录"),
+  unread:interfaceText(language,"unread","未读"),
 });
 
 export const homeHeroTitles:Record<SiteLanguage,readonly string[]>={

@@ -1,71 +1,79 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-class-timezone-eslint-zero-20260825",
+  "releaseId": "greatlovemeta-smartpay3-subscription-locales-20260826",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Stabilize classroom share timestamps and enforce clean authored source",
-    "zh": "稳定课堂共享时间并强制业务源码零告警"
+    "en": "Add SmartPay3 subscription checkout and twelve-language member payment pages",
+    "zh": "新增 SmartPay3 订阅结账并完善十二语言会员付款页面"
   },
   "purpose": {
-    "en": "Prevent classroom share-card timestamps from changing between Cloudflare server rendering and the visitor browser, while removing dead classroom code and making zero-error, zero-warning ESLint a permanent production gate.",
-    "zh": "防止课堂共享卡片时间在 Cloudflare 服务端渲染与访客浏览器之间发生变化，同时删除课堂死代码，并将 ESLint 零错误、零警告设为永久生产门禁。"
+    "en": "Give GreatLoveMeta members one clean SmartPay3 subscription flow whose price rules come from the active site contract, safely match payments to the member RefID, and keep account, subscription, checkout, footer, legal, and signed-in menu surfaces localized across all twelve supported languages.",
+    "zh": "为 GreatLoveMeta 会员提供统一、简洁的 SmartPay3 订阅流程，价格规则读取本站当前合约，以 RefID 安全匹配付款，并让账户、订阅、结账、页脚、法律页及登录菜单完整支持十二种语言。"
   },
   "features": {
     "en": [
-      "Render classroom share-card dates in the same explicit America/Los_Angeles timezone already used by classroom directory and detail views.",
-      "Remove the unused legacy PlaylistViewer and clean stale imports, hook effects, dynamic-media lint contracts, and cleanup refs.",
-      "Run authored-source ESLint with max warnings set to zero on every production deployment."
+      "Use SmartPay3 as the only supported contract and ABI for single-token or eligible USDT-plus-GLC subscription payments, with authoritative on-chain rule and price reads.",
+      "Attach the payer wallet and six-character RefID to each payment, prevent a wallet with subscription history from being rebound to another account, and synchronize only unclaimed records that match both the saved wallet and current RefID.",
+      "Add icon-only RefID and wallet copy controls, preflight token and gas balances before payment, and use the required 6-second initial confirmation wait followed by three 10-second retries.",
+      "Localize account-menu destinations, member profile, subscription status, every crypto-checkout step, footer links, and legal pages for English, Chinese, Japanese, Korean, Spanish, French, German, Russian, Italian, Portuguese, Arabic, and Hindi."
     ],
     "zh": [
-      "课堂共享卡片使用与课堂目录和详情页相同的明确 America/Los_Angeles 时区渲染日期。",
-      "删除未使用的旧 PlaylistViewer，并清理失效导入、Hook effect、动态媒体 lint 契约及清理引用。",
-      "每次生产发布均以最大警告数为零执行业务源码 ESLint。"
+      "仅使用 SmartPay3 合约与 ABI，支持单币及符合条件的 USDT 加 GLC 订阅付款，并以链上规则和价格作为权威来源。",
+      "每笔付款携带付款钱包及六位 RefID；已有订阅历史的钱包不能改绑其他账户；仅同步同时匹配已保存钱包、当前 RefID 且尚未入账的记录。",
+      "新增仅图标的 RefID 与钱包复制按钮，付款前检查代币及 Gas 余额，并按要求先等待 6 秒，再以 10 秒间隔重试三次确认记录。",
+      "账户下拉菜单目标页、会员档案、订阅状态、加密货币结账每一步、页脚链接及法律页面完整支持中、英、日、韩、西、法、德、俄、意、葡、阿拉伯及印地语。"
     ]
   },
   "affected": {
     "en": [
-      "Classroom share images, classroom playback and screen-share components, authored-source lint policy, deployment workflow, and Project release history"
+      "Member account and profile, subscription pricing and crypto checkout, administrator crypto-payment console, SmartPay3 contract bundle and ABI, D1 subscription reconciliation, twelve runtime locale dictionaries, deployment workflow, and Project release history"
     ],
     "zh": [
-      "课堂分享图片、课堂播放与屏幕共享组件、业务源码 lint 策略、发布工作流及 Project 发布历史"
+      "会员账户与档案、订阅定价与加密结账、管理员加密付款控制台、SmartPay3 合约包与 ABI、D1 订阅核对、十二语言运行时字典、发布工作流及 Project 发布历史"
     ]
   },
   "changes": {
     "en": [
-      "Pin localized share-image time formatting to America/Los_Angeles to eliminate server/browser hydration drift.",
-      "Replace synchronous effect state changes with deferred callbacks or derived state, and stabilize media element cleanup references.",
-      "Exclude only documented generated build output and pinned third-party browser bundles while continuing to lint app, components, and library source."
+      "Add the SmartPay3 Solidity source, reproducible compiler artifact, public ABI route, owner-only administration, W1–W5 split configuration, token withdrawal safeguards, payment-rule management, source-verification support, and paged transaction reads.",
+      "Add D1 schema for RefID, wallet binding, SmartPay3 deployment state, payment claims, and subscription reconciliation while preserving existing subscription dates.",
+      "Show the original GreatLoveMeta catalog price before wallet connection; offer a configured USDT/GLC split only after the connected wallet satisfies the on-chain GLC eligibility and balance checks.",
+      "Remove authored SmartPay1 and SmartPay2 compatibility paths so a site uses only its newly configured SmartPay3 address."
     ],
     "zh": [
-      "将本地化分享图片时间格式固定到 America/Los_Angeles，消除服务端与浏览器水合偏差。",
-      "用延迟回调或派生状态替代 effect 中的同步状态修改，并稳定媒体元素清理引用。",
-      "仅排除已记录的生成构建输出和固定版本第三方浏览器包，继续检查 app、components 与 lib 业务源码。"
+      "新增 SmartPay3 Solidity 源码、可复现编译产物、公开 ABI 路由、仅 Owner 可用的管理操作、W1–W5 分账、代币提款保护、付款规则管理、源码验证支持及分页交易读取。",
+      "新增 RefID、钱包绑定、SmartPay3 部署状态、付款认领及订阅核对所需 D1 结构，并保留现有订阅截止日期。",
+      "连接钱包前显示 GreatLoveMeta 原始产品目录价格；仅当连接钱包符合链上 GLC 资格与余额条件后，才提供后台配置的 USDT/GLC 混合付款方案。",
+      "删除业务源码中的 SmartPay1 与 SmartPay2 兼容路径，使本站仅使用新配置的 SmartPay3 地址。"
     ]
   },
   "validation": {
     "en": [
-      "Require ESLint to complete with exactly zero errors and zero warnings, then run the full site tests, shared classroom contracts, protected-navigation check, production build, and artifact validation.",
-      "Deploy the exact validated Git commit through GitHub Actions and Cloudflare and verify its detailed Project release record."
+      "Compiled SmartPay3 with Solidity 0.8.36 and verified the ABI, bytecode, mixed-payment accounting, eligibility checks, immediate owner transfer, former-owner and non-owner rejection, withdrawal protection, and deployment bundle reproduction.",
+      "Completed a production Vinext build and Cloudflare artifact validation; all 124 repository tests passed, ESLint completed with zero errors and zero warnings, and git diff validation passed.",
+      "Verified twelve-language runtime coverage, user-facing removal of SmartPay/mainID/secondID/OPC terminology, wallet and RefID copy controls, catalog-price-before-wallet behavior, protected navigation, and the exact Project release-report contract."
     ],
     "zh": [
-      "要求 ESLint 精确达到零错误、零警告，再执行整站测试、共享课堂契约、受保护导航检查、生产构建及产物验证。",
-      "通过 GitHub Actions 与 Cloudflare 发布完全相同且已验证的 Git 提交，并核对其详细 Project 发布记录。"
+      "使用 Solidity 0.8.36 编译 SmartPay3，并验证 ABI、字节码、混合付款记账、资格检查、Owner 即时转移、旧 Owner 与非 Owner 拒绝、提款保护及部署包可复现性。",
+      "完成 Vinext 生产构建与 Cloudflare 产物验证；仓库 124 项测试全部通过，ESLint 为零错误、零警告，Git 差异检查通过。",
+      "验证十二语言运行时覆盖、用户界面不显示 SmartPay/mainID/secondID/OPC 内部术语、钱包及 RefID 复制按钮、连接钱包前显示产品目录价格、受保护导航及精确 Project 发布报告契约。"
     ]
   },
   "deferred": {
     "en": [
-      "This portfolio migration does not change classroom pricing, permissions, realtime participant limits, wallet contracts, game rewards, or payment behavior."
+      "This deployment does not deploy or configure a live SmartPay3 contract, connect a wallet, approve tokens, transfer ownership, change W1–W5, withdraw tokens, or make a subscription purchase; an administrator must deploy and configure SmartPay3 before crypto options become available.",
+      "The existing PayPal subscription flow, current member subscription dates, classroom behavior, realtime limits, games, rewards, and swap behavior are unchanged; full realtime room testing is not required for this portfolio migration."
     ],
     "zh": [
-      "本轮组合迁移不改变课堂定价、权限、实时参与人数限制、钱包合约、游戏奖励或付款行为。"
+      "本次发布不会部署或配置真实 SmartPay3 合约，不连接钱包、不授权代币、不转移 Owner、不修改 W1–W5、不提款，也不执行订阅付款；管理员部署并配置 SmartPay3 后，加密付款选项才会出现。",
+      "现有 PayPal 订阅流程、会员订阅截止日期、课堂行为、实时人数限制、游戏、奖励及 Swap 行为保持不变；本轮全站迁移不要求完整实时会议测试。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Preserve GreatLoveMeta branding, games, reward logs, swap bundles, wallet integration, independent data, and Cloudflare resources; retain its documented generated swap-assets exclusion."
+      "Preserve GreatLoveMeta's independent monthly and annual products (one and twelve months), published PayPal-managed prices with existing $5 and $8 fallbacks, GreatLoveMeta/大爱元宇宙 branding, AI/RWA/community features, private group audio/video, webinars, HLS, games, rewards, swaps, Clerk tenant, D1/R2 data, WalletConnect project, and Cloudflare resources."
     ],
     "zh": [
-      "保留 GreatLoveMeta 品牌、游戏、奖励日志、Swap 资源、钱包集成、独立数据与 Cloudflare 资源，并保留其已记录的生成 swap-assets 排除规则。"
+      "保留 GreatLoveMeta 独立的月度及年度产品（一与十二个月）、由 PayPal 管理的已发布价格及现有 5 美元与 8 美元回退值、GreatLoveMeta/大爱元宇宙品牌、AI/RWA/社区功能、私密小组音视频、网络研讨会、HLS、游戏、奖励、Swap、Clerk 租户、D1/R2 数据、WalletConnect 项目标识及 Cloudflare 资源。"
     ]
   }
 }

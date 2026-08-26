@@ -12,8 +12,8 @@ test("account supports setting and updating a Clerk password", async () => {
   assert.doesNotMatch(form, /currentPassword/);
   assert.match(form, /recent email-code verification/);
   assert.match(form, /newPassword/);
-  assert.match(account, /<PasswordSettings lang=\{contentLang\}\/>/);
-  assert.match(menu, /Account \| Set password/);
+  assert.match(account, /<PasswordSettings lang=\{zh \? "zh" : "en"\}\/>/);
+  assert.match(menu, /t\.settings/);
 });
 
 test("header account uses the same icon-only trigger on desktop and mobile", async () => {

@@ -1,16 +1,15 @@
+/* eslint-disable @next/next/no-img-element -- Clerk avatar URLs are rendered directly so authenticated images are never proxied or cached. */
 "use client";
-
-/* eslint-disable @next/next/no-img-element -- Account avatars use arbitrary user-controlled URLs and intentionally bypass the framework image proxy. */
 
 import { useClerk } from "@clerk/nextjs";
 import Link from "next/link";
 import { AdminMenuLink } from "./AdminMenuLink";
 import { useEffect, useRef, useState } from "react";
 import styles from "./account-menu.module.css";
-import { interfaceText, type SiteLanguage } from "../lib/site-locale";
+import { shellCopyFor, type SiteLanguage } from "../lib/site-locale";
 
 export function HeaderAccount({ lang, initialSignedIn = false }: { lang: SiteLanguage; initialSignedIn?: boolean }) {
-  const t=(en:string,zh:string)=>interfaceText(lang,en,zh);
+  const t=shellCopyFor(lang);
   const clerk = useClerk();
   const [session, setSession] = useState<{ loaded: boolean; signedIn: boolean; imageUrl?: string }>({ loaded: initialSignedIn, signedIn: initialSignedIn });
   const [open, setOpen] = useState(false);
@@ -38,9 +37,9 @@ export function HeaderAccount({ lang, initialSignedIn = false }: { lang: SiteLan
   }, [signedIn]);
   if (!session.loaded) return <span className="auth-placeholder" aria-hidden="true"/>;
   if (signedIn) {
-    const label = t("My account","我的账户");
-    return <div ref={menuRef} className={`${styles.menu} gg-account-menu`}><button className="user-icon" onClick={() => setOpen(value => !value)} aria-label={`${label}${unread ? ` · ${unread} ${t("unread","未读")}` : ""}`} title={label} aria-expanded={open}>{session.imageUrl ? <img src={session.imageUrl} alt=""/> : <span className="avatar-glyph" aria-hidden="true"/>}{unread > 0 && <i className={`unread-avatar-badge${unread > 99 ? " dot" : ""}`}>{unread > 99 ? "" : unread}</i>}</button>{open && <nav aria-label={t("Account menu","账户菜单")}><Link onClick={() => setOpen(false)} href={`/${lang}/dashboard`}><b>{t("Dashboard","用户面板")}</b><small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/classes?view=mine`}><b>{t("My Courses","我的课程")}</b><small>→</small></Link><AdminMenuLink lang={lang} onNavigate={() => setOpen(false)}/><Link onClick={() => setOpen(false)} href={`/${lang}/messages`}><b>{t("Messages","消息中心")}</b>{unread > 0 ? <i className="menu-unread">{unread > 99 ? "99+" : unread}</i> : <small>→</small>}</Link><Link onClick={() => setOpen(false)} href={`/${lang}/account`}>{t("Account | Set password","账户 | 设置密码")}<small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/community`}>{t("Member community","会员社区")}<small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/project`}>{t("Ecosystem projects","共建项目")}<small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/pricing`}>{t("Membership","会员方案")}<small>→</small></Link><button onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); await clerk.signOut(); window.location.assign(`/${lang}`); }}>{t("Sign out","退出登录")}<small>↗</small></button></nav>}</div>;
+    const label=t.account;
+    return <div ref={menuRef} className={`${styles.menu} gg-account-menu`}><button className="user-icon" onClick={() => setOpen(value => !value)} aria-label={`${label}${unread ? ` · ${unread} ${t.unread}` : ""}`} title={label} aria-expanded={open}>{session.imageUrl ? <img src={session.imageUrl} alt=""/> : <span className="avatar-glyph" aria-hidden="true"/>}{unread > 0 && <i className={`unread-avatar-badge${unread > 99 ? " dot" : ""}`}>{unread > 99 ? "" : unread}</i>}</button>{open && <nav aria-label={t.accountMenu}><Link onClick={() => setOpen(false)} href={`/${lang}/dashboard`}><b>{t.dashboard}</b><small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/classes?view=mine`}><b>{t.myCourses}</b><small>→</small></Link><AdminMenuLink lang={lang} onNavigate={() => setOpen(false)}/><Link onClick={() => setOpen(false)} href={`/${lang}/messages`}><b>{t.messages}</b>{unread > 0 ? <i className="menu-unread">{unread > 99 ? "99+" : unread}</i> : <small>→</small>}</Link><Link onClick={() => setOpen(false)} href={`/${lang}/account`}>{t.settings}<small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/community`}>{t.memberCommunity}<small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/project`}>{t.projects}<small>→</small></Link><Link onClick={() => setOpen(false)} href={`/${lang}/pricing`}>{t.membership}<small>→</small></Link><button onClick={async () => { await fetch("/api/auth/logout", { method: "POST" }); await clerk.signOut(); window.location.assign(`/${lang}`); }}>{t.signOut}<small>↗</small></button></nav>}</div>;
   }
-  const signInLabel = t("Sign in or register","登录或注册");
+  const signInLabel=t.signIn;
   return <Link className="user-icon" href={`/${lang}/auth/login`} aria-label={signInLabel} title={signInLabel}><span className="avatar-glyph" aria-hidden="true"/></Link>;
 }
