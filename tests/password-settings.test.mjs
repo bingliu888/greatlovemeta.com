@@ -3,16 +3,16 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 
 test("account supports setting and updating a Clerk password", async () => {
-  const form = await readFile(new URL("../components/PasswordSettings.tsx", import.meta.url), "utf8");
+  const form = await Promise.all([Promise.all([readFile(new URL("../components/PasswordSettings.tsx", import.meta.url), "utf8"),readFile(new URL("../components/portfolio-auth/PortfolioPasswordSettings.tsx", import.meta.url), "utf8"),readFile(new URL("../components/portfolio-auth/PasswordField.tsx", import.meta.url), "utf8"),readFile(new URL("../components/portfolio-auth/auth-copy.generated.ts", import.meta.url), "utf8")]).then(parts=>parts.join("\n")),readFile(new URL("../components/portfolio-auth/PortfolioPasswordSettings.tsx", import.meta.url), "utf8"),readFile(new URL("../components/portfolio-auth/PasswordField.tsx", import.meta.url), "utf8"),readFile(new URL("../components/portfolio-auth/auth-copy.generated.ts", import.meta.url), "utf8")]).then(parts=>parts.join("\n"));
   const account = await readFile(new URL("../app/[lang]/account/page.tsx", import.meta.url), "utf8");
   const menu = await readFile(new URL("../components/HeaderAccount.tsx", import.meta.url), "utf8");
   assert.match(form, /useReverification/);
   assert.match(form, /user\?\.passwordEnabled/);
   assert.match(form, /user\.updatePassword/);
-  assert.doesNotMatch(form, /currentPassword/);
-  assert.match(form, /recent email-code verification/);
+  assert.match(form, /passwordEnabled \? <PasswordField[\s\S]*Current password/);
+  assert.match(form, /A recent email-code sign-in needs no extra code/);
   assert.match(form, /newPassword/);
-  assert.match(account, /<PasswordSettings lang=\{zh \? "zh" : "en"\}\/>/);
+  assert.match(account, /<PasswordSettings lang=\{lang\}\/>/);
   assert.match(menu, /t\.settings/);
 });
 

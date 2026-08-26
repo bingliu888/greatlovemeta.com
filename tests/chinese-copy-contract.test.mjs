@@ -95,6 +95,7 @@ test("Chinese UI copy contains no avoidable English interface phrases", () => {
   const leaks = [];
 
   for (const file of files) {
+    if (file.endsWith("auth-copy.generated.ts")) continue;
     if (file.includes("/app/api/")) continue;
     if (file.endsWith(".generated.ts")) continue;
     const source = readFileSync(file, "utf8");

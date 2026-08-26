@@ -102,9 +102,19 @@ export async function createSession(userId: string) {
   };
 }
 
-export async function createSessionForClerkUser(userId: string, email: string, name: string) {
+export async function createSessionForClerkUser(userId: string, email: string, name: string, linkByVerifiedEmail = false) {
   const normalizedEmail = email.toLowerCase();
-  let user = await db().prepare("SELECT id FROM users WHERE email = ?").bind(normalizedEmail).first<{ id: string }>();
+  let user = await db().prepare("SELECT id FROM users WHERE id = ?").bind(userId).first<{ id: string }>();
+  if (user) {
+    if (linkByVerifiedEmail) {
+      const owner = await db().prepare("SELECT id FROM users WHERE email = ?").bind(normalizedEmail).first<{ id: string }>();
+      if (!owner || owner.id === user.id) await db().prepare("UPDATE users SET email = ?, display_name = ? WHERE id = ?").bind(normalizedEmail, name.slice(0, 60), user.id).run();
+    }
+    return createSession(user.id);
+  }
+  user = linkByVerifiedEmail
+    ? await db().prepare("SELECT id FROM users WHERE email = ?").bind(normalizedEmail).first<{ id: string }>()
+    : null;
   if (!user) {
     const now = Math.floor(Date.now() / 1000);
     const displayName = name.slice(0, 60);
@@ -139,7 +149,11 @@ export async function getSessionUser(request?: Request): Promise<SessionUser | n
   }
   if (!user) {
     const clerkUser = await currentUser();
-    const email = clerkUser?.primaryEmailAddress?.emailAddress?.toLowerCase() || clerkUser?.emailAddresses[0]?.emailAddress?.toLowerCase();
+    const primaryEmail = clerkUser?.primaryEmailAddress || clerkUser?.emailAddresses[0];
+    const claimedEmail = primaryEmail?.emailAddress.toLowerCase();
+    const email = clerkUser && claimedEmail
+      ? primaryEmail?.verification?.status === "verified" ? claimedEmail : `${clerkUser.id}@unverified.invalid`
+      : undefined;
     if (clerkUser && email) {
       user = await db().prepare("SELECT id, email, display_name AS displayName, preferred_language AS preferredLanguage FROM users WHERE email = ?").bind(email).first<SessionUser>();
       if (!user) {

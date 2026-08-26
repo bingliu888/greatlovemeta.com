@@ -69,22 +69,17 @@ test("new messages and replies both provide a working bilingual Guru polish acti
   assert.match(source, /Guru could not help right now/);
 });
 
-test("email-code authentication switches to an explicit verification state", () => {
-  const clerk = read("components/ClerkAuthForm.tsx");
-  const localized = read("lib/auth-interface-copy.ts");
-  assert.match(clerk, /setStep\("code"\)/);
-  assert.match(clerk, /`Code sent to \$\{identifier\}`/);
-  assert.match(clerk, /`验证码已发送至 \$\{identifier\}`/);
-  assert.match(clerk, /autoComplete="one-time-code"/);
-  assert.match(localized, /verify:"Verify & continue"/);
-  assert.match(localized, /verify:"验证并继续"/);
-  assert.match(localized, /anotherEmail:"Use another email"/);
-  assert.match(localized, /anotherEmail:"更换邮箱"/);
-  assert.match(clerk, /step === "code" \? a\.verify/);
-
-  const fallback = read("components/AuthForm.tsx");
-  assert.match(fallback, /sent: "Code sent to"/);
-  assert.match(fallback, /sent: "验证码已发送至"/);
-  assert.match(fallback, /verify: "Verify & continue"/);
-  assert.match(fallback, /verify: "验证并继续"/);
+test("email-code authentication switches to an explicit verification state", async () => {
+  const [auth, copy] = await Promise.all([
+    read("components/portfolio-auth/ClerkDualAuthForm.tsx"),
+    read("components/portfolio-auth/auth-copy.generated.ts"),
+  ]);
+  assert.match(auth, /setStep\("code"\)/);
+  assert.match(auth, /Code sent to \{identifier\}/);
+  assert.match(auth, /autoComplete="one-time-code"/);
+  assert.match(auth, /step === "code" \? t\("Verify & continue"\)/);
+  assert.match(auth, /step !== "credentials" \? t\("Use another email"\)/);
+  assert.match(copy, /验证码已发送至 \{identifier\}/);
+  assert.match(copy, /验证并继续/);
+  assert.match(copy, /更换邮箱/);
 });

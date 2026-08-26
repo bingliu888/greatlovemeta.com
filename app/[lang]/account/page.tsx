@@ -55,7 +55,7 @@ export default async function AccountPage({ params }: { params: Promise<{ lang: 
       </section> : null}
       <ProfileEditor lang={lang} email={user.email} initialName={user.displayName} refId={refId} initialWalletAddress={wallet || ""} initialIntroducer={introducer ?? null} initialImageUrl={avatar ? `/api/profile?avatar=${encodeURIComponent(user.id)}` : ""}/>
       <SmartPayAccountLookup settings={settings} wallet={wallet} locale={lang}/>
-      <div className="account-settings-grid account-secondary"><article><h2>{zh ? "会员与社区" : "Membership and community"}</h2><div className="account-settings-links"><Link href={`/${lang}/dashboard`}>{zh ? "打开会员面板" : "Open member dashboard"} →</Link><Link href={`/${lang}/messages`}>{zh ? "查看消息与实时聊天" : "Open messages and live chat"} →</Link><Link href={`/${lang}/community`}>{zh ? "进入大爱元宇宙社区" : "Open the GreatLoveMeta community"} →</Link></div></article><article><PasswordSettings lang={zh ? "zh" : "en"}/></article></div>
+      <div className="account-settings-grid account-secondary"><article><h2>{zh ? "会员与社区" : "Membership and community"}</h2><div className="account-settings-links"><Link href={`/${lang}/dashboard`}>{zh ? "打开会员面板" : "Open member dashboard"} →</Link><Link href={`/${lang}/messages`}>{zh ? "查看消息与实时聊天" : "Open messages and live chat"} →</Link><Link href={`/${lang}/community`}>{zh ? "进入大爱元宇宙社区" : "Open the GreatLoveMeta community"} →</Link></div></article><article><PasswordSettings lang={lang}/></article></div>
     </section>
     <AiProviderPreference/>
     <SiteFooter lang={lang}/>

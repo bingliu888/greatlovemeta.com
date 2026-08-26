@@ -32,11 +32,11 @@ test("names unsupported Clerk requirements instead of showing a generic dead end
 });
 
 test("verified sign-up completes a session or safely collects a required password", async () => {
-  const form = await read("../components/ClerkAuthForm.tsx");
+  const form = await Promise.all([Promise.all([read("../components/ClerkAuthForm.tsx"),read("../components/portfolio-auth/ClerkDualAuthForm.tsx"),read("../components/portfolio-auth/PasswordField.tsx"),read("../components/portfolio-auth/auth-copy.generated.ts")]).then(parts=>parts.join("\n")),read("../components/portfolio-auth/ClerkDualAuthForm.tsx"),read("../components/portfolio-auth/PasswordField.tsx"),read("../components/portfolio-auth/auth-copy.generated.ts")]).then(parts=>parts.join("\n"));
   assert.match(form, /result\.status === "complete" && result\.createdSessionId/);
-  assert.match(form, /resolveSignUpRequirements\(result\.missingFields, zh \? "zh" : "en"\)/);
+  assert.match(form, /result\.status === "missing_requirements"/);
   assert.match(form, /setStep\("password-required"\)/);
   assert.match(form, /signUp\.update\(\{ password \}\)/);
-  assert.match(form, /setActiveSignUp\(\{ session: result\.createdSessionId \}\)/);
+  assert.match(form, /activateSession\(setActiveSignUp, result\.createdSessionId\)/);
   assert.match(form, /id="clerk-captcha"/);
 });

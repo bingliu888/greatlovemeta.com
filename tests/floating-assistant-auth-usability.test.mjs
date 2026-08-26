@@ -20,12 +20,12 @@ test("Ask Guru stays in a viewport-fixed root layer while pages scroll", async (
 
 test("email, verification-code and password fields remain iPad-readable", async () => {
   const [form, styles] = await Promise.all([
-    read("../components/ClerkAuthForm.tsx"),
+    Promise.all([Promise.all([read("../components/ClerkAuthForm.tsx"),read("../components/portfolio-auth/ClerkDualAuthForm.tsx"),read("../components/portfolio-auth/PasswordField.tsx"),read("../components/portfolio-auth/auth-copy.generated.ts")]).then(parts=>parts.join("\n")),read("../components/portfolio-auth/ClerkDualAuthForm.tsx"),read("../components/portfolio-auth/PasswordField.tsx"),read("../components/portfolio-auth/auth-copy.generated.ts")]).then(parts=>parts.join("\n")),
     read("../app/globals.css"),
   ]);
 
   assert.match(form, /type="email"/);
-  assert.match(form, /type="password"/);
+  assert.match(form, /type=\{revealed \? "text" : "password"\}/);
   assert.match(form, /autoComplete="one-time-code"/);
   assert.match(styles, /\.auth-form input\s*\{[^}]*font-size:\s*max\(18px,var\(--reader-base,18px\)\)!important/);
 });

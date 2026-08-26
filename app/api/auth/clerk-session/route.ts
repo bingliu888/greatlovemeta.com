@@ -1,4 +1,4 @@
-import { verifyToken } from "@clerk/backend";
+import { createClerkClient, verifyToken } from "@clerk/backend";
 import { createSessionForClerkUser } from "../../../../lib/auth";
 
 export async function POST(request: Request) {
@@ -10,16 +10,22 @@ export async function POST(request: Request) {
   const jwtKey = runtime.CLERK_JWT_KEY;
   if (!token || !secretKey || !publishableKey || !jwtKey) return Response.json({ error: "Unauthorized" }, { status: 401 });
   try {
-    const claims = await verifyToken(token, { jwtKey });
+    const claims = await verifyToken(token, { jwtKey, authorizedParties: [new URL(request.url).origin] });
     const userId = claims.sub;
     if (!userId) return Response.json({ error: "Unauthorized" }, { status: 401 });
-    const payload = await request.json() as { email?: string; name?: string };
-    const email = payload.email?.trim().toLowerCase();
-    if (!email || !email.includes("@")) return Response.json({ error: "Verified email required" }, { status: 400 });
+    const clerkUser = await createClerkClient({ secretKey, publishableKey }).users.getUser(userId);
+    if (clerkUser.banned || clerkUser.locked) return Response.json({ error: "Unauthorized" }, { status: 401 });
+    const primaryEmail = clerkUser.emailAddresses.find(address => address.id === clerkUser.primaryEmailAddressId)
+      || clerkUser.emailAddresses[0];
+    const email = primaryEmail?.emailAddress.trim().toLowerCase();
+    if (!email) return Response.json({ error: "Email required" }, { status: 400 });
+    const emailVerified = primaryEmail.verification?.status === "verified";
+    const localEmail = emailVerified ? email : `${userId}@unverified.invalid`;
     const session = await createSessionForClerkUser(
       userId,
-      email,
-      email === "bingliu@cybeye.com" ? "Admin" : /^bingliu\+([^@]+)@/i.exec(email)?.[1] || payload.name || email.split("@")[0] || "GreatLove Meta",
+      localEmail,
+      emailVerified && email === "bingliu@cybeye.com" ? "Admin" : /^bingliu\+([^@]+)@/i.exec(email)?.[1] || clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "GreatLove Meta",
+      emailVerified,
     );
     return Response.json({ ok: true }, { headers: { "Set-Cookie": session.cookie } });
   } catch (error) {

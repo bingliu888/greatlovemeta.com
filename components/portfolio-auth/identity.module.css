@@ -1,0 +1,107 @@
+.fieldGroup {
+  display: grid;
+  gap: .45rem;
+}
+
+.passwordField {
+  display: block;
+  position: relative;
+}
+
+.passwordField input {
+  box-sizing: border-box;
+  padding-inline-end: 3.25rem !important;
+  width: 100%;
+}
+
+.eyeButton {
+  align-items: center;
+  background: transparent !important;
+  border: 0 !important;
+  border-radius: .6rem;
+  box-shadow: none !important;
+  color: currentColor;
+  display: inline-flex;
+  height: 44px;
+  inset-inline-end: .2rem;
+  justify-content: center;
+  margin: 0 !important;
+  min-height: 44px;
+  min-width: 44px;
+  padding: .65rem !important;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 44px;
+}
+
+.eyeButton:hover,
+.eyeButton:focus-visible {
+  background: color-mix(in srgb, currentColor 8%, transparent) !important;
+}
+
+.eyeButton svg {
+  fill: none;
+  height: 1.25rem;
+  stroke: currentColor;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 1.8;
+  width: 1.25rem;
+}
+
+.settings {
+  display: grid;
+  gap: 1rem;
+  min-width: 0;
+}
+
+.settings > p,
+.settings > h2 {
+  margin: 0;
+}
+
+.kicker {
+  font-size: .78rem;
+  font-weight: 800;
+  letter-spacing: .12em;
+}
+
+.settingsForm {
+  display: grid;
+  gap: .9rem;
+}
+
+.settingsForm input {
+  border: 1px solid color-mix(in srgb, currentColor 25%, transparent);
+  border-radius: .65rem;
+  font: inherit;
+  min-height: 48px;
+  padding: .75rem .9rem;
+}
+
+.settingsForm button[type="submit"] {
+  min-height: 48px;
+}
+
+.error,
+.success,
+.notice {
+  border-radius: .65rem;
+  margin: 0;
+  padding: .75rem .9rem;
+}
+
+.error {
+  background: #fff0ee;
+  color: #9f251c;
+}
+
+.success {
+  background: #e9f8ef;
+  color: #145f37;
+}
+
+.notice {
+  background: color-mix(in srgb, currentColor 6%, transparent);
+}
