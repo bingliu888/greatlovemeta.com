@@ -1,79 +1,13 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-smartpay3-subscription-locales-20260826",
+  "releaseId": "greatlovemeta-direct-wallet-pay-20260827",
   "site": "greatlovemeta.com",
-  "title": {
-    "en": "Add SmartPay3 subscription checkout and twelve-language member payment pages",
-    "zh": "新增 SmartPay3 订阅结账并完善十二语言会员付款页面"
-  },
-  "purpose": {
-    "en": "Give GreatLoveMeta members one clean SmartPay3 subscription flow whose price rules come from the active site contract, safely match payments to the member RefID, and keep account, subscription, checkout, footer, legal, and signed-in menu surfaces localized across all twelve supported languages.",
-    "zh": "为 GreatLoveMeta 会员提供统一、简洁的 SmartPay3 订阅流程，价格规则读取本站当前合约，以 RefID 安全匹配付款，并让账户、订阅、结账、页脚、法律页及登录菜单完整支持十二种语言。"
-  },
-  "features": {
-    "en": [
-      "Use SmartPay3 as the only supported contract and ABI for single-token or eligible USDT-plus-GLC subscription payments, with authoritative on-chain rule and price reads.",
-      "Attach the payer wallet and six-character RefID to each payment, prevent a wallet with subscription history from being rebound to another account, and synchronize only unclaimed records that match both the saved wallet and current RefID.",
-      "Add icon-only RefID and wallet copy controls, preflight token and gas balances before payment, and use the required 6-second initial confirmation wait followed by three 10-second retries.",
-      "Localize account-menu destinations, member profile, subscription status, every crypto-checkout step, footer links, and legal pages for English, Chinese, Japanese, Korean, Spanish, French, German, Russian, Italian, Portuguese, Arabic, and Hindi."
-    ],
-    "zh": [
-      "仅使用 SmartPay3 合约与 ABI，支持单币及符合条件的 USDT 加 GLC 订阅付款，并以链上规则和价格作为权威来源。",
-      "每笔付款携带付款钱包及六位 RefID；已有订阅历史的钱包不能改绑其他账户；仅同步同时匹配已保存钱包、当前 RefID 且尚未入账的记录。",
-      "新增仅图标的 RefID 与钱包复制按钮，付款前检查代币及 Gas 余额，并按要求先等待 6 秒，再以 10 秒间隔重试三次确认记录。",
-      "账户下拉菜单目标页、会员档案、订阅状态、加密货币结账每一步、页脚链接及法律页面完整支持中、英、日、韩、西、法、德、俄、意、葡、阿拉伯及印地语。"
-    ]
-  },
-  "affected": {
-    "en": [
-      "Member account and profile, subscription pricing and crypto checkout, administrator crypto-payment console, SmartPay3 contract bundle and ABI, D1 subscription reconciliation, twelve runtime locale dictionaries, deployment workflow, and Project release history"
-    ],
-    "zh": [
-      "会员账户与档案、订阅定价与加密结账、管理员加密付款控制台、SmartPay3 合约包与 ABI、D1 订阅核对、十二语言运行时字典、发布工作流及 Project 发布历史"
-    ]
-  },
-  "changes": {
-    "en": [
-      "Add the SmartPay3 Solidity source, reproducible compiler artifact, public ABI route, owner-only administration, W1–W5 split configuration, token withdrawal safeguards, payment-rule management, source-verification support, and paged transaction reads.",
-      "Add D1 schema for RefID, wallet binding, SmartPay3 deployment state, payment claims, and subscription reconciliation while preserving existing subscription dates.",
-      "Show the original GreatLoveMeta catalog price before wallet connection; offer a configured USDT/GLC split only after the connected wallet satisfies the on-chain GLC eligibility and balance checks.",
-      "Remove authored SmartPay1 and SmartPay2 compatibility paths so a site uses only its newly configured SmartPay3 address."
-    ],
-    "zh": [
-      "新增 SmartPay3 Solidity 源码、可复现编译产物、公开 ABI 路由、仅 Owner 可用的管理操作、W1–W5 分账、代币提款保护、付款规则管理、源码验证支持及分页交易读取。",
-      "新增 RefID、钱包绑定、SmartPay3 部署状态、付款认领及订阅核对所需 D1 结构，并保留现有订阅截止日期。",
-      "连接钱包前显示 GreatLoveMeta 原始产品目录价格；仅当连接钱包符合链上 GLC 资格与余额条件后，才提供后台配置的 USDT/GLC 混合付款方案。",
-      "删除业务源码中的 SmartPay1 与 SmartPay2 兼容路径，使本站仅使用新配置的 SmartPay3 地址。"
-    ]
-  },
-  "validation": {
-    "en": [
-      "Compiled SmartPay3 with Solidity 0.8.36 and verified the ABI, bytecode, mixed-payment accounting, eligibility checks, immediate owner transfer, former-owner and non-owner rejection, withdrawal protection, and deployment bundle reproduction.",
-      "Completed a production Vinext build and Cloudflare artifact validation; all 124 repository tests passed, ESLint completed with zero errors and zero warnings, and git diff validation passed.",
-      "Verified twelve-language runtime coverage, user-facing removal of SmartPay/mainID/secondID/OPC terminology, wallet and RefID copy controls, catalog-price-before-wallet behavior, protected navigation, and the exact Project release-report contract."
-    ],
-    "zh": [
-      "使用 Solidity 0.8.36 编译 SmartPay3，并验证 ABI、字节码、混合付款记账、资格检查、Owner 即时转移、旧 Owner 与非 Owner 拒绝、提款保护及部署包可复现性。",
-      "完成 Vinext 生产构建与 Cloudflare 产物验证；仓库 124 项测试全部通过，ESLint 为零错误、零警告，Git 差异检查通过。",
-      "验证十二语言运行时覆盖、用户界面不显示 SmartPay/mainID/secondID/OPC 内部术语、钱包及 RefID 复制按钮、连接钱包前显示产品目录价格、受保护导航及精确 Project 发布报告契约。"
-    ]
-  },
-  "deferred": {
-    "en": [
-      "This deployment does not deploy or configure a live SmartPay3 contract, connect a wallet, approve tokens, transfer ownership, change W1–W5, withdraw tokens, or make a subscription purchase; an administrator must deploy and configure SmartPay3 before crypto options become available.",
-      "The existing PayPal subscription flow, current member subscription dates, classroom behavior, realtime limits, games, rewards, and swap behavior are unchanged; full realtime room testing is not required for this portfolio migration."
-    ],
-    "zh": [
-      "本次发布不会部署或配置真实 SmartPay3 合约，不连接钱包、不授权代币、不转移 Owner、不修改 W1–W5、不提款，也不执行订阅付款；管理员部署并配置 SmartPay3 后，加密付款选项才会出现。",
-      "现有 PayPal 订阅流程、会员订阅截止日期、课堂行为、实时人数限制、游戏、奖励及 Swap 行为保持不变；本轮全站迁移不要求完整实时会议测试。"
-    ]
-  },
-  "siteAdaptations": {
-    "en": [
-      "Preserve GreatLoveMeta's independent monthly and annual products (one and twelve months), published PayPal-managed prices with existing $5 and $8 fallbacks, GreatLoveMeta/大爱元宇宙 branding, AI/RWA/community features, private group audio/video, webinars, HLS, games, rewards, swaps, Clerk tenant, D1/R2 data, WalletConnect project, and Cloudflare resources."
-    ],
-    "zh": [
-      "保留 GreatLoveMeta 独立的月度及年度产品（一与十二个月）、由 PayPal 管理的已发布价格及现有 5 美元与 8 美元回退值、GreatLoveMeta/大爱元宇宙品牌、AI/RWA/社区功能、私密小组音视频、网络研讨会、HLS、游戏、奖励、Swap、Clerk 租户、D1/R2 数据、WalletConnect 项目标识及 Cloudflare 资源。"
-    ]
-  }
+  "title": {"en": "Send validated crypto payments directly to the wallet", "zh": "加密付款校验后直接进入钱包"},
+  "purpose": {"en": "Remove the redundant checkout browser confirmation while preserving GreatLoveMeta payment safety and Safari-safe navigation.", "zh": "移除重复的结账浏览器确认，同时保留 GreatLoveMeta 付款安全与 Safari 安全导航。"},
+  "features": {"en": ["Proceed directly to wallet approval or payment after all preflight checks pass.", "Keep wallet-native confirmation as the explicit authorization boundary.", "Add direct-wallet regression coverage."], "zh": ["全部预检通过后直接请求钱包授权或付款。", "继续以钱包原生确认作为明确授权边界。", "新增直达钱包回归覆盖。"]},
+  "affected": {"en": ["Member crypto checkout, safety contracts, deployment validation, and Project release history"], "zh": ["会员加密结账、安全契约、发布验证及 Project 发布历史"]},
+  "changes": {"en": ["Remove window.confirm and USER_CANCELLED from ordinary payment.", "Update bilingual direct-wallet guidance.", "Preserve lookup, RefID, balances, gas, simulation, approvals, receipts, subscription reconciliation, and full-document protected navigation."], "zh": ["从普通付款中移除 window.confirm 与 USER_CANCELLED。", "更新直达钱包双语说明。", "保留查找、RefID、余额、Gas、模拟、授权、回执、订阅核对及受保护页面全页导航。"]},
+  "validation": {"en": ["Run zero-warning lint, SmartPay3 compilation, production build, complete tests including protected-navigation checks, deployment gates, and production asset verification."], "zh": ["执行零警告 lint、SmartPay3 编译、生产构建、含受保护导航检查的完整测试、发布门禁及生产资源核验。"]},
+  "deferred": {"en": ["No real wallet approval, payment, subscription purchase, or contract administration is executed."], "zh": ["本次不执行真实钱包授权、付款、订阅购买或合约管理。"]},
+  "siteAdaptations": {"en": ["Preserve GreatLoveMeta branding, products, rewards, authentication, data, media, Safari navigation behavior, and independent Cloudflare resources."], "zh": ["保留 GreatLoveMeta 品牌、产品、奖励、身份验证、数据、媒体、Safari 导航行为及独立 Cloudflare 资源。"]}
 }

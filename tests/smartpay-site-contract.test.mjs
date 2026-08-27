@@ -87,6 +87,8 @@ test("site UI keeps contract internals admin-only and retains checkout safety", 
   assert.equal(includeClaimedPaymentForLookup("new-payment"), false);
   assert.equal(includeClaimedPaymentForLookup("manual-reconciliation"), true);
   assert.doesNotMatch(checkout, /Pay again anyway|sendPayment\(true\)|\bOPC\b/);
+  assert.doesNotMatch(checkout, /window\.confirm|USER_CANCELLED|确认余额提示|confirm the balance prompt/);
+  assert.match(checkout, /wallet directly requests any required approval or payment/);
   assert.doesNotMatch(account, /mainID|secondID|opc_3_month|\bOPC\b/);
   assert.match(profile, /6-character RefID/);
   assert.match(profile, /profile-copy-button/);
