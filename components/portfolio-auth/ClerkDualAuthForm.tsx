@@ -37,7 +37,7 @@ export function ClerkDualAuthForm({
   const [password, setPassword] = useState("");
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [code, setCode] = useState("");
-  const [method, setMethod] = useState<AuthMethod>("code");
+  const [method, setMethod] = useState<AuthMethod>("password");
   const [step, setStep] = useState<AuthStep>("credentials");
   const [flow, setFlow] = useState<AuthFlow>(null);
   const [error, setError] = useState("");

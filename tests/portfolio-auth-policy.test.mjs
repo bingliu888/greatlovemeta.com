@@ -34,6 +34,8 @@ test("portfolio password settings distinguishes add and update modes", async () 
 test("policy intro covers every portfolio locale without claiming a verification gate", async () => {
   const intro = await read("AuthPolicyIntro.tsx");
   for (const locale of ["en","zh","ja","ko","es","fr","de","ru","it","pt","ar","hi","id","bn","ur","pa","ta","te","ne","si","tr"]) assert.match(intro, new RegExp("\\b" + locale + ":"));
-  assert.match(intro, /new email creates an account immediately without another email check/);
+  assert.match(intro, /Password is the default sign-in method/);
+  assert.match(intro, /默认使用密码登录/);
+  assert.doesNotMatch(intro, /Email code is the default/);
   assert.doesNotMatch(intro, /new verified email creates/i);
 });
