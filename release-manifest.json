@@ -1,13 +1,63 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-direct-wallet-pay-20260827",
+  "releaseId": "greatlovemeta-com-smartpay-admin-parity-20260827-r1",
   "site": "greatlovemeta.com",
-  "title": {"en": "Send validated crypto payments directly to the wallet", "zh": "加密付款校验后直接进入钱包"},
-  "purpose": {"en": "Remove the redundant checkout browser confirmation while preserving GreatLoveMeta payment safety and Safari-safe navigation.", "zh": "移除重复的结账浏览器确认，同时保留 GreatLoveMeta 付款安全与 Safari 安全导航。"},
-  "features": {"en": ["Proceed directly to wallet approval or payment after all preflight checks pass.", "Keep wallet-native confirmation as the explicit authorization boundary.", "Add direct-wallet regression coverage."], "zh": ["全部预检通过后直接请求钱包授权或付款。", "继续以钱包原生确认作为明确授权边界。", "新增直达钱包回归覆盖。"]},
-  "affected": {"en": ["Member crypto checkout, safety contracts, deployment validation, and Project release history"], "zh": ["会员加密结账、安全契约、发布验证及 Project 发布历史"]},
-  "changes": {"en": ["Remove window.confirm and USER_CANCELLED from ordinary payment.", "Update bilingual direct-wallet guidance.", "Preserve lookup, RefID, balances, gas, simulation, approvals, receipts, subscription reconciliation, and full-document protected navigation."], "zh": ["从普通付款中移除 window.confirm 与 USER_CANCELLED。", "更新直达钱包双语说明。", "保留查找、RefID、余额、Gas、模拟、授权、回执、订阅核对及受保护页面全页导航。"]},
-  "validation": {"en": ["Run zero-warning lint, SmartPay3 compilation, production build, complete tests including protected-navigation checks, deployment gates, and production asset verification."], "zh": ["执行零警告 lint、SmartPay3 编译、生产构建、含受保护导航检查的完整测试、发布门禁及生产资源核验。"]},
-  "deferred": {"en": ["No real wallet approval, payment, subscription purchase, or contract administration is executed."], "zh": ["本次不执行真实钱包授权、付款、订阅购买或合约管理。"]},
-  "siteAdaptations": {"en": ["Preserve GreatLoveMeta branding, products, rewards, authentication, data, media, Safari navigation behavior, and independent Cloudflare resources."], "zh": ["保留 GreatLoveMeta 品牌、产品、奖励、身份验证、数据、媒体、Safari 导航行为及独立 Cloudflare 资源。"]}
+  "title": {
+    "en": "Match the SmartPay3 administrator flow to SmartMeeting",
+    "zh": "统一 SmartPay3 管理流程并对齐 SmartMeeting"
+  },
+  "purpose": {
+    "en": "Restore the canonical Contract-and-Owner-first SmartPay3 administrator page while keeping payment-product editing in the administrator dashboard.",
+    "zh": "恢复以合约与 Owner 为首屏的标准 SmartPay3 管理页，并把付款产品编辑保留在管理员面板。"
+  },
+  "features": {
+    "en": [
+      "Show contract deployment/import and the connected Owner wallet before every other SmartPay3 control.",
+      "Keep payment-product configuration available in the administrator dashboard without duplicating it on the crypto administration route."
+    ],
+    "zh": [
+      "在所有其他 SmartPay3 控件之前显示合约部署/导入及已连接的 Owner 钱包。",
+      "付款产品配置继续位于管理员面板，不再重复显示于加密付款管理路由。"
+    ]
+  },
+  "affected": {
+    "en": [
+      "Administrator crypto-payments page, administrator dashboard, and the SmartPay3 Owner-wallet contract test."
+    ],
+    "zh": [
+      "管理员加密付款页、管理员面板及 SmartPay3 Owner 钱包契约测试。"
+    ]
+  },
+  "changes": {
+    "en": [
+      "Remove the product-settings card from the crypto route, mount it in the dashboard, and assert that connecting an EVM wallet fills the Owner/deployer address."
+    ],
+    "zh": [
+      "从加密付款路由移除产品设置卡并挂载到管理员面板，同时断言连接 EVM 钱包会填入 Owner/部署钱包地址。"
+    ]
+  },
+  "validation": {
+    "en": [
+      "Pass the complete repository test suite, production vinext build, shared site-policy gates, architecture audit, and base-feature consistency audit."
+    ],
+    "zh": [
+      "通过完整仓库测试、生产 vinext 构建、共享站点政策检查、架构审计及基础功能一致性审计。"
+    ]
+  },
+  "deferred": {
+    "en": [
+      "No SmartPay3 contract is deployed and no on-chain transaction is submitted by this release; wallet approval remains an explicit administrator action."
+    ],
+    "zh": [
+      "本次发布不会部署 SmartPay3 合约或提交链上交易；钱包授权仍由管理员明确确认。"
+    ]
+  },
+  "siteAdaptations": {
+    "en": [
+      "Preserve GreatLoveMeta branding, community behavior, and this site's independent identity, user, payment, and data boundaries."
+    ],
+    "zh": [
+      "保留 GreatLoveMeta 品牌、community 业务行为，以及本站独立的身份、用户、支付与数据边界。"
+    ]
+  }
 }

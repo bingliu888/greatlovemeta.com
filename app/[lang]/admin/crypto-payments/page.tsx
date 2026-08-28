@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
-import { AdminCryptoSettings } from "../../../../components/AdminCryptoSettings";
 import { SiteFooter } from "../../../../components/SiteFooter";
 import { SiteHeader } from "../../../../components/SiteHeader";
 import { SmartPayAdminConsole } from "../../../../components/SmartPayAdminConsole";
@@ -28,8 +27,7 @@ export default async function CryptoPaymentsAdminPage({ params }: { params: Prom
     <section className="account-settings-main">
       <p className="section-kicker">SMARTPAY3 CONTROL</p>
       <h1>{zh ? "加密货币付款" : "Crypto payments"}</h1>
-      <p className="account-settings-intro">{zh ? "先维护本站代币与订阅价格，再部署或导入本站独立合约，并管理 Owner、W1–W5、付款规则、提款和订阅核对。" : "Maintain this site's tokens and subscription prices, then deploy or import its independent contract and manage the Owner, W1-W5, payment rules, withdrawals, and subscription reconciliation."}</p>
-      <AdminCryptoSettings lang={lang}/>
+      <p className="account-settings-intro">{zh ? "验证并保存合约，连接 TP 或其他 EVM 钱包，然后安全管理 Owner、W1–W5、提款、付款规则、测试付款和订阅核对。" : "Verify and save a contract, connect TP or another EVM wallet, then manage Owner, W1-W5, withdrawals, payment rules, test payments, and subscription reconciliation."}</p>
       <SmartPayAdminConsole initialSettings={settings} locale={lang} defaultWallet={wallet?.wallet || ""}/>
     </section>
     <SiteFooter lang={lang}/>

@@ -1,6 +1,7 @@
 import type { SessionUser } from "../lib/auth";
 import { getDatabase } from "../lib/auth";
 import type { SiteLanguage } from "../lib/site-locale";
+import { AdminCryptoSettings } from "./AdminCryptoSettings";
 
 async function count(sql: string) {
   return (await getDatabase().prepare(sql).first<{ count: number }>())?.count ?? 0;
@@ -20,6 +21,7 @@ export async function AdminDashboard({ lang, user }: { lang: SiteLanguage; user:
       <article><p>{zh ? "教师" : "Hosts"}</p><strong>{admins}</strong><span>{zh ? "服务器验证的管理角色" : "server-verified admin roles"}</span><a href={`/${lang}/admin/members?tab=subscribers`}>{zh ? "订阅会员" : "Subscribers"} →</a></article>
       <article><p>{zh ? "加密货币付款" : "Crypto payments"}</p><strong>SmartPay3</strong><span>{zh ? "管理付款通道、合约与交易核对" : "Manage rails, contracts, and reconciliation"}</span><a href={`/${lang}/admin/crypto-payments`}>{zh ? "打开付款管理" : "Open payment administration"} →</a></article>
     </section>
+    <AdminCryptoSettings lang={lang}/>
     <nav className="admin-links"><a href={`/${lang}/project`}>{zh ? "项目" : "Project"}</a><a href={`/${lang}/community`}>{zh ? "社区" : "Community"}</a><a href={`/${lang}/messages`}>{zh ? "消息" : "Messages"}</a></nav>
   </div>;
 }
