@@ -106,10 +106,9 @@ export async function createSessionForClerkUser(userId: string, email: string, n
   const normalizedEmail = email.toLowerCase();
   let user = await db().prepare("SELECT id FROM users WHERE id = ?").bind(userId).first<{ id: string }>();
   if (user) {
-    if (linkByVerifiedEmail) {
-      const owner = await db().prepare("SELECT id FROM users WHERE email = ?").bind(normalizedEmail).first<{ id: string }>();
-      if (!owner || owner.id === user.id) await db().prepare("UPDATE users SET email = ?, display_name = ? WHERE id = ?").bind(normalizedEmail, name.slice(0, 60), user.id).run();
-    }
+    const owner = await db().prepare("SELECT id FROM users WHERE email = ?").bind(normalizedEmail).first<{ id: string }>();
+    if (owner && owner.id !== user.id) throw new Error("Clerk email belongs to another account");
+    await db().prepare("UPDATE users SET email = ?, email_verified = ? WHERE id = ?").bind(normalizedEmail, linkByVerifiedEmail ? 1 : 0, user.id).run();
     return createSession(user.id);
   }
   user = linkByVerifiedEmail
@@ -118,8 +117,10 @@ export async function createSessionForClerkUser(userId: string, email: string, n
   if (!user) {
     const now = Math.floor(Date.now() / 1000);
     const displayName = name.slice(0, 60);
-    await db().prepare("INSERT INTO users (id, email, display_name, password_hash, preferred_language, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(userId, normalizedEmail, displayName, `clerk$${await sha256(crypto.randomUUID())}`, "en", now).run();
+    await db().prepare("INSERT INTO users (id, email, email_verified, display_name, password_hash, preferred_language, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(userId, normalizedEmail, linkByVerifiedEmail ? 1 : 0, displayName, `clerk$${await sha256(crypto.randomUUID())}`, "en", now).run();
     user = { id: userId };
+  } else if (linkByVerifiedEmail) {
+    await db().prepare("UPDATE users SET email_verified = 1 WHERE id = ?").bind(user.id).run();
   }
   return createSession(user.id);
 }
@@ -151,16 +152,19 @@ export async function getSessionUser(request?: Request): Promise<SessionUser | n
     const clerkUser = await currentUser();
     const primaryEmail = clerkUser?.primaryEmailAddress || clerkUser?.emailAddresses[0];
     const claimedEmail = primaryEmail?.emailAddress.toLowerCase();
-    const email = clerkUser && claimedEmail
-      ? primaryEmail?.verification?.status === "verified" ? claimedEmail : `${clerkUser.id}@unverified.invalid`
-      : undefined;
+    const email = clerkUser && claimedEmail ? claimedEmail : undefined;
     if (clerkUser && email) {
-      user = await db().prepare("SELECT id, email, display_name AS displayName, preferred_language AS preferredLanguage FROM users WHERE email = ?").bind(email).first<SessionUser>();
+      const emailVerified = primaryEmail?.verification?.status === "verified";
+      user = await db().prepare("SELECT id, email, display_name AS displayName, preferred_language AS preferredLanguage FROM users WHERE id = ?").bind(clerkUser.id).first<SessionUser>();
+      if (!user && emailVerified) user = await db().prepare("SELECT id, email, display_name AS displayName, preferred_language AS preferredLanguage FROM users WHERE email = ?").bind(email).first<SessionUser>();
       if (!user) {
         const now = Math.floor(Date.now() / 1000);
         const displayName = (clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "GreatLove Meta").slice(0, 60);
-        await db().prepare("INSERT INTO users (id, email, display_name, password_hash, preferred_language, created_at) VALUES (?, ?, ?, ?, ?, ?)").bind(clerkUser.id, email, displayName, `clerk$${await sha256(crypto.randomUUID())}`, "en", now).run();
+        await db().prepare("INSERT INTO users (id, email, email_verified, display_name, password_hash, preferred_language, created_at) VALUES (?, ?, ?, ?, ?, ?, ?)").bind(clerkUser.id, email, emailVerified ? 1 : 0, displayName, `clerk$${await sha256(crypto.randomUUID())}`, "en", now).run();
         user = { id: clerkUser.id, email, displayName, preferredLanguage: "en" };
+      } else if (user.id === clerkUser.id) {
+        await db().prepare("UPDATE users SET email = ?, email_verified = ? WHERE id = ?").bind(email, emailVerified ? 1 : 0, user.id).run();
+        user = { ...user, email };
       }
     }
   }

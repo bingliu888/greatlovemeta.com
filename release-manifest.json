@@ -1,63 +1,13 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-password-first-signin-20260827-r1",
+  "releaseId": "greatlovemeta-com-member-identity-persistence-20260828",
   "site": "greatlovemeta.com",
-  "title": {
-    "en": "Make password sign-in the production default",
-    "zh": "将生产登录默认方式改为密码"
-  },
-  "purpose": {
-    "en": "Align GreatLoveMeta.com's sign-in behavior with the portfolio Clerk password-first baseline.",
-    "zh": "将 GreatLoveMeta.com 登录行为对齐全站 Clerk 密码优先基线。"
-  },
-  "features": {
-    "en": [
-      "Open sign-in and sign-up pages in password mode while retaining email code as an optional user-selected method.",
-      "Show password-default guidance in every supported interface language."
-    ],
-    "zh": [
-      "登录与注册页默认打开密码模式，同时保留由用户主动选择的邮箱验证码方式。",
-      "所有受支持界面语言均显示密码优先说明。"
-    ]
-  },
-  "affected": {
-    "en": [
-      "GreatLoveMeta.com authentication form, localized sign-in copy, and shared authentication regression contracts."
-    ],
-    "zh": [
-      "GreatLoveMeta.com 身份验证表单、多语言登录文案及共享身份回归契约。"
-    ]
-  },
-  "changes": {
-    "en": [
-      "Switch the initial authentication state to password and remove rendered copy that claims an email code is the default."
-    ],
-    "zh": [
-      "将身份验证初始状态改为密码，并移除声称邮箱验证码为默认方式的渲染文案。"
-    ]
-  },
-  "validation": {
-    "en": [
-      "Pass the portfolio password-first audit, repository authentication contracts, deployment workflow, and basic production availability check."
-    ],
-    "zh": [
-      "通过全站密码优先审计、仓库身份契约、部署工作流及生产基本可用性检查。"
-    ]
-  },
-  "deferred": {
-    "en": [
-      "Email-code authentication remains available only when the user explicitly selects it."
-    ],
-    "zh": [
-      "用户主动选择时仍可使用邮箱验证码登录。"
-    ]
-  },
-  "siteAdaptations": {
-    "en": [
-      "Preserve GreatLoveMeta.com branding, product behavior, and this site's independent Clerk, user, payment, and data boundaries."
-    ],
-    "zh": [
-      "保留 GreatLoveMeta.com 品牌与产品行为，以及本站独立的 Clerk、用户、支付和数据边界。"
-    ]
-  }
+  "title": {"en":"Preserve real member identity on sign-in","zh":"登录时保留真实会员身份资料"},
+  "purpose": {"en":"Keep the real Clerk email visible and preserve a user-edited display name across password sign-ins.","zh":"保留真实 Clerk 邮箱，并确保用户修改的显示名称在密码重新登录后仍然保存。"},
+  "features": {"en":["Store normalized real email for verified and unverified members with a separate verification flag.","Preserve saved display names during Clerk synchronization."],"zh":["为已验证和未验证会员保存标准化真实邮箱，并独立记录验证状态。","Clerk 同步时保留用户已保存的显示名称。"]},
+  "affected": {"en":["GreatLoveMeta Clerk session bridge, user identity records, and account identity surfaces."],"zh":["GreatLoveMeta Clerk 会话桥接、用户身份记录及账户身份界面。"]},
+  "changes": {"en":["Repair legacy synthetic-email accounts, bind by Clerk ID first, preserve display names, and add regression coverage."],"zh":["修复历史合成邮箱账户，优先按 Clerk ID 绑定，保留显示名称，并增加回归覆盖。"]},
+  "validation": {"en":["Pass identity regression, lint, repository build and tests, deployment, and production checks."],"zh":["通过身份回归、代码规范、仓库构建与测试、部署及生产检查。"]},
+  "deferred": {"en":["Dedicated production account acceptance uses a non-admin test identity and never exposes credentials."],"zh":["生产验收使用专用非管理员测试身份，且绝不暴露凭据。"]},
+  "siteAdaptations": {"en":["Preserve GreatLoveMeta branding and its independent Clerk, user, payment, classroom, and data boundaries."],"zh":["保留 GreatLoveMeta 品牌及独立的 Clerk、用户、支付、课堂和数据边界。"]}
 }

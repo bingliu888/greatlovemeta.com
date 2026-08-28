@@ -20,10 +20,9 @@ export async function POST(request: Request) {
     const email = primaryEmail?.emailAddress.trim().toLowerCase();
     if (!email) return Response.json({ error: "Email required" }, { status: 400 });
     const emailVerified = primaryEmail.verification?.status === "verified";
-    const localEmail = emailVerified ? email : `${userId}@unverified.invalid`;
     const session = await createSessionForClerkUser(
       userId,
-      localEmail,
+      email,
       emailVerified && email === "bingliu@cybeye.com" ? "Admin" : /^bingliu\+([^@]+)@/i.exec(email)?.[1] || clerkUser.fullName || clerkUser.firstName || email.split("@")[0] || "GreatLove Meta",
       emailVerified,
     );
