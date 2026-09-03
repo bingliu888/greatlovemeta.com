@@ -1,13 +1,19 @@
 import type { Address, Hex } from "viem";
 import { decodeFunctionResult, encodeFunctionData } from "viem";
-import smartPay3ArtifactJson from "../contracts/artifacts/SmartPay3.json";
+import smartPay5ArtifactJson from "../contracts/artifacts/SmartPay5.json";
 import { cryptoRpc } from "./crypto-rpc";
-import { SMARTPAY3_ABI } from "./smartpay3";
+import { CRYPTO_SUBSCRIPTION_MAIN_IDS } from "./crypto-subscription";
+import {
+  SMARTPAY5_ABI,
+  SMARTPAY5_TRANSACTION_RECORDED_TOPIC,
+} from "./smartpay5";
+import { locateSmartPay5Receipt } from "./smartpay5-receipt-locator";
 
 type ContractTransactionRecord = {
   transactionId: Hex;
   timestamp: bigint;
   wallet: Address;
+  payerId: string;
   refId: string;
   mainId: string;
   secondId: string;
@@ -28,10 +34,8 @@ type ContractPaymentRule = {
   enabled: boolean;
 };
 
-const ZERO_ADDRESS = "0x0000000000000000000000000000000000000000" as Address;
-
 async function ethCall(rpcUrl: string, contract: Address, functionName: string, args: readonly unknown[] = []) {
-  const data = encodeFunctionData({ abi: SMARTPAY3_ABI, functionName, args });
+  const data = encodeFunctionData({ abi: SMARTPAY5_ABI, functionName, args });
   return cryptoRpc<Hex>(rpcUrl, "eth_call", [{ to: contract, data }, "latest"]);
 }
 
@@ -40,6 +44,7 @@ function mapTransactions(records: ContractTransactionRecord[]) {
     transactionId: record.transactionId,
     timestamp: Number(record.timestamp),
     wallet: record.wallet,
+    payerId: record.payerId,
     refId: record.refId,
     mainId: record.mainId,
     secondId: record.secondId,
@@ -50,29 +55,47 @@ function mapTransactions(records: ContractTransactionRecord[]) {
   }));
 }
 
-export async function smartPay3TransactionById(rpcUrl: string, contract: Address, transactionId: Hex) {
+export async function smartPay5TransactionById(rpcUrl: string, contract: Address, transactionId: Hex) {
   const data = await ethCall(rpcUrl, contract, "transactionById", [transactionId]);
-  const record = decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "transactionById", data }) as ContractTransactionRecord;
+  const record = decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "transactionById", data }) as ContractTransactionRecord;
   return mapTransactions([record])[0];
 }
 
-export async function smartPay3PayoutConfigurationRaw(rpcUrl: string, contract: Address) {
+export async function smartPay5ReceiptByTransactionId(input: {
+  rpcUrl: string;
+  contract: Address;
+  transactionId: Hex;
+  timestamp: number;
+}) {
+  async function rpc<T>(method: string, params: unknown[]) {
+    return cryptoRpc<T>(input.rpcUrl, method, params);
+  }
+  return locateSmartPay5Receipt({
+    rpc,
+    contract: input.contract,
+    transactionId: input.transactionId,
+    transactionTopic: SMARTPAY5_TRANSACTION_RECORDED_TOPIC,
+    timestamp: input.timestamp,
+  });
+}
+
+export async function smartPay5PayoutConfigurationRaw(rpcUrl: string, contract: Address) {
   const data = await ethCall(rpcUrl, contract, "payoutConfiguration");
   const [wallets, sharesBps] = decodeFunctionResult({
-    abi: SMARTPAY3_ABI,
+    abi: SMARTPAY5_ABI,
     functionName: "payoutConfiguration",
     data
   }) as [Address[], number[]];
   return wallets.map((wallet, index) => ({ wallet, shareBps: Number(sharesBps[index] || 0) }));
 }
 
-export async function smartPay3PaymentRules(rpcUrl: string, contract: Address) {
+export async function smartPay5PaymentRules(rpcUrl: string, contract: Address) {
   const countData = await ethCall(rpcUrl, contract, "paymentRuleCount");
-  const count = Number(decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "paymentRuleCount", data: countData }) as bigint);
+  const count = Number(decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "paymentRuleCount", data: countData }) as bigint);
   const records: ContractPaymentRule[] = [];
   for (let offset = 0; offset < count; offset += 100) {
     const pageData = await ethCall(rpcUrl, contract, "paymentRules", [BigInt(offset), BigInt(Math.min(100, count - offset))]);
-    records.push(...decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "paymentRules", data: pageData }) as ContractPaymentRule[]);
+    records.push(...decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "paymentRules", data: pageData }) as ContractPaymentRule[]);
   }
   return records.map(record => ({
     primaryTokenAddress: record.primaryTokenAddress,
@@ -86,51 +109,58 @@ export async function smartPay3PaymentRules(rpcUrl: string, contract: Address) {
   }));
 }
 
-export async function smartPay3LatestTransactions(input: {
+export async function smartPay5LatestTransactions(input: {
   rpcUrl: string;
   contract: Address;
-  wallet?: Address;
+  payerId?: string;
   maxCount: number;
 }) {
   if (!Number.isInteger(input.maxCount) || input.maxCount < 1 || input.maxCount > 100) {
-    throw new Error("INVALID_SMARTPAY3_LATEST_COUNT");
+    throw new Error("INVALID_SMARTPAY5_LATEST_COUNT");
   }
-  const data = await ethCall(input.rpcUrl, input.contract, "latestTransactions", [input.wallet || ZERO_ADDRESS, BigInt(input.maxCount)]);
+  const functionName = input.payerId ? "getTransactionsByPayerID" : "getLatestTransactions";
+  const args = input.payerId ? [input.payerId, BigInt(input.maxCount)] : [BigInt(input.maxCount)];
+  const data = await ethCall(input.rpcUrl, input.contract, functionName, args);
   const [records, total] = decodeFunctionResult({
-    abi: SMARTPAY3_ABI,
-    functionName: "latestTransactions",
+    abi: SMARTPAY5_ABI,
+    functionName,
     data
   }) as [ContractTransactionRecord[], bigint];
   return { transactions: mapTransactions(records), totalTransactions: Number(total) };
 }
 
-export async function smartPay3Ownership(rpcUrl: string, contract: Address) {
+export async function smartPay5Ownership(rpcUrl: string, contract: Address) {
   const [ownerData, pausedData] = await Promise.all([
     ethCall(rpcUrl, contract, "owner"),
     ethCall(rpcUrl, contract, "paused")
   ]);
   return {
-    owner: decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "owner", data: ownerData }) as Address,
-    paused: decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "paused", data: pausedData }) as boolean
+    owner: decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "owner", data: ownerData }) as Address,
+    paused: decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "paused", data: pausedData }) as boolean
   };
 }
 
-export async function verifySmartPay3Identity(rpcUrl: string, contract: Address) {
+export async function verifySmartPay5Identity(rpcUrl: string, contract: Address) {
   const code = await cryptoRpc<string>(rpcUrl, "eth_getCode", [contract, "latest"]);
   if (!code || code === "0x") throw new Error("CONTRACT_CODE_NOT_FOUND");
-  const expectedCode = String((smartPay3ArtifactJson as { deployedBytecode?: string }).deployedBytecode || "");
+  const expectedCode = String((smartPay5ArtifactJson as { deployedBytecode?: string }).deployedBytecode || "");
   if (!expectedCode || code.toLowerCase() !== expectedCode.toLowerCase()) throw new Error("CONTRACT_IDENTITY_MISMATCH");
   const [ownership, threeData, sixData, twelveData] = await Promise.all([
-    smartPay3Ownership(rpcUrl, contract),
+    smartPay5Ownership(rpcUrl, contract),
     ethCall(rpcUrl, contract, "MAIN_ID_3_MONTH"),
     ethCall(rpcUrl, contract, "MAIN_ID_6_MONTH"),
     ethCall(rpcUrl, contract, "MAIN_ID_12_MONTH")
   ]);
   const ids = [
-    decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "MAIN_ID_3_MONTH", data: threeData }) as string,
-    decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "MAIN_ID_6_MONTH", data: sixData }) as string,
-    decodeFunctionResult({ abi: SMARTPAY3_ABI, functionName: "MAIN_ID_12_MONTH", data: twelveData }) as string
+    decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "MAIN_ID_3_MONTH", data: threeData }) as string,
+    decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "MAIN_ID_6_MONTH", data: sixData }) as string,
+    decodeFunctionResult({ abi: SMARTPAY5_ABI, functionName: "MAIN_ID_12_MONTH", data: twelveData }) as string
   ];
-  if (ids.join("|") !== "opc_3_month|opc_6_month|opc_12_month") throw new Error("CONTRACT_IDENTITY_MISMATCH");
+  const expectedIds = [
+    CRYPTO_SUBSCRIPTION_MAIN_IDS.monthly,
+    CRYPTO_SUBSCRIPTION_MAIN_IDS.six_month,
+    CRYPTO_SUBSCRIPTION_MAIN_IDS.annual
+  ];
+  if (ids.join("|") !== expectedIds.join("|")) throw new Error("CONTRACT_IDENTITY_MISMATCH");
   return { ...ownership, mainIds: ids, upgradeRequired: false };
 }

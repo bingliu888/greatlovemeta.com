@@ -65,11 +65,8 @@ export function ProfileEditor({ lang, email, initialName, refId, initialWalletAd
       setWalletAddress(normalizedWallet);
       setWalletEditing(false);
       setMessage(zh ? "个人资料已保存。" : "Profile saved.");
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "";
-      setMessage(reason === "WALLET_IN_USE" || reason.includes("another account")
-        ? (zh ? "此钱包已绑定到其他有订阅记录的账户。如需更正，请联系管理员。" : "This wallet belongs to another account with subscription history. Contact an administrator if it needs correction.")
-        : (zh ? "保存失败，请重试。" : "Could not save. Please try again."));
+    } catch {
+      setMessage(zh ? "保存失败，请重试。" : "Could not save. Please try again.");
     } finally {
       setBusy(false);
     }
@@ -149,7 +146,7 @@ export function ProfileEditor({ lang, email, initialName, refId, initialWalletAd
       <div className="wallet-profile-field">
         <div><label htmlFor="profile-wallet">{zh ? "EVM 钱包" : "EVM wallet"}</label><button type="button" onClick={() => setWalletEditing(value => !value)}>{walletEditing ? (zh ? "取消" : "Cancel") : (walletAddress ? (zh ? "修改" : "Edit") : (zh ? "添加" : "Add"))}</button></div>
         <div className="profile-copy-field"><input id="profile-wallet" inputMode="text" autoComplete="off" readOnly={!walletEditing} placeholder="0x…" value={walletAddress} onChange={event => setWalletAddress(event.target.value)} /><CopyIconButton value={walletAddress} label={zh ? "复制钱包地址" : "Copy wallet address"}/></div>
-        <small>{zh ? "无需连接钱包即可保存。一个钱包不能绑定到另一个已有订阅记录的账户。" : "No wallet connection is required to save it. A wallet cannot be bound to another account that already has subscription history."}</small>
+        <small>{zh ? "无需连接钱包即可保存；此资料钱包仅供展示，不限制您付款时连接的钱包，也不要求每个账户唯一。" : "No wallet connection is required to save it. This profile wallet is display-only, need not match the funding wallet, and is not unique per account."}</small>
       </div>
       <button className="profile-save" disabled={busy}>{busy ? (zh ? "正在保存…" : "Saving…") : (zh ? "保存个人资料" : "Save profile")}</button>
       {message && <p className="profile-message" role="status">{message}</p>}

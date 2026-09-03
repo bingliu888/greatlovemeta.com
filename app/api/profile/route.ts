@@ -58,7 +58,6 @@ export async function POST(request: Request) {
     return Response.json({ profile: { displayName: displayName ?? user.displayName, preferredLanguage: hasProfile ? preferredLanguage : user.preferredLanguage, walletAddress: savedWallet ?? walletAddress } });
   } catch (error) {
     const reason = error instanceof Error ? error.message : "";
-    if (reason === "WALLET_ALREADY_IN_USE") return Response.json({ error: "This wallet belongs to another account with subscription history" }, { status: 409 });
     if (reason === "INVALID_WALLET") return Response.json({ error: "Enter a valid EVM wallet address" }, { status: 400 });
     return Response.json({ error: "Unable to save the account profile" }, { status: 500 });
   }

@@ -9,6 +9,7 @@ type TransactionRecord = {
   transactionId: string;
   timestamp: number;
   wallet: string;
+  payerId: string;
   refId: string;
   mainId: string;
   secondId: string;
@@ -26,10 +27,10 @@ type LookupResponse = {
   error?: string;
 };
 
-export function SmartPayAccountLookup({ settings, wallet, locale }: { settings: CryptoPaymentSetting[]; wallet: string | null; locale: SiteLanguage }) {
+export function SmartPayAccountLookup({ settings, locale }: { settings: CryptoPaymentSetting[]; locale: SiteLanguage }) {
   const zh = locale === "zh";
-  const rails = [...new Map(settings.filter(item => Boolean(item.smartPay3Contract)).map(item => [
-    `${item.chainId}:${item.smartPay3Contract?.toLowerCase()}`,
+  const rails = [...new Map(settings.filter(item => Boolean(item.smartPay5Contract)).map(item => [
+    `${item.chainId}:${item.smartPay5Contract?.toLowerCase()}`,
     item
   ])).values()];
   const [settingId, setSettingId] = useState(rails[0]?.id || "");
@@ -38,11 +39,11 @@ export function SmartPayAccountLookup({ settings, wallet, locale }: { settings: 
   const [message, setMessage] = useState("");
 
   async function checkAndActivate() {
-    if (!wallet || !settingId) return;
+    if (!settingId) return;
     setBusy(true);
     setMessage("");
     try {
-      const params = new URLSearchParams({ settingId, wallet, limit: "100" });
+      const params = new URLSearchParams({ settingId, limit: "100" });
       const lookup = await fetch(`/api/billing/crypto/smartpay/records?${params}`, { cache: "no-store" });
       const lookupData = await lookup.json().catch(() => ({})) as LookupResponse;
       if (!lookup.ok) throw new Error(lookupData.error || "LOOKUP_FAILED");
@@ -61,11 +62,11 @@ export function SmartPayAccountLookup({ settings, wallet, locale }: { settings: 
         if (!result.alreadyRecorded) synced += 1;
       }
       if (synced) {
-        setMessage(zh ? `已按钱包与 RefID 验证并同步 ${synced} 条订阅，正在刷新账户状态…` : `${synced} subscription record(s) matched the wallet and RefID and were synchronized. Refreshing your account…`);
+        setMessage(zh ? `已按付款人 ID、产品所有者 RefID 与套餐验证并同步 ${synced} 条订阅，正在刷新账户状态…` : `${synced} subscription record(s) matched the PayerID, product-owner RefID, and package and were synchronized. Refreshing your account…`);
         window.setTimeout(() => window.location.reload(), 900);
         return;
       }
-      setMessage(zh ? "最新 100 条钱包交易中没有属于当前 RefID 的未入账订阅付款。" : "The latest 100 wallet transactions contain no unclaimed subscription payment for this RefID.");
+      setMessage(zh ? "尚未找到符合此账户付款人 ID 和产品的付款。" : "No payment matching this account PayerID and product was found.");
     } catch {
       setMessage(zh ? "暂时无法检查链上付款。" : "Unable to check on-chain payments right now.");
     } finally {
@@ -76,11 +77,11 @@ export function SmartPayAccountLookup({ settings, wallet, locale }: { settings: 
   if (!rails.length) return null;
   return <section className="profile-card smartpay-account-lookup">
     <h2>{zh ? "链上付款检查" : "On-chain payment check"}</h2>
-    <p>{zh ? "按已保存的钱包免费读取最新 100 条交易，只处理同时匹配当前账户 RefID 且尚未入账的订阅付款。查询无需连接钱包、签名或支付 Gas。" : "Read the latest 100 transactions for the saved wallet for free. Only unclaimed subscription payments that also match this account’s RefID are processed. No wallet connection, signature, or gas is required."}</p>
-    {wallet ? <div className="smartpay-account-fields">
-      <label><span>{zh ? "付款网络" : "Payment network"}</span><select value={settingId} onChange={event => setSettingId(event.target.value)}>{rails.map(item => <option key={`${item.chainId}:${item.smartPay3Contract}`} value={item.id}>{item.chainName}</option>)}</select></label>
+    <p>{zh ? "按当前登录账户的付款人 ID 读取近期付款，并应用产品所有者 RefID 与套餐匹配的未入账交易；无需连接钱包、签名或支付 Gas。" : "Read recent payments by this signed-in account's PayerID and apply unclaimed transactions matching the product-owner RefID and package. No wallet connection, signature, or gas is required."}</p>
+    <div className="smartpay-account-fields">
+      <label><span>{zh ? "付款网络" : "Payment network"}</span><select value={settingId} onChange={event => setSettingId(event.target.value)}>{rails.map(item => <option key={`${item.chainId}:${item.smartPay5Contract}`} value={item.id}>{item.chainName}</option>)}</select></label>
       <button className="button primary" disabled={busy} onClick={() => void checkAndActivate()}>{busy ? "…" : (zh ? "读取最新交易并同步" : "Read latest transactions & sync")}</button>
-    </div> : <p className="billing-message">{zh ? "请先在账户资料中保存付款钱包。" : "Save your payer wallet in the profile first."}</p>}
+    </div>
     {transactions.length ? <ul>{transactions.map(record => {
       const recordPlan = cryptoSubscriptionPlanForIds(record.mainId, record.secondId);
       const term = recordPlan === "annual" ? (zh ? "12 个月订阅" : "12-month subscription") : (zh ? "1 个月订阅" : "1-month subscription");

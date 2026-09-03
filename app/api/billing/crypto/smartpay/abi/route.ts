@@ -1,9 +1,9 @@
 import { NextResponse } from "next/server";
-import { SMARTPAY3_ABI } from "../../../../../../lib/smartpay3";
+import { SMARTPAY5_ABI } from "../../../../../../lib/smartpay5";
 
 export const dynamic = "force-dynamic";
 export async function GET() {
-  const contract = "SmartPay3";
+  const contract = "SmartPay5";
   return NextResponse.json({
     contract,
     siteSpecific: true,
@@ -25,19 +25,23 @@ export async function GET() {
     constructorInputs: ["initialOwner"],
     postDeploymentAdmin: true,
     maxPayoutWallets: 5,
+    payerId: {
+      public: true,
+      length: 6,
+      comparison: "case-insensitive",
+      websiteCheckout: "the signed-in member's own public referral code"
+    },
     refId: {
       public: true,
       length: 6,
-      casePreservedOnChain: true,
-      smartMeetingComparison: "case-insensitive",
-      websiteCheckout: "automatically supplied from the signed-in member profile",
-      thirdPartyCheckout: "supplied by the payer"
+      comparison: "case-insensitive",
+      websiteCheckout: "the permanent administrator's public referral code as membership product owner"
     },
     mainIds: [
       "greatlovemeta_membership_monthly",
       "greatlovemeta_membership_annual"
     ],
     subscriptionSecondId: "",
-    abi: SMARTPAY3_ABI
+    abi: SMARTPAY5_ABI
   });
 }

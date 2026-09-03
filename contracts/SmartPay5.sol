@@ -7,21 +7,24 @@ import {Ownable} from "@openzeppelin/contracts/access/Ownable.sol";
 import {Pausable} from "@openzeppelin/contracts/utils/Pausable.sol";
 import {ReentrancyGuard} from "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 
-/// @title SmartPay3
+/// @title SmartPay5
 /// @notice Site-specific flexible ERC-20 checkout for an independently deployed product.
 /// @dev A rule can be dual-token (USDT plus GLC) or primary-token-only. Dual
 ///      rules store both 100% prices so pay() can derive the only valid
 ///      complement. Single-token rules use address(0) and zero values for the
 ///      secondary token and require the full primary amount. Every payment also
-///      carries the public six-character account RefID supplied by the payer.
-///      RefID case is deliberately preserved for third-party clients; each
-///      website performs case-insensitive account matching.
-contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
+///      carries two public six-character identities: payerId identifies the
+///      signed-in member receiving the entitlement, while refId identifies the
+///      product creator/owner. The connected wallet only signs and funds the
+///      transaction; it is never used as the member identity or list index.
+///      Tokens may burn or tax part of each transfer, so recipient balance
+///      deltas are intentionally not required to equal nominal rule amounts.
+contract SmartPay5 is Ownable, Pausable, ReentrancyGuard {
     using SafeERC20 for IERC20;
 
-    string public constant MAIN_ID_3_MONTH = "opc_3_month";
-    string public constant MAIN_ID_6_MONTH = "opc_6_month";
-    string public constant MAIN_ID_12_MONTH = "opc_12_month";
+    string public constant MAIN_ID_3_MONTH = "greatlovemeta_membership_monthly";
+    string public constant MAIN_ID_6_MONTH = "greatlovemeta_membership_six_month";
+    string public constant MAIN_ID_12_MONTH = "greatlovemeta_membership_annual";
     string public constant SUBSCRIPTION_SECOND_ID = "";
 
     uint256 public constant MAX_ID_BYTES = 96;
@@ -45,6 +48,7 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         bytes32 transactionId;
         uint64 timestamp;
         address wallet;
+        string payerId;
         string refId;
         string mainId;
         string secondId;
@@ -57,6 +61,7 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
     error EmptyMainId();
     error IdTooLong();
     error InvalidRefId();
+    error InvalidPayerId();
     error InvalidAddress();
     error InvalidAmount();
     error InvalidPageSize();
@@ -68,7 +73,6 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
     error PayoutsNotConfigured();
     error InvalidPaymentRatio();
     error SecondaryBalanceEligibilityNotMet();
-    error TokenTransferAmountMismatch();
     error OwnershipRenunciationDisabled();
 
     event PaymentRuleUpdated(
@@ -87,6 +91,7 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         bytes32 indexed transactionId,
         uint64 timestamp,
         address indexed wallet,
+        string payerId,
         string refId,
         string mainId,
         string secondId,
@@ -112,8 +117,7 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
     mapping(bytes32 => bool) private _registeredPaymentRuleKeys;
     mapping(bytes32 => TransactionRecord) private _transactions;
     bytes32[] private _transactionIds;
-    mapping(address => bytes32[]) private _walletTransactionIds;
-    mapping(address => uint256) private _walletNonces;
+    mapping(bytes32 => bytes32[]) private _payerIdTransactionIds;
     address[] private _payoutWallets;
     uint16[] private _payoutSharesBps;
 
@@ -174,10 +178,12 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         string calldata mainId,
         string calldata secondId,
         uint256 primaryTokenAmount,
-        string calldata refId
+        string calldata refId,
+        string calldata payerId
     ) external whenNotPaused nonReentrant returns (bytes32 transactionId) {
         _validateIds(mainId, secondId);
         _validateRefId(refId);
+        _validatePayerId(payerId);
         PaymentRule memory rule = _paymentRules[_ruleKey(primaryTokenAddress, secondaryTokenAddress, mainId, secondId)];
         if (!rule.enabled || rule.primaryTokenAmount == 0) {
             revert PaymentRuleDisabled();
@@ -199,13 +205,16 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
             ) revert SecondaryBalanceEligibilityNotMet();
         }
 
-        transactionId = _nextTransactionId(rule, primaryTokenAmount, secondaryTokenAmount, mainId, secondId, refId);
+        transactionId = _nextTransactionId(
+            rule, primaryTokenAmount, secondaryTokenAmount, mainId, secondId, refId, payerId
+        );
         if (primaryTokenAmount != 0) _collectPayment(primaryTokenAddress, primaryTokenAmount, transactionId);
         if (secondaryTokenAmount != 0) _collectPayment(secondaryTokenAddress, secondaryTokenAmount, transactionId);
         TransactionRecord memory record = TransactionRecord({
             transactionId: transactionId,
             timestamp: uint64(block.timestamp),
             wallet: msg.sender,
+            payerId: payerId,
             refId: refId,
             mainId: mainId,
             secondId: secondId,
@@ -216,12 +225,13 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         });
         _transactions[transactionId] = record;
         _transactionIds.push(transactionId);
-        _walletTransactionIds[msg.sender].push(transactionId);
+        _payerIdTransactionIds[_userIdKey(payerId)].push(transactionId);
         ++totalTransactions;
         emit TransactionRecorded(
             record.transactionId,
             record.timestamp,
             record.wallet,
+            record.payerId,
             record.refId,
             record.mainId,
             record.secondId,
@@ -238,13 +248,21 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         return record;
     }
 
-    function latestTransactions(address wallet, uint256 maxCount)
+    function getTransactionsByPayerID(string calldata payerId, uint256 maxCount)
         external
         view
         returns (TransactionRecord[] memory page, uint256 total)
     {
-        if (wallet == address(0)) return _latestTransactions(_transactionIds, maxCount);
-        return _latestTransactions(_walletTransactionIds[wallet], maxCount);
+        _validatePayerId(payerId);
+        return _latestTransactions(_payerIdTransactionIds[_userIdKey(payerId)], maxCount);
+    }
+
+    function getLatestTransactions(uint256 maxCount)
+        external
+        view
+        returns (TransactionRecord[] memory page, uint256 total)
+    {
+        return _latestTransactions(_transactionIds, maxCount);
     }
 
     function _latestTransactions(bytes32[] storage ids, uint256 maxCount)
@@ -342,8 +360,16 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
     }
 
     function _validateRefId(string memory refId) private pure {
-        bytes memory value = bytes(refId);
-        if (value.length != REF_ID_BYTES) revert InvalidRefId();
+        if (!_validUserId(refId)) revert InvalidRefId();
+    }
+
+    function _validatePayerId(string memory payerId) private pure {
+        if (!_validUserId(payerId)) revert InvalidPayerId();
+    }
+
+    function _validUserId(string memory userId) private pure returns (bool) {
+        bytes memory value = bytes(userId);
+        if (value.length != REF_ID_BYTES) return false;
         for (uint256 index; index < value.length; ++index) {
             uint8 character = uint8(value[index]);
             if (character >= 97 && character <= 122) character -= 32;
@@ -351,8 +377,18 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
                 || (character >= 74 && character <= 78)
                 || (character >= 80 && character <= 90);
             bool validDigit = character >= 50 && character <= 57;
-            if (!validLetter && !validDigit) revert InvalidRefId();
+            if (!validLetter && !validDigit) return false;
         }
+        return true;
+    }
+
+    function _userIdKey(string memory userId) private pure returns (bytes32) {
+        bytes memory normalized = bytes(userId);
+        for (uint256 index; index < normalized.length; ++index) {
+            uint8 character = uint8(normalized[index]);
+            if (character >= 97 && character <= 122) normalized[index] = bytes1(character - 32);
+        }
+        return keccak256(normalized);
     }
 
     function _ruleKey(
@@ -376,12 +412,12 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         for (uint256 index; index < finalIndex; ++index) {
             uint256 splitAmount = (tokenAmount * _payoutSharesBps[index]) / BPS_DENOMINATOR;
             if (splitAmount == 0) continue;
-            _transferExact(paymentToken, _payoutWallets[index], splitAmount);
+            paymentToken.safeTransferFrom(msg.sender, _payoutWallets[index], splitAmount);
             distributed += splitAmount;
             emit PayoutExecuted(transactionId, tokenAddress, _payoutWallets[index], splitAmount);
         }
         uint256 remainder = tokenAmount - distributed;
-        _transferExact(paymentToken, _payoutWallets[finalIndex], remainder);
+        paymentToken.safeTransferFrom(msg.sender, _payoutWallets[finalIndex], remainder);
         emit PayoutExecuted(transactionId, tokenAddress, _payoutWallets[finalIndex], remainder);
     }
 
@@ -391,12 +427,13 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         uint256 secondaryTokenAmount,
         string memory mainId,
         string memory secondId,
-        string memory refId
+        string memory refId,
+        string memory payerId
     )
         private
         returns (bytes32)
     {
-        uint256 nonce = ++_walletNonces[msg.sender];
+        uint256 nonce = totalTransactions + 1;
         return keccak256(abi.encode(
             address(this),
             block.chainid,
@@ -408,7 +445,8 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
             secondaryTokenAmount,
             keccak256(bytes(mainId)),
             keccak256(bytes(secondId)),
-            keccak256(bytes(refId))
+            keccak256(bytes(refId)),
+            keccak256(bytes(payerId))
         ));
     }
 
@@ -452,14 +490,4 @@ contract SmartPay3 is Ownable, Pausable, ReentrancyGuard {
         emit PayoutConfigurationUpdated(payoutConfigHash, wallets, sharesBps);
     }
 
-    function _transferExact(IERC20 token, address wallet, uint256 tokenAmount) private {
-        uint256 balanceBefore = token.balanceOf(wallet);
-        token.safeTransferFrom(msg.sender, wallet, tokenAmount);
-        uint256 balanceAfter = token.balanceOf(wallet);
-        if (wallet == msg.sender) {
-            if (balanceAfter != balanceBefore) revert TokenTransferAmountMismatch();
-        } else if (balanceAfter - balanceBefore != tokenAmount) {
-            revert TokenTransferAmountMismatch();
-        }
-    }
 }

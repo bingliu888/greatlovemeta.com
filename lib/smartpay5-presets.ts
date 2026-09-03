@@ -11,12 +11,12 @@ const PLAN_ROWS: Array<{
   { plan: "annual", months: 12, amount: "annualTokenAmount" }
 ];
 
-export const SMARTPAY3_MINIMUM_GLC_DISPLAY = "1000000000";
-export const SMARTPAY3_GLC_PER_USDT = 1_000_000n;
-export const SMARTPAY3_DEFAULT_USDT_PERCENT = 50;
-export const SMARTPAY3_NO_SECONDARY_TOKEN = "0x0000000000000000000000000000000000000000";
+export const SMARTPAY5_MINIMUM_GLC_DISPLAY = "1000000000";
+export const SMARTPAY5_GLC_PER_USDT = 1_000_000n;
+export const SMARTPAY5_DEFAULT_USDT_PERCENT = 50;
+export const SMARTPAY5_NO_SECONDARY_TOKEN = "0x0000000000000000000000000000000000000000";
 
-export type SmartPay3RulePreset = {
+export type SmartPay5RulePreset = {
   key: string;
   mode: "dual" | "single";
   chainId: number;
@@ -44,7 +44,7 @@ export type SmartPay3RulePreset = {
   secondaryPercent: number;
 };
 
-export type ComparableSmartPay3Rule = {
+export type ComparableSmartPay5Rule = {
   primaryTokenAddress: string;
   secondaryTokenAddress: string;
   mainId: string;
@@ -55,7 +55,7 @@ export type ComparableSmartPay3Rule = {
   enabled: boolean;
 };
 
-export function smartPay3ExpectedTokenPair(
+export function smartPay5ExpectedTokenPair(
   settings: readonly CryptoPaymentSetting[],
   primarySetting: CryptoPaymentSetting
 ) {
@@ -63,7 +63,7 @@ export function smartPay3ExpectedTokenPair(
     return {
       mode: "single" as const,
       secondarySetting: null,
-      secondaryTokenAddress: SMARTPAY3_NO_SECONDARY_TOKEN
+      secondaryTokenAddress: SMARTPAY5_NO_SECONDARY_TOKEN
     };
   }
   const secondarySetting = settings.find(setting => setting.chainId === primarySetting.chainId
@@ -75,24 +75,24 @@ export function smartPay3ExpectedTokenPair(
   } : null;
 }
 
-export function smartPay3RulePresets(settings: readonly CryptoPaymentSetting[], chainId: number | undefined) {
-  if (!chainId) return [] as SmartPay3RulePreset[];
+export function smartPay5RulePresets(settings: readonly CryptoPaymentSetting[], chainId: number | undefined) {
+  if (!chainId) return [] as SmartPay5RulePreset[];
   const active = settings.filter(setting => setting.chainId === chainId && Boolean(setting.enabled));
   const usdtSettings = active.filter(setting => setting.tokenSymbol.toUpperCase() === "USDT");
   const singleTokenSettings = active.filter(setting => setting.tokenSymbol.toUpperCase() !== "USDT");
   const glc = active.find(setting => setting.tokenSymbol.toUpperCase() === "GLC");
   const minimumSecondaryBalanceAtomic = glc
-    ? tokenAmountToAtomic(SMARTPAY3_MINIMUM_GLC_DISPLAY, glc.tokenDecimals).toString()
+    ? tokenAmountToAtomic(SMARTPAY5_MINIMUM_GLC_DISPLAY, glc.tokenDecimals).toString()
     : "0";
   const dualPresets = glc ? usdtSettings.flatMap(usdt => PLAN_ROWS.map(row => {
     const fullPrimaryAtomic = tokenAmountToAtomic(usdt[row.amount], usdt.tokenDecimals);
-    const primaryPercent = Number.isInteger(usdt.smartPay3UsdtPercent) ? usdt.smartPay3UsdtPercent : SMARTPAY3_DEFAULT_USDT_PERCENT;
-    if (primaryPercent < 0 || primaryPercent > 100) throw new Error("SMARTPAY3_INVALID_USDT_PERCENT");
+    const primaryPercent = Number.isInteger(usdt.smartPay5UsdtPercent) ? usdt.smartPay5UsdtPercent : SMARTPAY5_DEFAULT_USDT_PERCENT;
+    if (primaryPercent < 0 || primaryPercent > 100) throw new Error("SMARTPAY5_INVALID_USDT_PERCENT");
     const secondaryPercent = 100 - primaryPercent;
     const primaryAtomic = fullPrimaryAtomic;
-    const numerator = fullPrimaryAtomic * SMARTPAY3_GLC_PER_USDT * (10n ** BigInt(glc.tokenDecimals));
+    const numerator = fullPrimaryAtomic * SMARTPAY5_GLC_PER_USDT * (10n ** BigInt(glc.tokenDecimals));
     const denominator = 10n ** BigInt(usdt.tokenDecimals);
-    if (numerator % denominator !== 0n) throw new Error("SMARTPAY3_SECONDARY_AMOUNT_NOT_EXACT");
+    if (numerator % denominator !== 0n) throw new Error("SMARTPAY5_SECONDARY_AMOUNT_NOT_EXACT");
     const secondaryAtomic = numerator / denominator;
     const ids = cryptoSubscriptionIdsForPlan(row.plan);
     return {
@@ -117,11 +117,11 @@ export function smartPay3RulePresets(settings: readonly CryptoPaymentSetting[], 
       secondaryTokenDecimals: glc.tokenDecimals,
       secondaryTokenAmount: atomicTokenAmountToDisplay(secondaryAtomic, glc.tokenDecimals),
       secondaryTokenAmountAtomic: secondaryAtomic.toString(),
-      minimumSecondaryBalance: SMARTPAY3_MINIMUM_GLC_DISPLAY,
+      minimumSecondaryBalance: SMARTPAY5_MINIMUM_GLC_DISPLAY,
       minimumSecondaryBalanceAtomic,
       primaryPercent,
       secondaryPercent
-    } satisfies SmartPay3RulePreset;
+    } satisfies SmartPay5RulePreset;
   })) : [];
   const singlePresets = singleTokenSettings.flatMap(setting => PLAN_ROWS.map(row => {
     const primaryAtomic = tokenAmountToAtomic(setting[row.amount], setting.tokenDecimals);
@@ -143,7 +143,7 @@ export function smartPay3RulePresets(settings: readonly CryptoPaymentSetting[], 
       primaryTokenAmountAtomic: primaryAtomic.toString(),
       secondarySettingId: "",
       secondarySettingLabel: "",
-      secondaryTokenAddress: SMARTPAY3_NO_SECONDARY_TOKEN,
+      secondaryTokenAddress: SMARTPAY5_NO_SECONDARY_TOKEN,
       secondaryTokenSymbol: "",
       secondaryTokenDecimals: 0,
       secondaryTokenAmount: "0",
@@ -152,12 +152,12 @@ export function smartPay3RulePresets(settings: readonly CryptoPaymentSetting[], 
       minimumSecondaryBalanceAtomic: "0",
       primaryPercent: 100,
       secondaryPercent: 0
-    } satisfies SmartPay3RulePreset;
+    } satisfies SmartPay5RulePreset;
   }));
   return [...dualPresets, ...singlePresets];
 }
 
-export function smartPay3RulePresetStatus(preset: SmartPay3RulePreset, rules: readonly ComparableSmartPay3Rule[]) {
+export function smartPay5RulePresetStatus(preset: SmartPay5RulePreset, rules: readonly ComparableSmartPay5Rule[]) {
   const rule = rules.find(candidate => candidate.primaryTokenAddress.toLowerCase() === preset.primaryTokenAddress.toLowerCase()
     && candidate.secondaryTokenAddress.toLowerCase() === preset.secondaryTokenAddress.toLowerCase()
     && candidate.mainId === preset.mainId && candidate.secondId === preset.secondId) || null;

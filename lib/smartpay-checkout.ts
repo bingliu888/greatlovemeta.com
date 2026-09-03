@@ -17,7 +17,7 @@ export type SmartPayCheckoutOption = {
   mainId: string;
   secondId: string;
   minConfirmations: number;
-  smartPay3Offer?: {
+  smartPay5Offer?: {
     mode: "dual" | "single";
     contractAddress: string;
     primaryTokenAddress: string;
@@ -51,7 +51,7 @@ export function smartPayOptionsForPlan(options: readonly SmartPayCheckoutOption[
 }
 
 export function smartPayCheckoutDisplayAmount(option: SmartPayCheckoutOption, walletOfferEligible = false) {
-  const offer = option.smartPay3Offer;
+  const offer = option.smartPay5Offer;
   if (!walletOfferEligible || !offer) return `${option.tokenAmount} ${option.tokenSymbol}`;
   const parts = [
     BigInt(offer.primaryTokenAmountAtomic) > 0n ? `${offer.primaryTokenAmount} ${offer.primaryTokenSymbol}` : "",
@@ -70,12 +70,12 @@ export async function availableSmartPayCheckoutIdentity<T>(readIdentity: () => P
   }
 }
 
-export function configuredSmartPay3CheckoutScopes(settings: readonly CryptoPaymentSetting[]) {
+export function configuredSmartPay5CheckoutScopes(settings: readonly CryptoPaymentSetting[]) {
   const scopes = new Map<string, { chainId: number; contractAddress: string }>();
   for (const setting of settings) {
-    if (!setting.enabled || !/^0x[a-fA-F0-9]{40}$/.test(setting.smartPay3Contract || "")) continue;
-    const key = `${setting.chainId}:${setting.smartPay3Contract!.toLowerCase()}`;
-    if (!scopes.has(key)) scopes.set(key, { chainId: setting.chainId, contractAddress: setting.smartPay3Contract! });
+    if (!setting.enabled || !/^0x[a-fA-F0-9]{40}$/.test(setting.smartPay5Contract || "")) continue;
+    const key = `${setting.chainId}:${setting.smartPay5Contract!.toLowerCase()}`;
+    if (!scopes.has(key)) scopes.set(key, { chainId: setting.chainId, contractAddress: setting.smartPay5Contract! });
   }
   return [...scopes.values()];
 }

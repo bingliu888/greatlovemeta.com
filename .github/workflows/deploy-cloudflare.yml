@@ -42,7 +42,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
 
-      - name: Compile SmartPay3 artifacts
+      - name: Compile SmartPay5 artifacts
         run: npm run contracts:compile
 
       - name: Lint authored source with zero-warning policy
@@ -110,8 +110,8 @@ jobs:
           grep -Fq '$8' pricing.html
           ! grep -Fq 'Six months' pricing.html
           verify_content https://greatlovemeta.com/en/pricing/crypto 'CRYPTO PAYMENT' crypto-checkout.html
-          ! grep -Eq 'SmartPay3|mainID|secondID' crypto-checkout.html
-          verify_content https://greatlovemeta.com/contracts/SmartPay3.abi.json '"pay"' smartpay3-abi.json
+          ! grep -Eq 'SmartPay5|mainID|secondID' crypto-checkout.html
+          verify_content https://greatlovemeta.com/contracts/SmartPay5.abi.json '"pay"' smartpay5-abi.json
           verify_content https://greatlovemeta.com/locales/public-interface/ja.json '"Copy RefID"' ja-interface.json
           verify_content https://greatlovemeta.com/locales/public-interface/ar.json '"Copy wallet address"' ar-interface.json
           verify_content https://greatlovemeta.com/api/billing/status '"signedIn":false' billing-status.json

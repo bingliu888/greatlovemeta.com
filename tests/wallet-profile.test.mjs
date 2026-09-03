@@ -22,7 +22,8 @@ test("account profile can display, validate, save, and update an EVM wallet", as
   assert.match(route, /wallet_address AS walletAddress/);
   assert.match(route, /saveMemberWallet/);
   assert.match(walletBinding, /UPDATE users SET wallet_address/);
-  assert.match(walletBinding, /WALLET_ALREADY_IN_USE/);
+  assert.doesNotMatch(walletBinding, /WALLET_ALREADY_IN_USE|member_wallet_bindings/);
+  assert.doesNotMatch(route, /another account|WALLET_ALREADY_IN_USE/);
   assert.match(route, /\^0x\[a-fA-F0-9\]\{40\}\$/);
   assert.match(schema, /walletAddress: text\("wallet_address"\)/);
   assert.match(migrationSources.join("\n"), /ALTER TABLE `users` ADD `wallet_address` text/);

@@ -15,7 +15,7 @@ const allowedLatinTerms = Object.freeze([
   "MB", "ID", "URL", "SSL", "DNS", "Webhook", "API", "Polygon",
   "iOS", "cz.cool", "HLS", "DeepSeek", "Flash", "WalletConnect", "ERC-20",
   "DOCX", "XLSX", "PPTX", "PDT", "GreatLoveMeta",
-  "RefID", "Gas", "TransactionID", "SmartPay3", "Owner", "W1", "W2", "W3", "W4", "W5",
+  "RefID", "Gas", "TransactionID", "SmartPay5", "Owner", "W1", "W2", "W3", "W4", "W5",
   "TP", "Solidity", "PolygonScan", "Sourcify", "Worker", "ABI", "ERC", "Standard", "JSON",
 ]);
 

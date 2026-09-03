@@ -1,25 +1,25 @@
 import { NextResponse } from "next/server";
 import { isAddress, type Address, type Hex } from "viem";
-import smartPay3ArtifactJson from "../../../../../contracts/artifacts/SmartPay3.json";
+import smartPay5ArtifactJson from "../../../../../contracts/artifacts/SmartPay5.json";
 import { cryptoRpc, cryptoRpcUrl } from "../../../../../lib/crypto-rpc";
 import { cryptoSettingById } from "../../../../../lib/crypto-settings";
 import { createId, database, nowSeconds } from "../../../../../lib/db";
 import { requirePermanentAdmin } from "../../../../../lib/member";
 import {
-  SMARTPAY3_FACTORY_ADDRESS,
-  smartPay3DeploymentData,
-  smartPay3FactoryDeployment,
-  smartPay3FactoryDeploymentFromSalt
+  SMARTPAY5_FACTORY_ADDRESS,
+  smartPay5DeploymentData,
+  smartPay5FactoryDeployment,
+  smartPay5FactoryDeploymentFromSalt
 } from "../../../../../lib/smartpay-deployment";
-import { verifySmartPay3Identity } from "../../../../../lib/smartpay3-server";
+import { verifySmartPay5Identity } from "../../../../../lib/smartpay5-server";
 import {
-  smartPay3SourceVerificationPayload,
+  smartPay5SourceVerificationPayload,
   smartPayExplorerAddressUrl,
   smartPayExplorerVerificationStatus,
   smartPaySourceDownloadUrls,
-  type SmartPay3VerificationArtifact
+  type SmartPay5VerificationArtifact
 } from "../../../../../lib/smartpay-source-verification";
-import { SMARTPAY3_ABI } from "../../../../../lib/smartpay3";
+import { SMARTPAY5_ABI } from "../../../../../lib/smartpay5";
 
 export const dynamic = "force-dynamic";
 
@@ -39,7 +39,7 @@ type VerificationResult = {
 
 const serviceMessage = (value: unknown) => String(value || "").replace(/\s+/g, " ").trim().slice(0, 200);
 
-async function submitSourcify(chainId: number, contract: Address, payload: ReturnType<typeof smartPay3SourceVerificationPayload>["sourcify"]) {
+async function submitSourcify(chainId: number, contract: Address, payload: ReturnType<typeof smartPay5SourceVerificationPayload>["sourcify"]) {
   const response = await fetch(`https://sourcify.dev/server/v2/verify/${chainId}/${contract}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
@@ -55,7 +55,7 @@ async function submitSourcify(chainId: number, contract: Address, payload: Retur
   } satisfies VerificationResult;
 }
 
-async function submitEtherscan(chainId: number, contract: Address, payload: ReturnType<typeof smartPay3SourceVerificationPayload>["etherscan"]) {
+async function submitEtherscan(chainId: number, contract: Address, payload: ReturnType<typeof smartPay5SourceVerificationPayload>["etherscan"]) {
   const publicStatus = await smartPayExplorerVerificationStatus(chainId, contract);
   if (publicStatus.verified) return {
     submitted: true,
@@ -126,9 +126,9 @@ async function submitEtherscan(chainId: number, contract: Address, payload: Retu
 export async function GET() {
   try {
     await requirePermanentAdmin();
-    const artifact = smartPay3ArtifactJson as SmartPayArtifact;
-    if (artifact.contractName !== "SmartPay3" || !artifact.compiler || !/^0x(?:[0-9a-f]{2})+$/i.test(artifact.bytecode || "")) {
-      return NextResponse.json({ error: "SmartPay3 deployment artifact is unavailable" }, { status: 503 });
+    const artifact = smartPay5ArtifactJson as SmartPayArtifact;
+    if (artifact.contractName !== "SmartPay5" || !artifact.compiler || !/^0x(?:[0-9a-f]{2})+$/i.test(artifact.bytecode || "")) {
+      return NextResponse.json({ error: "SmartPay5 deployment artifact is unavailable" }, { status: 503 });
     }
     return NextResponse.json({
       contractName: artifact.contractName,
@@ -160,10 +160,10 @@ export async function POST(request: Request) {
     let transactionHash = String(input?.transactionHash || "").trim();
     const deploymentSalt = String(input?.deploymentSalt || "").trim().toLowerCase();
     const retryExisting = input?.retryExisting === true;
-    const contractName = "SmartPay3";
-    const artifactJson = smartPay3ArtifactJson;
+    const contractName = "SmartPay5";
+    const artifactJson = smartPay5ArtifactJson;
     const setting = await cryptoSettingById(settingId);
-    const savedContract = setting?.smartPay3Contract;
+    const savedContract = setting?.smartPay5Contract;
     if (input?.confirmPublicSource !== true || !setting || !isAddress(contractAddress)
       || (!retryExisting && !/^0x[0-9a-f]{64}$/i.test(transactionHash))
       || (deploymentSalt && !/^0x[0-9a-f]{64}$/i.test(deploymentSalt))
@@ -181,7 +181,7 @@ export async function POST(request: Request) {
     }
     const rpcUrl = await cryptoRpcUrl(setting.chainId);
     if (!rpcUrl) return NextResponse.json({ error: "Blockchain RPC is not configured for this network" }, { status: 503 });
-    const identity = await verifySmartPay3Identity(rpcUrl, contractAddress as Address);
+    const identity = await verifySmartPay5Identity(rpcUrl, contractAddress as Address);
     const receipt = await cryptoRpc<{ contractAddress?: string | null; status?: string; to?: string | null }>(rpcUrl, "eth_getTransactionReceipt", [transactionHash]);
     if (receipt.status !== "0x1") {
       return NextResponse.json({ error: `The deployment receipt does not match the saved ${contractName} address` }, { status: 422 });
@@ -198,21 +198,21 @@ export async function POST(request: Request) {
         bytecode: artifactJson.bytecode as Hex,
         constructorInputs: ["initialOwner"]
       } as never;
-      const creationData = smartPay3DeploymentData(artifact, identity.owner, SMARTPAY3_ABI);
+      const creationData = smartPay5DeploymentData(artifact, identity.owner, SMARTPAY5_ABI);
       const expected = deploymentSalt
-        ? smartPay3FactoryDeploymentFromSalt(creationData, deploymentSalt as Hex)
-        : smartPay3FactoryDeployment(creationData, identity.owner, setting.chainId, "greatlovemeta.com");
+        ? smartPay5FactoryDeploymentFromSalt(creationData, deploymentSalt as Hex)
+        : smartPay5FactoryDeployment(creationData, identity.owner, setting.chainId, "greatlovemeta.com");
       factoryDeployment = expected.contractAddress.toLowerCase() === contractAddress
-        && receipt.to?.toLowerCase() === SMARTPAY3_FACTORY_ADDRESS.toLowerCase()
-        && transaction.to?.toLowerCase() === SMARTPAY3_FACTORY_ADDRESS.toLowerCase()
+        && receipt.to?.toLowerCase() === SMARTPAY5_FACTORY_ADDRESS.toLowerCase()
+        && transaction.to?.toLowerCase() === SMARTPAY5_FACTORY_ADDRESS.toLowerCase()
         && transaction.from?.toLowerCase() === identity.owner.toLowerCase()
         && transaction.input?.toLowerCase() === expected.data.toLowerCase();
       if (!factoryDeployment) {
         return NextResponse.json({ error: `The deployment receipt does not match the saved ${contractName} address` }, { status: 422 });
       }
     }
-    const verificationArtifact = artifactJson as SmartPay3VerificationArtifact;
-    const payload = smartPay3SourceVerificationPayload(verificationArtifact, identity.owner, directDeployment ? transactionHash as Hex : undefined);
+    const verificationArtifact = artifactJson as SmartPay5VerificationArtifact;
+    const payload = smartPay5SourceVerificationPayload(verificationArtifact, identity.owner, directDeployment ? transactionHash as Hex : undefined);
     const publishedSource = verificationArtifact.standardJsonInput.sources[verificationArtifact.sourceName].content;
     const [sourcify, explorer] = await Promise.all([
       submitSourcify(setting.chainId, contractAddress as Address, payload.sourcify),

@@ -8,9 +8,7 @@ export async function POST(request:Request){
   try {
     const wallet=await saveMemberWallet(user.id,String(body?.wallet||""));
     return Response.json({wallet});
-  } catch (error) {
-    const reason=error instanceof Error?error.message:"";
-    if(reason==="WALLET_ALREADY_IN_USE")return Response.json({error:"This wallet belongs to another account with subscription history"},{status:409});
+  } catch {
     return Response.json({error:"Enter a valid EVM wallet address"},{status:400});
   }
 }

@@ -7,6 +7,6 @@ export const GREATLOVEMETA_WALLET_CONNECT = {
   },
   admin: {
     appName: "GreatLoveMeta.com Admin",
-    description: "Manage the GreatLoveMeta SmartPay3 contract"
+    description: "Manage the GreatLoveMeta SmartPay5 contract"
   }
 } as const;

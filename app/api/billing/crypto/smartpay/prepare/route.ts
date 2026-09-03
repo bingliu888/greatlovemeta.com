@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { requireMember } from "../../../../../../lib/member";
 import { ensureReferralCode } from "../../../../../../lib/referrals";
+import { smartPayProductOwnerRefId } from "../../../../../../lib/smartpay-product-owner";
 import { currentSmartPayCheckoutOption } from "../../../../../../lib/smartpay-checkout-server";
 import type { CryptoSubscriptionPlan } from "../../../../../../lib/crypto-subscription";
 
@@ -20,8 +21,11 @@ export async function POST(request: Request) {
     if (!option) {
       return NextResponse.json({ error: "This payment option is not currently enabled on-chain" }, { status: 409 });
     }
-    const referral = await ensureReferralCode(member.id);
-    return NextResponse.json({ option, refId: referral.code });
+    const [payer, refId] = await Promise.all([
+      ensureReferralCode(member.id),
+      smartPayProductOwnerRefId(),
+    ]);
+    return NextResponse.json({ option, payerId: payer.code, refId });
   } catch (error) {
     if (error instanceof Response) return error;
     console.warn("On-chain payment preparation failed", error instanceof Error ? error.message.slice(0, 160) : "unknown");

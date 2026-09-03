@@ -2,30 +2,30 @@ import type { Address } from "viem";
 import { atomicTokenAmountToDisplay } from "./crypto-amount";
 import { cryptoRpcUrl } from "./crypto-rpc";
 import { activeCryptoSettings, type CryptoPaymentSetting } from "./crypto-settings";
-import { availableSmartPayCheckoutIdentity, configuredSmartPay3CheckoutScopes, type SmartPayCheckoutOption } from "./smartpay-checkout";
+import { availableSmartPayCheckoutIdentity, configuredSmartPay5CheckoutScopes, type SmartPayCheckoutOption } from "./smartpay-checkout";
 import type { CryptoSubscriptionPlan } from "./crypto-subscription";
-import { smartPay3RulePresets, smartPay3RulePresetStatus } from "./smartpay3-presets";
+import { smartPay5RulePresets, smartPay5RulePresetStatus } from "./smartpay5-presets";
 import {
-  smartPay3PaymentRules,
-  smartPay3PayoutConfigurationRaw,
-  verifySmartPay3Identity
-} from "./smartpay3-server";
+  smartPay5PaymentRules,
+  smartPay5PayoutConfigurationRaw,
+  verifySmartPay5Identity
+} from "./smartpay5-server";
 
 export async function currentSmartPayCheckoutOptions(inputSettings?: readonly CryptoPaymentSetting[]) {
   const settings = inputSettings ? [...inputSettings] : await activeCryptoSettings();
-  const smartPay3Options = (await Promise.all(configuredSmartPay3CheckoutScopes(settings).map(async scope => {
+  const smartPay5Options = (await Promise.all(configuredSmartPay5CheckoutScopes(settings).map(async scope => {
     const rpcUrl = await cryptoRpcUrl(scope.chainId);
     if (!rpcUrl) return [] as SmartPayCheckoutOption[];
     const contractAddress = scope.contractAddress as Address;
-    const identity = await availableSmartPayCheckoutIdentity(() => verifySmartPay3Identity(rpcUrl, contractAddress));
+    const identity = await availableSmartPayCheckoutIdentity(() => verifySmartPay5Identity(rpcUrl, contractAddress));
     if (!identity || identity.paused) return [] as SmartPayCheckoutOption[];
     const [payouts, rules] = await Promise.all([
-      smartPay3PayoutConfigurationRaw(rpcUrl, contractAddress),
-      smartPay3PaymentRules(rpcUrl, contractAddress)
+      smartPay5PayoutConfigurationRaw(rpcUrl, contractAddress),
+      smartPay5PaymentRules(rpcUrl, contractAddress)
     ]);
     if (!payouts.length) return [] as SmartPayCheckoutOption[];
-    return smartPay3RulePresets(settings, scope.chainId).flatMap(preset => {
-      const status = smartPay3RulePresetStatus(preset, rules);
+    return smartPay5RulePresets(settings, scope.chainId).flatMap(preset => {
+      const status = smartPay5RulePresetStatus(preset, rules);
       const rule = status.rule;
       if (!rule?.enabled || BigInt(rule.primaryTokenAmount) <= 0n) return [];
       const fullPrimaryAtomic = BigInt(rule.primaryTokenAmount);
@@ -67,7 +67,7 @@ export async function currentSmartPayCheckoutOptions(inputSettings?: readonly Cr
         minConfirmations
       };
       return [{
-        key: `smartpay3:${preset.key}`,
+        key: `smartpay5:${preset.key}`,
         settingId: primarySetting.id,
         plan: preset.plan,
         months: preset.months,
@@ -82,11 +82,11 @@ export async function currentSmartPayCheckoutOptions(inputSettings?: readonly Cr
         mainId: preset.mainId,
         secondId: preset.secondId,
         minConfirmations,
-        smartPay3Offer: offer
+        smartPay5Offer: offer
       } satisfies SmartPayCheckoutOption];
     });
   }))).flat();
-  return smartPay3Options;
+  return smartPay5Options;
 }
 
 export async function currentSmartPayCheckoutOption(settingId: string, plan: CryptoSubscriptionPlan) {

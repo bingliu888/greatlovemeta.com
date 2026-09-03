@@ -1,13 +1,31 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-member-identity-persistence-20260828",
+  "releaseId": "greatlovemeta-com-smartpay5-20260903",
   "site": "greatlovemeta.com",
-  "title": {"en":"Preserve real member identity on sign-in","zh":"登录时保留真实会员身份资料"},
-  "purpose": {"en":"Keep the real Clerk email visible and preserve a user-edited display name across password sign-ins.","zh":"保留真实 Clerk 邮箱，并确保用户修改的显示名称在密码重新登录后仍然保存。"},
-  "features": {"en":["Store normalized real email for verified and unverified members with a separate verification flag.","Preserve saved display names during Clerk synchronization."],"zh":["为已验证和未验证会员保存标准化真实邮箱，并独立记录验证状态。","Clerk 同步时保留用户已保存的显示名称。"]},
-  "affected": {"en":["GreatLoveMeta Clerk session bridge, user identity records, and account identity surfaces."],"zh":["GreatLoveMeta Clerk 会话桥接、用户身份记录及账户身份界面。"]},
-  "changes": {"en":["Repair legacy synthetic-email accounts, bind by Clerk ID first, preserve display names, and add regression coverage."],"zh":["修复历史合成邮箱账户，优先按 Clerk ID 绑定，保留显示名称，并增加回归覆盖。"]},
-  "validation": {"en":["Pass identity regression, lint, repository build and tests, deployment, and production checks."],"zh":["通过身份回归、代码规范、仓库构建与测试、部署及生产检查。"]},
-  "deferred": {"en":["Dedicated production account acceptance uses a non-admin test identity and never exposes credentials."],"zh":["生产验收使用专用非管理员测试身份，且绝不暴露凭据。"]},
-  "siteAdaptations": {"en":["Preserve GreatLoveMeta branding and its independent Clerk, user, payment, classroom, and data boundaries."],"zh":["保留 GreatLoveMeta 品牌及独立的 Clerk、用户、支付、课堂和数据边界。"]}
+  "title": { "en": "Migrate GreatLoveMeta subscriptions to SmartPay5", "zh": "将 GreatLoveMeta 订阅迁移至 SmartPay5" },
+  "purpose": {
+    "en": "Bind subscription entitlement to the signed-in member PayerID while allowing any connected wallet to fund the payment, including fee-on-transfer tokens.",
+    "zh": "以登录会员的 PayerID 绑定订阅权益，同时允许任意连接钱包付款，并支持转账扣税代币。"
+  },
+  "features": {
+    "en": ["Pass the signed-in member RefID as PayerID and the permanent administrator RefID as product owner.", "Read payment history by PayerID while retaining the funding wallet only for audit.", "Accept fee-on-transfer tokens without recipient balance-delta or amount verification."],
+    "zh": ["以登录会员 RefID 作为 PayerID，并以永久管理员 RefID 作为产品所有者。", "按 PayerID 读取付款记录，付款钱包仅作审计。", "不校验收款余额差额或实际到账金额，从而支持转账扣税代币。"]
+  },
+  "affected": {
+    "en": ["GreatLoveMeta monthly and annual crypto subscriptions, account payment history, and administrator payment tools."],
+    "zh": ["GreatLoveMeta 月费及年费加密订阅、账户付款记录与管理员支付工具。"]
+  },
+  "changes": {
+    "en": ["Publish a fresh site-owned SmartPay5 ABI and deployment path with GreatLoveMeta membership product IDs and empty SecondID.", "Claim subscriptions only after a successful confirmed SmartPay5 receipt and derive entitlement time from the clamped chain timestamp.", "Allow the funding wallet to differ from or be absent from the member profile, remove wallet uniqueness, normalize PayerID lookup case-insensitively, and pin fflate 0.8.3."],
+    "zh": ["发布全新本站 SmartPay5 ABI 与部署路径，采用 GreatLoveMeta 会员产品 ID 及空 SecondID。", "仅在 SmartPay5 回执成功且确认数充足后更新订阅，并以校正后的链上时间计算权益。", "允许付款钱包与会员资料钱包不同或资料中没有钱包，移除钱包唯一限制，PayerID 查询忽略大小写，并锁定 fflate 0.8.3。"]
+  },
+  "validation": {
+    "en": ["Compile and execute SmartPay5 contract tests including fee-on-transfer and case-insensitive PayerID coverage, apply every D1 migration to a fresh database, pass lint, build, full repository tests, deployment workflow, and production HTTP probes."],
+    "zh": ["编译并执行 SmartPay5 合约测试（含转账扣税与 PayerID 大小写无关场景），在全新数据库应用全部 D1 迁移，并通过代码规范、构建、全仓测试、部署流程及生产 HTTP 探测。"]
+  },
+  "deferred": { "en": ["Realtime browser testing is intentionally omitted at the user's request."], "zh": ["按用户要求，本次不执行实时浏览器测试。"] },
+  "siteAdaptations": {
+    "en": ["Preserve GreatLoveMeta branding, header, footer, monthly and annual plans, Clerk, classrooms, RealtimeKit, referrals, R2, and independent infrastructure."],
+    "zh": ["保留 GreatLoveMeta 品牌、页头页尾、月费及年费套餐、Clerk、课堂、RealtimeKit、推荐系统、R2 与独立基础设施。"]
+  }
 }

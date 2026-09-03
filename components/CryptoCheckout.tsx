@@ -14,13 +14,13 @@ import { smartPayAvailablePlans, smartPayCheckoutDisplayAmount, smartPayOptionsF
 import { GREATLOVEMETA_WALLET_CONNECT } from "../lib/greatlovemeta-commerce";
 import type { CryptoSubscriptionPlan } from "../lib/crypto-subscription";
 import type { SubscriptionPlan } from "../lib/subscription-plans";
-import { SMARTPAY3_ABI } from "../lib/smartpay3";
-import { readSmartPay3WalletPreflight, type SmartPay3WalletPreflight } from "../lib/smartpay3-wallet-preflight";
+import { SMARTPAY5_ABI } from "../lib/smartpay5";
+import { readSmartPay5WalletPreflight, type SmartPay5WalletPreflight } from "../lib/smartpay5-wallet-preflight";
 
 type Plan = CryptoSubscriptionPlan;
 type Status = { signedIn: boolean; wallet?: string | null; cryptoSettings?: CryptoPaymentSetting[]; plans?: SubscriptionPlan[] };
 type CheckoutOptionsResponse = { options?: SmartPayCheckoutOption[]; error?: string };
-type PreparedCheckoutOption = SmartPayCheckoutOption & { refId: string };
+type PreparedCheckoutOption = SmartPayCheckoutOption & { payerId: string; refId: string };
 type ExistingPayment = {
   txHash: string;
   paymentId?: string;
@@ -53,10 +53,9 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
   const [direct, setDirect] = useState(false);
   const [connected, setConnected] = useState(false);
   const [walletProvider, setWalletProvider] = useState<EthereumProvider | null>(null);
-  const [smartPay3Preflight, setSmartPay3Preflight] = useState<SmartPay3WalletPreflight | null>(null);
-  const [smartPay3UsingCombo, setSmartPay3UsingCombo] = useState(false);
+  const [smartPay5Preflight, setSmartPay5Preflight] = useState<SmartPay5WalletPreflight | null>(null);
+  const [smartPay5UsingCombo, setSmartPay5UsingCombo] = useState(false);
   const [preflightBusy, setPreflightBusy] = useState(false);
-  const [balance, setBalance] = useState("");
   const [txHash, setTxHash] = useState("");
   const [existingPayment, setExistingPayment] = useState<ExistingPayment | null>(null);
   const [pendingPaymentHash, setPendingPaymentHash] = useState("");
@@ -118,14 +117,14 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
   const selected = (status.cryptoSettings || []).find(item => item.id === selectedOption?.settingId) || null;
   const selectedPlan = plans.find(item => item.id === plan) || { id: plan, months: selectedOption?.months || (plan === "annual" ? 12 : 1), price: "—", amountCents: 0 };
   const nativeTokenSymbol = selected ? walletChain(selected).nativeCurrency.symbol : "Gas";
-  const smartPay3Offer = selectedOption?.smartPay3Offer || null;
-  const smartPay3ShowsPrimary = Boolean(smartPay3Offer) && (smartPay3Preflight
-    ? (!smartPay3UsingCombo || BigInt(smartPay3Offer!.primaryTokenAmountAtomic) > 0n)
-    : smartPay3Offer!.primaryPercent > 0);
-  const smartPay3ShowsSecondary = Boolean(smartPay3Offer) && (smartPay3Preflight
-    ? (smartPay3UsingCombo && BigInt(smartPay3Offer!.secondaryTokenAmountAtomic) > 0n)
-    : smartPay3Offer!.secondaryPercent > 0);
-  const walletOfferEligible = Boolean(connected && smartPay3UsingCombo && smartPay3Preflight?.eligibilityMet);
+  const smartPay5Offer = selectedOption?.smartPay5Offer || null;
+  const smartPay5ShowsPrimary = Boolean(smartPay5Offer) && (smartPay5Preflight
+    ? (!smartPay5UsingCombo || BigInt(smartPay5Offer!.primaryTokenAmountAtomic) > 0n)
+    : smartPay5Offer!.primaryPercent > 0);
+  const smartPay5ShowsSecondary = Boolean(smartPay5Offer) && (smartPay5Preflight
+    ? (smartPay5UsingCombo && BigInt(smartPay5Offer!.secondaryTokenAmountAtomic) > 0n)
+    : smartPay5Offer!.secondaryPercent > 0);
+  const walletOfferEligible = Boolean(connected && smartPay5UsingCombo && smartPay5Preflight?.eligibilityMet);
   const selectedDisplayAmount = selectedOption
     ? smartPayCheckoutDisplayAmount(selectedOption, walletOfferEligible)
     : "";
@@ -138,25 +137,12 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     return true;
   };
 
-  async function saveWallet(value: string) {
-    const response = await fetch("/api/profile", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ walletAddress: value })
-    });
-    if (!response.ok) {
-      const data = await response.json().catch(() => ({})) as { error?: string };
-      throw new Error(data.error || "SAVE_FAILED");
-    }
-    await loadStatus();
-  }
-
   async function connectWallet() {
     if (!selected || !selectedOption || !ensureLogin()) return;
     try {
       setBusy("connect");
       setMessage("");
-      setSmartPay3Preflight(null);
+      setSmartPay5Preflight(null);
       const result = await connectEvmWallet({
         setting: selected,
         projectId: GREATLOVEMETA_WALLET_CONNECT.projectId,
@@ -165,17 +151,13 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
         scriptId: GREATLOVEMETA_WALLET_CONNECT.scriptId
       });
       await assertProviderChain(result.provider, selectedOption.chainId);
-      await saveWallet(result.address);
       setWalletProvider(result.provider);
       setWallet(result.address);
       setConnected(true);
       setDirect(false);
       await refreshConnectedPreflight(result.provider, result.address);
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "";
-      setMessage(reason.includes("another account")
-        ? (zh ? "此钱包已属于有订阅历史的其他账户，无法绑定；如需更正请联系管理员。" : reason)
-        : (zh ? "无法连接钱包。请扫描二维码或在钱包中允许大爱元宇宙连接。" : "Could not connect the wallet. Scan the QR code or approve GreatLoveMeta in your wallet."));
+    } catch {
+      setMessage(zh ? "无法连接钱包。请扫描二维码或在钱包中允许 GreatLoveMeta 连接。" : "Could not connect the wallet. Scan the QR code or approve GreatLoveMeta in your wallet.");
     } finally {
       setBusy("");
     }
@@ -188,11 +170,12 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       headers: { "content-type": "application/json" },
       body: JSON.stringify({ settingId: selectedOption.settingId, plan: selectedOption.plan })
     });
-    const data = await response.json().catch(() => ({})) as { option?: SmartPayCheckoutOption; refId?: string; error?: string };
-    if (!response.ok || !data.option || !/^[A-HJ-NP-Z2-9]{6}$/.test(data.refId || "")) {
+    const data = await response.json().catch(() => ({})) as { option?: SmartPayCheckoutOption; payerId?: string; refId?: string; error?: string };
+    if (!response.ok || !data.option || !/^[A-HJ-NP-Z2-9]{6}$/.test(data.payerId || "")
+      || !/^[A-HJ-NP-Z2-9]{6}$/.test(data.refId || "")) {
       throw new Error(data.error || "RULE_UNAVAILABLE");
     }
-    return { ...data.option, refId: data.refId! } as PreparedCheckoutOption;
+    return { ...data.option, payerId: data.payerId!, refId: data.refId! } as PreparedCheckoutOption;
   }
 
   async function lookupExistingPayment(context: PaymentLookupContext) {
@@ -259,16 +242,16 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     }
   }
 
-  async function readSmartPay3PreflightForAmounts(
+  async function readSmartPay5PreflightForAmounts(
     provider: EthereumProvider,
     address: string,
     prepared: PreparedCheckoutOption,
     primaryRequired: bigint,
     secondaryRequired: bigint
   ) {
-    const offer = prepared.smartPay3Offer;
-    if (!offer) throw new Error("SMARTPAY3_RULE_UNAVAILABLE");
-    return readSmartPay3WalletPreflight({
+    const offer = prepared.smartPay5Offer;
+    if (!offer) throw new Error("SMARTPAY5_RULE_UNAVAILABLE");
+    return readSmartPay5WalletPreflight({
       provider,
       wallet: address as Address,
       contractAddress: prepared.contractAddress as Address,
@@ -279,25 +262,26 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       minimumSecondaryBalance: BigInt(offer.minimumSecondaryBalanceAtomic),
       mainId: prepared.mainId,
       secondId: prepared.secondId,
-      refId: prepared.refId
+      refId: prepared.refId,
+      payerId: prepared.payerId
     });
   }
 
-  async function readCurrentSmartPay3Preflight(
+  async function readCurrentSmartPay5Preflight(
     provider: EthereumProvider,
     address: string,
     prepared: PreparedCheckoutOption,
     forceFullUsdt = false
   ) {
-    const offer = prepared.smartPay3Offer;
-    if (!offer) throw new Error("SMARTPAY3_RULE_UNAVAILABLE");
+    const offer = prepared.smartPay5Offer;
+    if (!offer) throw new Error("SMARTPAY5_RULE_UNAVAILABLE");
     if (!forceFullUsdt && offer.primaryPercent < 100) {
-      const combo = await readSmartPay3PreflightForAmounts(provider, address, prepared,
+      const combo = await readSmartPay5PreflightForAmounts(provider, address, prepared,
         BigInt(offer.primaryTokenAmountAtomic), BigInt(offer.secondaryTokenAmountAtomic));
       if (offer.primaryPercent === 0 || combo.eligibilityMet) return { preflight: combo, usingCombo: true };
     }
     return {
-      preflight: await readSmartPay3PreflightForAmounts(provider, address, prepared, BigInt(prepared.tokenAmountAtomic), 0n),
+      preflight: await readSmartPay5PreflightForAmounts(provider, address, prepared, BigInt(prepared.tokenAmountAtomic), 0n),
       usingCombo: false
     };
   }
@@ -306,11 +290,11 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     setPreflightBusy(true);
     try {
       const prepared = await preparePayment();
-      const offer = prepared.smartPay3Offer;
-      if (!offer) throw new Error("SMARTPAY3_RULE_UNAVAILABLE");
-      const result = await readCurrentSmartPay3Preflight(provider, address, prepared);
-      setSmartPay3Preflight(result.preflight);
-      setSmartPay3UsingCombo(result.usingCombo);
+      const offer = prepared.smartPay5Offer;
+      if (!offer) throw new Error("SMARTPAY5_RULE_UNAVAILABLE");
+      const result = await readCurrentSmartPay5Preflight(provider, address, prepared);
+      setSmartPay5Preflight(result.preflight);
+      setSmartPay5UsingCombo(result.usingCombo);
       setMessage(!result.preflight.primaryEnough
           ? (zh ? `钱包 ${offer.primaryTokenSymbol} 余额不足；不会发送授权或付款交易。` : `The wallet ${offer.primaryTokenSymbol} balance is insufficient. No approval or payment will be sent.`)
           : !result.preflight.eligibilityMet
@@ -323,7 +307,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
                   ? (zh ? `本次付款将收取 100% ${offer.primaryTokenSymbol}；付款前会显示余额并再次确认。` : `This payment will use 100% ${offer.primaryTokenSymbol}. The balance will be shown again before payment.`)
                   : (zh ? "GLC 不足或比例为 100%；本次付款将只收取 100% USDT。" : "GLC is insufficient or the ratio is 100%; this payment will use 100% USDT only."));
     } catch {
-      setSmartPay3Preflight(null);
+      setSmartPay5Preflight(null);
       setMessage(zh ? "暂时无法读取钱包余额或预估 Gas。" : "Unable to read wallet balances or estimate gas right now.");
     } finally {
       setPreflightBusy(false);
@@ -340,7 +324,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     let submittedHash = "";
     try {
       setBusy("send");
-      setMessage(zh ? "正在检查该钱包是否有尚未入账的同项目付款…" : "Checking this wallet for an unreconciled matching payment…");
+      setMessage(zh ? "正在按当前账户付款人 ID 检查尚未入账的同项目付款…" : "Checking this account PayerID for an unreconciled matching payment…");
       const previous = await lookupExistingPayment("new-payment");
       if (previous) {
         setExistingPayment(previous);
@@ -353,12 +337,12 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       setMessage(zh ? "正在通过服务器重新核对链上付款规则…" : "Rechecking the on-chain payment rule with the server…");
       const prepared = await preparePayment();
       await assertProviderChain(provider, prepared.chainId);
-      const offer = prepared.smartPay3Offer;
+      const offer = prepared.smartPay5Offer;
       if (!offer) throw new Error("RULE_UNAVAILABLE");
-        const mode = await readCurrentSmartPay3Preflight(provider, wallet, prepared);
+        const mode = await readCurrentSmartPay5Preflight(provider, wallet, prepared);
         let preflight = mode.preflight;
-        setSmartPay3Preflight(preflight);
-        setSmartPay3UsingCombo(mode.usingCombo);
+        setSmartPay5Preflight(preflight);
+        setSmartPay5UsingCombo(mode.usingCombo);
         const primaryRequired = mode.usingCombo ? BigInt(offer.primaryTokenAmountAtomic) : BigInt(prepared.tokenAmountAtomic);
         const secondaryRequired = mode.usingCombo ? BigInt(offer.secondaryTokenAmountAtomic) : 0n;
         if (!preflight.primaryEnough) throw new Error("INSUFFICIENT_TOKEN_BALANCE");
@@ -375,7 +359,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
           const approvalHash = await provider.request({ method: "eth_sendTransaction", params: [{ from: wallet, to: tokenAddress, data: approvalData, gas: preflight.gasLimit }] });
           if (typeof approvalHash !== "string") throw new Error("NO_APPROVAL_HASH");
           await waitForTransactionReceipt(provider, approvalHash);
-          preflight = await readSmartPay3PreflightForAmounts(provider, wallet, prepared, primaryRequired, secondaryRequired);
+          preflight = await readSmartPay5PreflightForAmounts(provider, wallet, prepared, primaryRequired, secondaryRequired);
           if (!preflight.primaryEnough || !preflight.eligibilityMet || preflight.gasEnough === false
             || preflight.simulationError || !preflight.gasLimit) throw new Error("PAYMENT_SIMULATION_FAILED");
         }
@@ -386,9 +370,9 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
             ? (zh ? `${offer.secondaryTokenSymbol} 授权已确认；请在钱包确认全额 ${offer.secondaryTokenSymbol} 付款。` : `${offer.secondaryTokenSymbol} approval is ready. Confirm the full-${offer.secondaryTokenSymbol} payment in your wallet.`)
             : (zh ? `${offer.primaryTokenSymbol} 授权已确认；请在钱包确认全额 ${offer.primaryTokenSymbol} 付款。` : `${offer.primaryTokenSymbol} approval is ready. Confirm the full-${offer.primaryTokenSymbol} payment in your wallet.`));
         const payData = encodeFunctionData({
-          abi: SMARTPAY3_ABI,
+          abi: SMARTPAY5_ABI,
           functionName: "pay",
-          args: [offer.primaryTokenAddress as Address, offer.secondaryTokenAddress as Address, prepared.mainId, prepared.secondId, primaryRequired, prepared.refId]
+          args: [offer.primaryTokenAddress as Address, offer.secondaryTokenAddress as Address, prepared.mainId, prepared.secondId, primaryRequired, prepared.refId, prepared.payerId]
         });
         const hash = await provider.request({ method: "eth_sendTransaction", params: [{ from: wallet, to: prepared.contractAddress, data: payData, gas: preflight.gasLimit }] });
         if (typeof hash !== "string") throw new Error("NO_HASH");
@@ -424,23 +408,8 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     }
   }
 
-  async function refreshBalance() {
-    if (!selected || !wallet) return;
-    setBusy("balance");
-    setMessage("");
-    const response = await fetch("/api/billing/crypto/balance", {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ settingId: selected.id })
-    });
-    const data = await response.json().catch(() => ({})) as { amount?: string; symbol?: string; error?: string };
-    if (response.ok) setBalance(`${data.amount} ${data.symbol}`);
-    else setMessage(data.error || (zh ? "暂时无法读取余额。" : "Unable to read the balance."));
-    setBusy("");
-  }
-
   async function verify(candidateHash?: string, afterSuccessfulPayment = false) {
-    if (!selectedOption || !wallet) return;
+    if (!selectedOption) return;
     setBusy("verify");
     let hash = (candidateHash || txHash).trim().toLowerCase();
     if (!/^0x[a-f0-9]{64}$/.test(hash)) {
@@ -503,30 +472,11 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     setBusy("");
   }
 
-  async function saveDirect() {
-    if (!/^0x[a-fA-F0-9]{40}$/.test(wallet)) {
-      setMessage(zh ? "请输入有效的 EVM 钱包地址。" : "Enter a valid EVM wallet address.");
-      return;
-    }
-    try {
-      setBusy("wallet");
-      await saveWallet(wallet);
-      setMessage(zh ? "付款钱包已保存。" : "Payer wallet saved.");
-    } catch (error) {
-      const reason = error instanceof Error ? error.message : "";
-      setMessage(reason.includes("another account")
-        ? (zh ? "此钱包已属于有订阅历史的其他账户，无法绑定；如需更正请联系管理员。" : reason)
-        : (zh ? "付款钱包无法保存。" : "Could not save the payer wallet."));
-    } finally {
-      setBusy("");
-    }
-  }
-
   function choosePlan(nextPlan: Plan) {
     setPlan(nextPlan);
     setSettingId(options.find(option => option.plan === nextPlan)?.settingId || "");
-    setSmartPay3Preflight(null);
-    setSmartPay3UsingCombo(false);
+    setSmartPay5Preflight(null);
+    setSmartPay5UsingCombo(false);
     setExistingPayment(null);
     setPendingPaymentHash("");
     setConfirmedUntil(null);
@@ -549,7 +499,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       <h2>{zh ? "步骤 2：选择链上付款项目" : "Step 2: Choose an on-chain payment option"}</h2>
       <p className="flow-intro">{zh ? "这里只显示链上已启用的付款规则；代币金额以合约当前返回值为准。" : "Only enabled on-chain payment rules are shown. Current contract values are authoritative for token amounts."}</p>
       {planOptions.length ? <div className="radio-list">{planOptions.map(option => {
-        return <label key={option.key}><input type="radio" checked={selectedOption?.key === option.key} onChange={() => { setSettingId(option.settingId); setSmartPay3Preflight(null); setSmartPay3UsingCombo(false); setExistingPayment(null); setPendingPaymentHash(""); setConfirmedUntil(null); }}/><span className="plan-option-copy"><strong>{option.tokenSymbol}</strong><small>{option.chainName}</small></span><span className="plan-option-price"><b>{smartPayCheckoutDisplayAmount(option)}</b><small>{zh ? "链上原价" : "On-chain price"}</small></span></label>;
+        return <label key={option.key}><input type="radio" checked={selectedOption?.key === option.key} onChange={() => { setSettingId(option.settingId); setSmartPay5Preflight(null); setSmartPay5UsingCombo(false); setExistingPayment(null); setPendingPaymentHash(""); setConfirmedUntil(null); }}/><span className="plan-option-copy"><strong>{option.tokenSymbol}</strong><small>{option.chainName}</small></span><span className="plan-option-price"><b>{smartPayCheckoutDisplayAmount(option)}</b><small>{zh ? "链上原价" : "On-chain price"}</small></span></label>;
       })}</div> : <p>{zh ? "此服务期当前没有链上付款项目。" : "This term has no current on-chain payment option."}</p>}
       <button className="button primary" disabled={!selectedOption} onClick={() => { if (!ensureLogin()) return; setStep(3); if (connected && walletProvider && wallet) void refreshConnectedPreflight(walletProvider, wallet); }}>{zh ? "下一步：付款钱包" : "Next: payment wallet"} →</button>
     </section> : null}
@@ -558,17 +508,18 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       <button className="text-button" onClick={() => setStep(2)}>← {zh ? "上一步" : "Back"}</button>
       <h2>{zh ? "步骤 3：连接或填写付款钱包" : "Step 3: Connect or enter a payer wallet"}</h2>
       <div className="payment-summary"><strong>{subscriptionTerm(selectedPlan.months, zh)}</strong><span>{selectedDisplayAmount} · {selectedOption.chainName}</span></div>
-      <dl><div><dt>{zh ? "付款合约" : "Payment contract"}</dt><dd><a className="chain-link" href={explorerUrl(selectedOption.chainId, "address", selectedOption.contractAddress) || "#"} target="_blank" rel="noreferrer">{selectedOption.contractAddress}</a></dd></div><div><dt>{zh ? "主代币合约" : "Primary token contract"}</dt><dd><a className="chain-link" href={explorerUrl(selectedOption.chainId, "token", selectedOption.tokenAddress) || "#"} target="_blank" rel="noreferrer">{selectedOption.tokenAddress}</a></dd></div>{selectedOption.smartPay3Offer?.mode === "dual" ? <div><dt>{zh ? "GLC 合约" : "GLC contract"}</dt><dd><a className="chain-link" href={explorerUrl(selectedOption.chainId, "token", selectedOption.smartPay3Offer.secondaryTokenAddress) || "#"} target="_blank" rel="noreferrer">{selectedOption.smartPay3Offer.secondaryTokenAddress}</a></dd></div> : null}</dl>
+      <dl><div><dt>{zh ? "付款合约" : "Payment contract"}</dt><dd><a className="chain-link" href={explorerUrl(selectedOption.chainId, "address", selectedOption.contractAddress) || "#"} target="_blank" rel="noreferrer">{selectedOption.contractAddress}</a></dd></div><div><dt>{zh ? "主代币合约" : "Primary token contract"}</dt><dd><a className="chain-link" href={explorerUrl(selectedOption.chainId, "token", selectedOption.tokenAddress) || "#"} target="_blank" rel="noreferrer">{selectedOption.tokenAddress}</a></dd></div>{selectedOption.smartPay5Offer?.mode === "dual" ? <div><dt>{zh ? "GLC 合约" : "GLC contract"}</dt><dd><a className="chain-link" href={explorerUrl(selectedOption.chainId, "token", selectedOption.smartPay5Offer.secondaryTokenAddress) || "#"} target="_blank" rel="noreferrer">{selectedOption.smartPay5Offer.secondaryTokenAddress}</a></dd></div> : null}</dl>
       <p className="flow-intro">{zh ? "服务器会重新读取当前规则、实际代币余额和 Gas；校验通过后会直接请求钱包完成必要授权或付款。成功后自动读取 TransactionID 并更新订阅。" : "The server rereads the current rule, token balances, and gas first. After validation passes, the wallet directly requests any required approval or payment. The TransactionID then updates the subscription automatically."}</p>
       {!direct ? <>
         {connected ? <div className="direct-payment">
-          <p className="connected-wallet-line">{zh ? `已连接 ${wallet}` : `Connected ${wallet}`}</p>
+          <p className="connected-wallet-line">{zh ? "已连接钱包" : "Connected wallet"} · {wallet}</p>
+          <p>{zh ? "此钱包只负责签名和付款；订阅归属当前登录账户的付款人 ID，不要求与个人资料钱包相同。" : "This wallet only signs and funds the payment. Access belongs to the signed-in account PayerID, and the wallet does not need to match the profile."}</p>
           <div className="wallet-payment-preflight" aria-label={zh ? "付款前余额与 Gas 检查" : "Pre-payment balance and gas check"}>
-            {smartPay3Offer ? <>
-              {smartPay3ShowsPrimary ? <div><span>{zh ? `钱包 ${smartPay3Offer.primaryTokenSymbol} 余额` : `Wallet ${smartPay3Offer.primaryTokenSymbol} balance`}</span><strong>{smartPay3Preflight ? `${displayAtomic(smartPay3Preflight.primaryBalanceAtomic, smartPay3Offer.primaryTokenDecimals)} ${smartPay3Offer.primaryTokenSymbol}` : (preflightBusy ? "…" : "—")}</strong>{smartPay3Preflight ? <small className={smartPay3Preflight.primaryEnough ? "rule-enabled" : "rule-disabled"}>{smartPay3Preflight.primaryEnough ? (zh ? "余额足够" : "Enough") : (zh ? "余额不足" : "Insufficient")}</small> : null}</div> : null}
-              {smartPay3ShowsSecondary ? <div><span>{zh ? `钱包 ${smartPay3Offer.secondaryTokenSymbol} 余额` : `Wallet ${smartPay3Offer.secondaryTokenSymbol} balance`}</span><strong>{smartPay3Preflight ? `${displayAtomic(smartPay3Preflight.secondaryBalanceAtomic, smartPay3Offer.secondaryTokenDecimals)} ${smartPay3Offer.secondaryTokenSymbol}` : (preflightBusy ? "…" : "—")}</strong>{smartPay3Preflight ? <small className={smartPay3Preflight.eligibilityMet ? "rule-enabled" : "rule-disabled"}>{smartPay3Preflight.eligibilityMet ? (zh ? "余额与门槛足够" : "Balance & threshold met") : (zh ? "余额或门槛不足" : "Balance or threshold insufficient")}</small> : null}</div> : null}
-              <div><span>{zh ? `钱包 ${nativeTokenSymbol} Gas 余额` : `Wallet ${nativeTokenSymbol} gas balance`}</span><strong>{smartPay3Preflight ? `${displayAtomic(smartPay3Preflight.nativeBalanceAtomic, 18, 8)} ${nativeTokenSymbol}` : (preflightBusy ? "…" : "—")}</strong>{smartPay3Preflight ? <small className={smartPay3Preflight.gasEnough === false ? "rule-disabled" : "rule-enabled"}>{smartPay3Preflight.gasEnough === false ? (zh ? "Gas 不足" : "Insufficient gas") : smartPay3Preflight.gasEnough === true ? (zh ? "Gas 足够" : "Enough gas") : (zh ? "等待交易预估" : "Awaiting estimate")}</small> : null}</div>
-              <div><span>{zh ? "下一笔钱包操作" : "Next wallet action"}</span><strong>{smartPay3Preflight ? (smartPay3Preflight.nextAction === "approve-primary" ? `${smartPay3Offer.primaryTokenSymbol} approval` : smartPay3Preflight.nextAction === "approve-secondary" ? `${smartPay3Offer.secondaryTokenSymbol} approval` : (zh ? "付款" : "Payment")) : "—"}</strong><small>{smartPay3Preflight?.gasLimit ? `Gas limit ${BigInt(smartPay3Preflight.gasLimit).toString()} · ≤ ${displayAtomic(smartPay3Preflight.estimatedFeeAtomic || "0", 18, 8)} ${nativeTokenSymbol}` : smartPay3Preflight?.simulationError ? (zh ? "模拟回滚，不会发送" : "Simulation reverted; not sent") : (zh ? "尚未预估" : "Not estimated")}</small></div>
+            {smartPay5Offer ? <>
+              {smartPay5ShowsPrimary ? <div><span>{zh ? `钱包 ${smartPay5Offer.primaryTokenSymbol} 余额` : `Wallet ${smartPay5Offer.primaryTokenSymbol} balance`}</span><strong>{smartPay5Preflight ? `${displayAtomic(smartPay5Preflight.primaryBalanceAtomic, smartPay5Offer.primaryTokenDecimals)} ${smartPay5Offer.primaryTokenSymbol}` : (preflightBusy ? "…" : "—")}</strong>{smartPay5Preflight ? <small className={smartPay5Preflight.primaryEnough ? "rule-enabled" : "rule-disabled"}>{smartPay5Preflight.primaryEnough ? (zh ? "余额足够" : "Enough") : (zh ? "余额不足" : "Insufficient")}</small> : null}</div> : null}
+              {smartPay5ShowsSecondary ? <div><span>{zh ? `钱包 ${smartPay5Offer.secondaryTokenSymbol} 余额` : `Wallet ${smartPay5Offer.secondaryTokenSymbol} balance`}</span><strong>{smartPay5Preflight ? `${displayAtomic(smartPay5Preflight.secondaryBalanceAtomic, smartPay5Offer.secondaryTokenDecimals)} ${smartPay5Offer.secondaryTokenSymbol}` : (preflightBusy ? "…" : "—")}</strong>{smartPay5Preflight ? <small className={smartPay5Preflight.eligibilityMet ? "rule-enabled" : "rule-disabled"}>{smartPay5Preflight.eligibilityMet ? (zh ? "余额与门槛足够" : "Balance & threshold met") : (zh ? "余额或门槛不足" : "Balance or threshold insufficient")}</small> : null}</div> : null}
+              <div><span>{zh ? `钱包 ${nativeTokenSymbol} Gas 余额` : `Wallet ${nativeTokenSymbol} gas balance`}</span><strong>{smartPay5Preflight ? `${displayAtomic(smartPay5Preflight.nativeBalanceAtomic, 18, 8)} ${nativeTokenSymbol}` : (preflightBusy ? "…" : "—")}</strong>{smartPay5Preflight ? <small className={smartPay5Preflight.gasEnough === false ? "rule-disabled" : "rule-enabled"}>{smartPay5Preflight.gasEnough === false ? (zh ? "Gas 不足" : "Insufficient gas") : smartPay5Preflight.gasEnough === true ? (zh ? "Gas 足够" : "Enough gas") : (zh ? "等待交易预估" : "Awaiting estimate")}</small> : null}</div>
+              <div><span>{zh ? "下一笔钱包操作" : "Next wallet action"}</span><strong>{smartPay5Preflight ? (smartPay5Preflight.nextAction === "approve-primary" ? `${smartPay5Offer.primaryTokenSymbol} approval` : smartPay5Preflight.nextAction === "approve-secondary" ? `${smartPay5Offer.secondaryTokenSymbol} approval` : (zh ? "付款" : "Payment")) : "—"}</strong><small>{smartPay5Preflight?.gasLimit ? `Gas limit ${BigInt(smartPay5Preflight.gasLimit).toString()} · ≤ ${displayAtomic(smartPay5Preflight.estimatedFeeAtomic || "0", 18, 8)} ${nativeTokenSymbol}` : smartPay5Preflight?.simulationError ? (zh ? "模拟回滚，不会发送" : "Simulation reverted; not sent") : (zh ? "尚未预估" : "Not estimated")}</small></div>
             </> : null}
           </div>
           <button type="button" className="button ghost" disabled={preflightBusy || Boolean(busy)} onClick={() => walletProvider && void refreshConnectedPreflight(walletProvider, wallet)}>{preflightBusy ? "…" : (zh ? "刷新余额与 Gas" : "Refresh balances & gas")}</button>
@@ -585,7 +536,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
           </div> : confirmedUntil ? <div className="existing-crypto-payment confirmed" role="status"><strong>{zh ? "付款与订阅已确认" : "Payment and subscription confirmed"}</strong><small>{zh ? `订阅至 ${new Date(confirmedUntil * 1000).toLocaleDateString(locale)}` : `Subscription through ${new Date(confirmedUntil * 1000).toLocaleDateString(locale)}`}</small></div> : <button className="button primary" disabled={Boolean(busy) || preflightBusy} onClick={() => void sendPayment()}>{busy === "send" ? "…" : (zh ? "核对余额并付款" : "Check balances & pay")}</button>}
         </div> : <button className="button primary" disabled={busy === "connect"} onClick={() => void connectWallet()}>{busy === "connect" ? "…" : (zh ? "连接钱包" : "Connect wallet")}</button>}
         <button className="text-button direct-link" onClick={() => setDirect(true)}>{zh ? "查找或核对已有付款" : "Find or verify an existing payment"} →</button>
-      </> : <div className="direct-payment"><label><span>{zh ? "您的付款钱包" : "Your payer wallet"}</span><input value={wallet} onChange={event => setWallet(event.target.value.trim())} placeholder="0x…"/></label><button className="button ghost" disabled={busy === "wallet"} onClick={() => void saveDirect()}>{zh ? "保存付款钱包" : "Save payer wallet"}</button><p className="wallet-balance">{balance ? `${zh ? "钱包代币余额" : "Wallet token balance"} · ${balance}` : (zh ? "尚未读取钱包代币余额" : "Wallet token balance not loaded")} <button className="inline-icon" title={zh ? "刷新余额" : "Refresh balance"} aria-label={zh ? "刷新余额" : "Refresh balance"} onClick={() => void refreshBalance()} disabled={busy === "balance"}>{busy === "balance" ? "…" : "↻"}</button></p><label><span>{zh ? "交易哈希（可选）" : "Transaction hash (optional)"}</span><input value={txHash} onChange={event => setTxHash(event.target.value.trim())} placeholder="0x…"/><small>{zh ? "留空会按已保存钱包查找近期匹配的链上付款。" : "Leave blank to find a recent matching on-chain payment for the saved wallet."}</small></label><button className="button primary" disabled={busy === "verify" || !wallet} onClick={() => void verify()}>{busy === "verify" ? "…" : (zh ? `读取交易并更新 ${selectedPlan.months} 个月订阅` : `Read transaction & update ${selectedPlan.months}-month subscription`)}</button></div>}
+      </> : <div className="direct-payment"><p>{zh ? "按当前登录账户的付款人 ID 读取近期付款，并应用产品所有者 RefID 与套餐匹配的未入账交易；无需连接钱包、签名或支付 Gas。" : "Read recent payments by this signed-in account's PayerID and apply unclaimed transactions matching the product-owner RefID and package. No wallet connection, signature, or gas is required."}</p><label><span>{zh ? "交易哈希（可选）" : "Transaction hash (optional)"}</span><input value={txHash} onChange={event => setTxHash(event.target.value.trim())} placeholder="0x…"/><small>{zh ? "留空会按当前账户查找近期匹配的链上付款。" : "Leave blank to find a recent matching on-chain payment for this account."}</small></label><button className="button primary" disabled={busy === "verify"} onClick={() => void verify()}>{busy === "verify" ? "…" : (zh ? `读取交易并更新 ${selectedPlan.months} 个月订阅` : `Read transaction & update ${selectedPlan.months}-month subscription`)}</button></div>}
       {message ? <p className="billing-message" role="status">{message}</p> : null}
     </section> : null}
   </div>;

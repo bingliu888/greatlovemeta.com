@@ -58,6 +58,9 @@
     "vite": "8.0.13",
     "wrangler": "4.92.0"
   },
+  "overrides": {
+    "fflate": "0.8.3"
+  },
   "type": "module",
   "displayName": "GreatLoveMeta.com"
 }

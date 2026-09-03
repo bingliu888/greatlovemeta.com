@@ -25,7 +25,7 @@ export default async function CryptoPaymentsAdminPage({ params }: { params: Prom
   return <main className="dashboard-page smartpay-admin-page">
     <SiteHeader lang={lang}/>
     <section className="account-settings-main">
-      <p className="section-kicker">SMARTPAY3 CONTROL</p>
+      <p className="section-kicker">SMARTPAY5 CONTROL</p>
       <h1>{zh ? "加密货币付款" : "Crypto payments"}</h1>
       <p className="account-settings-intro">{zh ? "验证并保存合约，连接 TP 或其他 EVM 钱包，然后安全管理 Owner、W1–W5、提款、付款规则、测试付款和订阅核对。" : "Verify and save a contract, connect TP or another EVM wallet, then manage Owner, W1-W5, withdrawals, payment rules, test payments, and subscription reconciliation."}</p>
       <SmartPayAdminConsole initialSettings={settings} locale={lang} defaultWallet={wallet?.wallet || ""}/>

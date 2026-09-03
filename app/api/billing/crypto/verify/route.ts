@@ -1,4 +1,4 @@
-import { POST as claimSmartPay3Transaction } from "../smartpay/claim/route";
+import { POST as claimSmartPay5Transaction } from "../smartpay/claim/route";
 
 export const dynamic = "force-dynamic";
 
@@ -12,5 +12,5 @@ export async function POST(request: Request) {
     },
     body: JSON.stringify({ settingId: input?.settingId, paymentId: input?.txHash })
   });
-  return claimSmartPay3Transaction(forwarded);
+  return claimSmartPay5Transaction(forwarded);
 }

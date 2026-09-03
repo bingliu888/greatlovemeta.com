@@ -6,8 +6,9 @@ import { database } from "../../../../../lib/db";
 import { isPermanentAdmin, requireMember } from "../../../../../lib/member";
 import { cryptoSubscriptionIdsForPlan } from "../../../../../lib/crypto-subscription";
 import { ensureReferralCode, normalizeReferralCode } from "../../../../../lib/referrals";
-import { smartPay3LatestTransactions, verifySmartPay3Identity } from "../../../../../lib/smartpay3-server";
-import { smartPay3ExpectedTokenPair } from "../../../../../lib/smartpay3-presets";
+import { smartPayProductOwnerRefId } from "../../../../../lib/smartpay-product-owner";
+import { smartPay5LatestTransactions, verifySmartPay5Identity } from "../../../../../lib/smartpay5-server";
+import { smartPay5ExpectedTokenPair } from "../../../../../lib/smartpay5-presets";
 import { smartPayRecipientMatches } from "../../../../../lib/smartpay-reconciliation";
 
 export const dynamic = "force-dynamic";
@@ -21,48 +22,48 @@ export async function POST(request: Request) {
       includeClaimed?: boolean;
     } | null;
     const requestedMemberId = String(input?.memberId || actor.id);
-    let member: { id:string; payerWalletAddress:string|null } = actor;
+    let member: { id:string } = actor;
     if (requestedMemberId !== actor.id) {
       if (!isPermanentAdmin(actor)) return NextResponse.json({ error: "Only the permanent administrator can check another member" }, { status: 403 });
-      const target = await database().prepare("SELECT id,wallet_address AS payerWalletAddress FROM users WHERE id=? LIMIT 1")
-        .bind(requestedMemberId).first<{ id:string; payerWalletAddress:string|null }>();
+      const target = await database().prepare("SELECT id FROM users WHERE id=? LIMIT 1")
+        .bind(requestedMemberId).first<{ id:string }>();
       if (!target) return NextResponse.json({ error: "Member not found" }, { status: 404 });
       member = target;
     }
-    if (!member.payerWalletAddress || !isAddress(member.payerWalletAddress)) {
-      return NextResponse.json({ error: "The member must save a payer wallet first" }, { status: 409 });
-    }
     const setting = await cryptoSettingById(String(input?.settingId || ""));
     if (!setting) return NextResponse.json({ error: "Select an active crypto payment setting" }, { status: 400 });
-    if (!setting.smartPay3Contract || !isAddress(setting.smartPay3Contract)) {
+    if (!setting.smartPay5Contract || !isAddress(setting.smartPay5Contract)) {
       return NextResponse.json({ error: "On-chain subscription payment is not configured for this token" }, { status: 409 });
     }
     const billingPlan = input?.plan === "annual" ? "annual" : "monthly";
     const rpcUrl = await cryptoRpcUrl(setting.chainId);
     if (!rpcUrl) return NextResponse.json({ error: "Blockchain RPC is not configured for this network" }, { status: 503 });
-    const payer = member.payerWalletAddress.toLowerCase() as Address;
-    const memberRefId = (await ensureReferralCode(member.id)).code;
-    const contract = setting.smartPay3Contract as Address;
+    const [payer, productOwnerRefId] = await Promise.all([
+      ensureReferralCode(member.id),
+      smartPayProductOwnerRefId(),
+    ]);
+    const contract = setting.smartPay5Contract as Address;
     const ids = cryptoSubscriptionIdsForPlan(billingPlan);
-    await verifySmartPay3Identity(rpcUrl, contract);
-    const { transactions: payments } = await smartPay3LatestTransactions({ rpcUrl, contract, wallet: payer, maxCount: 100 });
-    const tokenPair = smartPay3ExpectedTokenPair(await activeCryptoSettings(), setting);
+    await verifySmartPay5Identity(rpcUrl, contract);
+    const { transactions: payments } = await smartPay5LatestTransactions({ rpcUrl, contract, payerId: payer.code, maxCount: 100 });
+    const tokenPair = smartPay5ExpectedTokenPair(await activeCryptoSettings(), setting);
     if (!tokenPair) return NextResponse.json({ error: "This token pair is not available for on-chain payment" }, { status: 409 });
     for (const payment of payments) {
-      if (normalizeReferralCode(payment.refId) !== memberRefId
-        || !smartPayRecipientMatches(payment, payer, memberRefId)) continue;
+      if (normalizeReferralCode(payment.payerId) !== payer.code
+        || normalizeReferralCode(payment.refId) !== productOwnerRefId
+        || !smartPayRecipientMatches(payment, payer.code, productOwnerRefId)) continue;
       if (payment.mainId !== ids.mainId || payment.secondId !== ids.secondId) continue;
       if (payment.primaryTokenAddress.toLowerCase() !== setting.tokenContract.toLowerCase()
         || payment.secondaryTokenAddress.toLowerCase() !== tokenPair.secondaryTokenAddress) continue;
       const claimed = await database().prepare(`SELECT id,user_id AS memberId,entitlement_status AS status,
           transaction_id AS txHash,current_period_ends_at AS currentPeriodEnd
-        FROM smartpay3_payment_claims
+        FROM smartpay5_payment_claims
         WHERE lower(contract_address)=lower(?) AND lower(transaction_id)=lower(?) LIMIT 1`)
         .bind(contract, payment.transactionId)
         .first<{ id:string; memberId:string; status:string; txHash:string; currentPeriodEnd:number | null }>();
       if (!claimed) return NextResponse.json({
         txHash: payment.transactionId,
-        paymentMode: "smartpay3",
+        paymentMode: "smartpay5",
         paymentId: payment.transactionId,
         claimed: false,
         timestamp: Number(payment.timestamp),
@@ -71,7 +72,7 @@ export async function POST(request: Request) {
       if (input?.includeClaimed === true && claimed.memberId === member.id) {
         return NextResponse.json({
           txHash: claimed.txHash || payment.transactionId,
-          paymentMode: "smartpay3",
+          paymentMode: "smartpay5",
           paymentId: payment.transactionId,
           claimed: true,
           verified: claimed.status === "synced",

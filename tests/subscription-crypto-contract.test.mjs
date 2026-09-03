@@ -22,16 +22,16 @@ test("footer and pricing publish one GreatLoveMeta-local monthly and annual plan
   assert.doesNotMatch([plans, pricing, checkout, admin].join("\n"), /six_month|sixMonth|Six months/);
 });
 
-test("SmartPay3 checkout and administrator controls are complete", async () => {
-  const [flow, admin, dashboard, migration, verify, consoleSource] = await Promise.all([read("components/CryptoCheckout.tsx"), read("components/AdminCryptoSettings.tsx"), read("components/AdminDashboard.tsx"), read("drizzle/0122_smartpay3_refid.sql"), read("app/api/billing/crypto/smartpay/claim/route.ts"), read("components/SmartPayAdminConsole.tsx")]);
+test("SmartPay5 checkout and administrator controls are complete", async () => {
+  const [flow, admin, dashboard, migration, verify, consoleSource] = await Promise.all([read("components/CryptoCheckout.tsx"), read("components/AdminCryptoSettings.tsx"), read("components/AdminDashboard.tsx"), read("drizzle/0125_smartpay5_payerid_fee_token.sql"), read("app/api/billing/crypto/smartpay/claim/route.ts"), read("components/SmartPayAdminConsole.tsx")]);
   for(const marker of ["Connect wallet","connectWallet","eth_sendTransaction","Transaction hash (optional)","prepared.refId","verifyCryptoPaymentWithConfirmations"])assert.ok(flow.includes(marker),`missing ${marker}`);
   assert.doesNotMatch(flow,/WalletConnect QR|connectInjected|connectWalletConnect|@walletconnect\/ethereum-provider/);
   assert.match(admin, /WalletConnect Project ID/);
   assert.match(dashboard, /admin\/crypto-payments/);
-  assert.match(migration, /smartpay3_payment_claims/);
-  assert.match(migration, /member_wallet_bindings/);
+  assert.match(migration, /smartpay5_payment_claims/);
+  assert.match(migration, /payer_id/);
   assert.match(verify, /normalizeReferralCode\(record\.refId\)/);
-  assert.match(verify, /INSERT INTO smartpay3_payment_claims/);
+  assert.match(verify, /INSERT INTO smartpay5_payment_claims/);
   assert.match(consoleSource, /Redeploy \$\{contractName\}/);
 });
 
