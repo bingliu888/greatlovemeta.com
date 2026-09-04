@@ -1,23 +1,23 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-traditional-shell-fix-20260904",
+  "releaseId": "greatlovemeta-com-traditional-auth-shell-fix-20260904",
   "site": "greatlovemeta.com",
-  "title": { "en": "Complete Traditional Chinese shared-shell localization", "zh": "完成繁体中文共用界面本地化" },
+  "title": { "en": "Complete Traditional Chinese account and shared-shell localization", "zh": "完成繁体中文账户与共用界面本地化" },
   "purpose": {
-    "en": "Correct the server-rendered shared header, footer, account, and administrator copy that remained Simplified Chinese after the twenty-two-language rollout.",
-    "zh": "修正 22 种语言上线后，服务器渲染的共用页头、页尾、账户及管理员文案仍残留简体中文的问题。"
+    "en": "Correct the server-rendered shared header, footer, authentication, account, and administrator copy that remained Simplified Chinese after the twenty-two-language rollout.",
+    "zh": "修正 22 种语言上线后，服务器渲染的共用页头、页尾、登录、账户及管理员文案仍残留简体中文的问题。"
   },
   "features": {
-    "en": ["Collect every `interfaceText` English/Chinese pair into both the public dictionaries and the compact server-side interface dictionary.", "Polish Traditional Chinese account terminology and shared navigation labels, including 帳戶, 帳號, 主要導覽, and 頁尾導覽.", "Keep already-localized runtime values protected so Japanese, Traditional Chinese, and other language strings are not translated a second time."],
-    "zh": ["把每一组 `interfaceText` 中英文文案同时纳入公共词典与精简服务器端界面词典。", "校正繁体中文账户与共用导航术语，包括「帳戶」「帳號」「主要導覽」和「頁尾導覽」。", "继续保护运行时已翻译文字，避免日语、繁体中文及其他语言被二次翻译。"]
+    "en": ["Collect every `interfaceText` English/Chinese pair into both the public dictionaries and the compact server-side interface dictionary.", "Polish Traditional Chinese account terminology and shared navigation labels, including 帳戶, 帳號, 主要導覽, and 頁尾導覽.", "Preserve the full `zh-tw` locale in the authentication policy, brand, and metadata instead of collapsing it to Simplified Chinese."],
+    "zh": ["把每一组 `interfaceText` 中英文文案同时纳入公共词典与精简服务器端界面词典。", "校正繁体中文账户与共用导航术语，包括「帳戶」「帳號」「主要導覽」和「頁尾導覽」。", "登录说明、品牌及页面元数据保留完整 `zh-tw` 区域标记，不再回退为简体中文。"]
   },
   "affected": {
-    "en": ["Traditional Chinese shared shell and every locale that consumes the same server-side interface-key path."],
-    "zh": ["繁体中文共用界面，以及使用同一服务器端界面词条路径的所有语言。"]
+    "en": ["Traditional Chinese shared shell, authentication page, metadata, and every locale that consumes the same server-side interface-key path."],
+    "zh": ["繁体中文共用界面、登录页、页面元数据，以及使用同一服务器端界面词条路径的所有语言。"]
   },
   "changes": {
-    "en": ["Extend the deterministic dictionary generator with explicit server-interface key collection instead of relying on previously generated keys.", "Regenerate all twenty non-base locale dictionaries at the same 2,657-key revision and regenerate the compact server-side dictionary.", "Add a regression contract that rejects Simplified Chinese account terminology in the Traditional Chinese server dictionary."],
-    "zh": ["扩展确定性词典生成器，显式收集服务器端界面词条，不再依赖旧生成文件中的词条。", "以相同的 2,657 条词条版本重新生成全部 20 份非基础语言词典及精简服务器端词典。", "新增回归测试，禁止繁体中文服务器词典出现简体账户术语。"]
+    "en": ["Extend the deterministic dictionary generator with explicit server-interface key collection instead of relying on previously generated keys.", "Regenerate all twenty non-base locale dictionaries at the same 2,657-key revision and regenerate the compact server-side dictionary.", "Fix `zh-tw` authentication-policy normalization and emit a Traditional Chinese auth brand, page title template, and description with regression coverage."],
+    "zh": ["扩展确定性词典生成器，显式收集服务器端界面词条，不再依赖旧生成文件中的词条。", "以相同的 2,657 条词条版本重新生成全部 20 份非基础语言词典及精简服务器端词典。", "修正 `zh-tw` 登录说明区域标记，并为登录品牌、页面标题模板及描述输出繁体中文且加入回归测试。"]
   },
   "validation": {
     "en": ["Generate equal-size dictionaries, reject foreign-site and source-code contamination, pass lint, production build, full repository and SmartPay5 contract tests, artifact validation, deployment workflow, production HTTP probes, and representative Traditional Chinese, Japanese, and Urdu browser checks."],

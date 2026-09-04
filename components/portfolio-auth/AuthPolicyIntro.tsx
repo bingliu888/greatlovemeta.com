@@ -28,7 +28,8 @@ const policyCopy: Record<string, string> = {
 };
 
 function normalizeLocale(value: string | undefined) {
-  const normalized = value?.trim().toLowerCase().split("-")[0] || "en";
+  const raw = value?.trim().toLowerCase().replace("_", "-") || "en";
+  const normalized = raw === "zh-tw" || raw === "zh-hant" || raw.startsWith("zh-hant-") ? "zh-tw" : raw.split("-")[0];
   return policyCopy[normalized] ? normalized : "en";
 }
 

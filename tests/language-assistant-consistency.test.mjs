@@ -30,7 +30,8 @@ test("Chinese surfaces consistently present the 大爱元宇宙 brand", async ()
   assert.match(legal, /关于大爱元宇宙/);
   assert.match(collections, /由大爱元宇宙本站呈现/);
   assert.match(pricing, /大爱元宇宙高级会员/);
-  assert.match(languageLayout, /template: "%s \| 大爱元宇宙"/);
+  assert.match(languageLayout, /const brand = traditional \? "大愛元宇宙" : "大爱元宇宙"/);
+  assert.match(languageLayout, /template: `%s \| \$\{brand\}`/);
 });
 
 test("Guru launcher is icon-only and public", async () => {

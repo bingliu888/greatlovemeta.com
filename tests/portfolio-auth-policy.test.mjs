@@ -36,6 +36,8 @@ test("policy intro covers every portfolio locale without claiming a verification
   const intro = await read("AuthPolicyIntro.tsx");
   for (const locale of ["en","zh","ja","ko","es","fr","de","ru","it","pt","ar","hi","id","bn","ur","pa","ta","te","ne","si","tr"]) assert.match(intro, new RegExp("\\b" + locale + ":"));
   assert.match(intro,/"zh-tw":/);
+  assert.match(intro,/raw === "zh-tw"/);
+  assert.match(intro,/raw\.startsWith\("zh-hant-"\)/);
   assert.match(intro, /Password is the default sign-in method/);
   assert.match(intro, /默认使用密码登录/);
   assert.doesNotMatch(intro, /Email code is the default/);
