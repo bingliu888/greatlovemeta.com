@@ -1,31 +1,13 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-complete-static-locale-20260904",
+  "releaseId": "greatlovemeta-com-gold3-v1-settlement-20260904-r1",
   "site": "greatlovemeta.com",
-  "title": { "en": "Complete static locale and Traditional Chinese account coverage", "zh": "完成静态页面与繁体中文账户多语言覆盖" },
-  "purpose": {
-    "en": "Correct the shared shell and authentication copy that remained Simplified Chinese, and include previously filtered legal-page paragraphs in every one of the twenty-two language experiences.",
-    "zh": "修正共用界面与登录页残留的简体中文，并将此前被过滤的法律页面段落纳入全部 22 种语言体验。"
-  },
-  "features": {
-    "en": ["Collect every `interfaceText` English/Chinese pair into both the public dictionaries and the compact server-side interface dictionary.", "Polish Traditional Chinese account terminology and shared navigation labels, including 帳戶, 帳號, 主要導覽, and 頁尾導覽.", "Preserve `zh-tw` in authentication and translate prose containing semicolons or ordinary words such as export instead of mistaking it for source code."],
-    "zh": ["把每一组 `interfaceText` 中英文文案同时纳入公共词典与精简服务器端界面词典。", "校正繁体中文账户与共用导航术语，包括「帳戶」「帳號」「主要導覽」和「頁尾導覽」。", "登录流程保留 `zh-tw`，并正确翻译含分号或 export 等普通词语的正文，不再将其误判为源代码。"]
-  },
-  "affected": {
-    "en": ["Traditional Chinese shared shell, authentication page, metadata, and static legal pages in all twenty-two languages."],
-    "zh": ["繁体中文共用界面、登录页、页面元数据，以及全部 22 种语言的静态法律页面。"]
-  },
-  "changes": {
-    "en": ["Extend deterministic interface-key collection with a legal-copy-only prose collector so natural paragraphs are retained without admitting source fragments.", "Regenerate all twenty non-base locale dictionaries at the same 2,662-key revision and regenerate the compact server-side dictionary.", "Fix `zh-tw` authentication-policy normalization and emit a Traditional Chinese auth brand, page title template, and description with regression coverage."],
-    "zh": ["为确定性界面词条收集加入仅限法律文案的正文收集器，在保留自然语言段落的同时阻止源代码片段进入词典。", "以相同的 2,662 条词条版本重新生成全部 20 份非基础语言词典及精简服务器端词典。", "修正 `zh-tw` 登录说明区域标记，并为登录品牌、页面标题模板及描述输出繁体中文且加入回归测试。"]
-  },
-  "validation": {
-    "en": ["Generate equal-size dictionaries, reject foreign-site and source-code contamination, pass lint, production build, full repository and SmartPay5 contract tests, artifact validation, deployment workflow, production HTTP probes, and representative Traditional Chinese, Japanese, and Urdu browser checks."],
-    "zh": ["生成词条数量一致的语言词典，排除其他站点及源代码污染，并通过代码规范、生产构建、全仓与 SmartPay5 合约测试、产物校验、部署流程、生产 HTTP 探测，以及繁体中文、日语和乌尔都语代表性浏览器检查。"]
-  },
-  "deferred": { "en": ["User-authored and live classroom content remains in its authored language; this release localizes static product interface copy only.", "No live microphone or camera session is started because realtime media behavior is unchanged."], "zh": ["用户编写内容与实时课堂内容仍保留原始语言；本次仅本地化产品静态界面文案。", "实时音视频行为没有变化，因此本次不启动真实麦克风或摄像头会话。"] },
-  "siteAdaptations": {
-    "en": ["Preserve GreatLoveMeta branding, authored English and Chinese home content, SmartPay5 subscriptions, Clerk identity, classrooms, RealtimeKit, referrals, R2, and independent infrastructure.", "No Solidity, ABI, payment rule, database schema, or deployed on-chain contract is changed or redeployed."],
-    "zh": ["保留 GreatLoveMeta 品牌、人工编写的中英文首页内容、SmartPay5 订阅、Clerk 身份系统、课堂、RealtimeKit、推荐系统、R2 与独立基础设施。", "本次不更改或重新部署 Solidity、ABI、付款规则、数据库结构或任何链上合约。"]
-  }
+  "title": { "en": "Correct Gold 3 v1 SmartPay5 settlement", "zh": "修正 Gold 3 v1 SmartPay5 结算" },
+  "purpose": { "en": "Correct SmartPay5 receipt reconciliation, concurrent renewal, and administrator identity for production settlement.", "zh": "修正生产结算中的 SmartPay5 回执对账、并发续期与管理员身份。" },
+  "features": { "en": ["Decode the contract's internal TransactionID from a confirmed receipt before subscription claim.", "Trust only an active Clerk user's exact primary email when bridging a web session."], "zh": ["从已确认回执解码合约内部 TransactionID 后再认领订阅。", "桥接网页会话时仅信任未封禁、未锁定 Clerk 用户的精确主邮箱。"] },
+  "affected": { "en": ["Crypto verification, SmartPay5 claims and records, subscription renewal, and administrator payment tools."], "zh": ["影响加密付款核验、SmartPay5 认领与记录、订阅续期及管理员付款工具。"] },
+  "changes": { "en": ["Use a claim-gated atomic upsert for cumulative, replay-safe subscription periods.", "Require fresh verified Clerk primary-email ownership for the permanent administrator without coupling it to a legacy local ID."], "zh": ["使用受认领状态约束的原子更新，安全累加订阅期限并防止重放。", "永久管理员必须即时验证当前 Clerk 主邮箱所有权，且不与旧本地 ID 耦合。"] },
+  "validation": { "en": ["Run receipt decoding, future-block confirmation, bounded-body/RPC ordering, full administrator-entry enumeration, legacy-ID admin, leap-boundary calendar renewal, replay, protected-navigation, repository test, lint, and build gates."], "zh": ["运行回执解码、未来区块确认数、有界请求与 RPC 顺序、全部管理员入口枚举、旧 ID 管理员、闰年边界日历续期、防重放、受保护导航、仓库测试、lint 与构建门禁。"] },
+  "deferred": { "en": ["No contract, payment configuration, translation dictionary, classroom feature, header, footer, or production content is changed; no real payment is submitted."], "zh": ["不修改合约、付款配置、翻译词典、课堂功能、页头、页脚或生产内容；不提交真实付款。"] },
+  "siteAdaptations": { "en": ["Preserve GreatLoveMeta branding, 22-language interface, site-owned infrastructure, and existing products and data."], "zh": ["保留 GreatLoveMeta 品牌、22 语言界面、站点独立基础设施及现有产品与数据。"] }
 }

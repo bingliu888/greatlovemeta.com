@@ -3,7 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { AdminMemberRoleEditor } from "../../../../../components/AdminMemberRoleEditor";
 import { SiteHeader } from "../../../../../components/SiteHeader";
 import { SiteFooter } from "../../../../../components/SiteFooter";
-import { isBootstrapAdminEmail } from "../../../../../lib/admin-access";
+import { isBootstrapAdminEmail, isPermanentAdminUser } from "../../../../../lib/admin-access";
 import { getDatabase, getSessionUser } from "../../../../../lib/auth";
 import { safeSiteLanguage } from "../../../../../lib/site-locale";
 import "../../admin.css";
@@ -27,7 +27,7 @@ export default async function Page({ params }: { params: Promise<{ lang: string;
     headers: { cookie: requestHeaders.get("cookie") ?? "" },
   }));
   if (!admin) redirect(`/${lang}/auth/login`);
-  if (admin.email.trim().toLowerCase() !== "bingliu@cybeye.com") redirect(`/${lang}/dashboard`);
+  if (!await isPermanentAdminUser(admin)) redirect(`/${lang}/dashboard`);
   const member = await getDatabase()
     .prepare("SELECT u.id,u.email,u.display_name AS displayName,COALESCE(r.role,CASE WHEN lower(u.email)='bingliu@cybeye.com' THEN 'admin' ELSE 'member' END) AS role,u.created_at AS createdAt FROM users u LEFT JOIN platform_user_roles r ON r.user_id=u.id WHERE u.id=? LIMIT 1")
     .bind(memberId)

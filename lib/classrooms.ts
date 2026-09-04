@@ -1,5 +1,5 @@
 import { getDatabase, createId, getSessionUser, type SessionUser } from "@/lib/auth";
-import { isAdminUser, isTeacherUser, isBootstrapAdminEmail } from "@/lib/admin-access";
+import { isAdminUser, isPermanentAdminUser, isTeacherUser } from "@/lib/admin-access";
 import { canManageClass, paidClassAccess } from "@/lib/class-managers";
 
 export type ClassType = "public" | "trial" | "private";
@@ -71,7 +71,7 @@ export async function verifyClassEntryPassword(code: string, value: string) {
 
 export async function createClassRoom(user: SessionUser, input: Record<string,unknown>) {
   if (!await isTeacherUser(user)) throw new Error("TEACHER_REQUIRED");
-  if (!isBootstrapAdminEmail(user.email)) {
+  if (!await isPermanentAdminUser(user)) {
     const count=await getDatabase().prepare("SELECT COUNT(*) AS count FROM class_rooms WHERE host_user_id=? AND status='active'").bind(user.id).first<{count:number}>();
     if(Number(count?.count||0)>=5)throw new Error("DIRECTOR_CLASS_LIMIT");
   }

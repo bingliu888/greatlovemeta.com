@@ -1,10 +1,11 @@
 import type { SessionUser } from "./auth";
+import { isPermanentAdminUser } from "./admin-access";
 import {
-  BOOTSTRAP_ADMIN_EMAIL,
+  hasFreshPermanentAdmin,
   requireMember,
   requirePermanentAdmin
 } from "./smartpay-access";
 
-export { requireMember, requirePermanentAdmin };
-export const isPermanentAdmin = (member: Pick<SessionUser, "email">) =>
-  member.email.trim().toLowerCase() === BOOTSTRAP_ADMIN_EMAIL;
+export { hasFreshPermanentAdmin, requireMember, requirePermanentAdmin };
+export const isPermanentAdmin = (member: SessionUser | null) =>
+  isPermanentAdminUser(member);

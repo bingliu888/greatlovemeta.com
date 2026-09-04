@@ -150,9 +150,13 @@ export async function getSessionUser(request?: Request): Promise<SessionUser | n
   }
   if (!user) {
     const clerkUser = await currentUser();
-    const primaryEmail = clerkUser?.primaryEmailAddress || clerkUser?.emailAddresses[0];
+    const primaryEmail = clerkUser?.primaryEmailAddressId
+      ? clerkUser.emailAddresses.find(address => address.id === clerkUser.primaryEmailAddressId)
+      : undefined;
     const claimedEmail = primaryEmail?.emailAddress.toLowerCase();
-    const email = clerkUser && claimedEmail ? claimedEmail : undefined;
+    const email = clerkUser && !clerkUser.banned && !clerkUser.locked && claimedEmail
+      ? claimedEmail
+      : undefined;
     if (clerkUser && email) {
       const emailVerified = primaryEmail?.verification?.status === "verified";
       user = await db().prepare("SELECT id, email, display_name AS displayName, preferred_language AS preferredLanguage FROM users WHERE id = ?").bind(clerkUser.id).first<SessionUser>();

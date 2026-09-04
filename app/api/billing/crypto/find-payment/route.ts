@@ -3,7 +3,7 @@ import { isAddress, type Address } from "viem";
 import { cryptoRpcUrl } from "../../../../../lib/crypto-rpc";
 import { activeCryptoSettings, cryptoSettingById } from "../../../../../lib/crypto-settings";
 import { database } from "../../../../../lib/db";
-import { isPermanentAdmin, requireMember } from "../../../../../lib/member";
+import { hasFreshPermanentAdmin, requireMember } from "../../../../../lib/member";
 import { cryptoSubscriptionIdsForPlan } from "../../../../../lib/crypto-subscription";
 import { ensureReferralCode, normalizeReferralCode } from "../../../../../lib/referrals";
 import { smartPayProductOwnerRefId } from "../../../../../lib/smartpay-product-owner";
@@ -24,7 +24,7 @@ export async function POST(request: Request) {
     const requestedMemberId = String(input?.memberId || actor.id);
     let member: { id:string } = actor;
     if (requestedMemberId !== actor.id) {
-      if (!isPermanentAdmin(actor)) return NextResponse.json({ error: "Only the permanent administrator can check another member" }, { status: 403 });
+      if (!await hasFreshPermanentAdmin(actor)) return NextResponse.json({ error: "Only the permanent administrator can check another member" }, { status: 403 });
       const target = await database().prepare("SELECT id FROM users WHERE id=? LIMIT 1")
         .bind(requestedMemberId).first<{ id:string }>();
       if (!target) return NextResponse.json({ error: "Member not found" }, { status: 404 });

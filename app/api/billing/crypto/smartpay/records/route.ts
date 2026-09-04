@@ -3,7 +3,7 @@ import { isAddress, type Address } from "viem";
 import { cryptoRpcUrl } from "../../../../../../lib/crypto-rpc";
 import { activeCryptoSettings, cryptoSettingById } from "../../../../../../lib/crypto-settings";
 import { database } from "../../../../../../lib/db";
-import { isPermanentAdmin, requireMember } from "../../../../../../lib/member";
+import { hasFreshPermanentAdmin, requireMember } from "../../../../../../lib/member";
 import { ensureReferralCode, normalizeReferralCode } from "../../../../../../lib/referrals";
 import { smartPayProductOwnerRefId } from "../../../../../../lib/smartpay-product-owner";
 import { smartPay5LatestTransactions, verifySmartPay5Identity } from "../../../../../../lib/smartpay5-server";
@@ -22,7 +22,7 @@ export async function GET(request: Request) {
     if (!setting || !configuredContract || !isAddress(configuredContract)) {
       return NextResponse.json({ error: "On-chain subscription payment is not configured for this token" }, { status: 409 });
     }
-    const permanentAdmin = isPermanentAdmin(member);
+    const permanentAdmin = await hasFreshPermanentAdmin(member);
     const ownPayerId = (await ensureReferralCode(member.id)).code;
     const payerParam = normalizeReferralCode(String(params.get("payerId") || ""));
     const requestedPayerId = permanentAdmin ? payerParam : ownPayerId;

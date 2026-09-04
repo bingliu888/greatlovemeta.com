@@ -3,6 +3,7 @@ import { notFound, redirect } from "next/navigation";
 import { SiteFooter } from "../../../../components/SiteFooter";
 import { SiteHeader } from "../../../../components/SiteHeader";
 import { SmartPayAdminConsole } from "../../../../components/SmartPayAdminConsole";
+import { isPermanentAdminUser } from "../../../../lib/admin-access";
 import { getDatabase, getSessionUser } from "../../../../lib/auth";
 import { allCryptoPaymentSettings } from "../../../../lib/crypto-payments";
 import { isSiteLanguage } from "../../../../lib/site-locale";
@@ -15,7 +16,7 @@ export default async function CryptoPaymentsAdminPage({ params }: { params: Prom
   const incoming = await headers();
   const user = await getSessionUser(new Request("https://greatlovemeta.com", { headers: { cookie: incoming.get("cookie") || "" } }));
   if (!user) redirect(`/${lang}/auth/login?returnTo=/${lang}/admin/crypto-payments`);
-  if (user.email.trim().toLowerCase() !== "bingliu@cybeye.com") redirect(`/${lang}/dashboard`);
+  if (!await isPermanentAdminUser(user)) redirect(`/${lang}/dashboard`);
   const [settings, wallet] = await Promise.all([
     allCryptoPaymentSettings(),
     getDatabase().prepare("SELECT wallet_address AS wallet FROM users WHERE id=? LIMIT 1")

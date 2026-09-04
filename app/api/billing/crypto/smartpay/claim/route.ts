@@ -4,10 +4,10 @@ import { consumeAccountRequestLimit } from "../../../../../../lib/account-reques
 import { boundedJsonBody } from "../../../../../../lib/bounded-request-body";
 import { cryptoRpc, cryptoRpcUrl } from "../../../../../../lib/crypto-rpc";
 import { activeCryptoSettings, cryptoSettingById } from "../../../../../../lib/crypto-settings";
-import { subscriptionMonths, subscriptionWindow } from "../../../../../../lib/crypto-subscription-recording";
+import { SMARTPAY5_SUBSCRIPTION_UPSERT_SQL, smartPay5SubscriptionUpsertValues, subscriptionMonths } from "../../../../../../lib/crypto-subscription-recording";
 import { cryptoSubscriptionPlanForIds } from "../../../../../../lib/crypto-subscription";
 import { createId, database, nowSeconds } from "../../../../../../lib/db";
-import { isPermanentAdmin, requireMember } from "../../../../../../lib/member";
+import { hasFreshPermanentAdmin, requireMember } from "../../../../../../lib/member";
 import { awardReferralForSubscription, ensureReferralCode, normalizeReferralCode } from "../../../../../../lib/referrals";
 import { smartPayRecipientMatches } from "../../../../../../lib/smartpay-reconciliation";
 import { smartPayProductOwnerRefId } from "../../../../../../lib/smartpay-product-owner";
@@ -23,6 +23,11 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
+    const input = await boundedJsonBody<{
+      settingId?: string;
+      paymentId?: string;
+      memberId?: string;
+    }>(request, 8 * 1024);
     const actor = await requireMember(request);
     if (!actor.emailVerified) {
       return NextResponse.json(
@@ -39,17 +44,12 @@ export async function POST(request: Request) {
       unavailableMessage: "Payment protection is temporarily unavailable.",
     });
     if (limited) return limited;
-    const input = await boundedJsonBody<{
-      settingId?: string;
-      paymentId?: string;
-      memberId?: string;
-    }>(request, 8 * 1024);
     const paymentId = String(input?.paymentId || "").trim().toLowerCase();
     const requestedUserId = String(input?.memberId || actor.id);
     if (!/^0x[a-f0-9]{64}$/.test(paymentId)) {
       return NextResponse.json({ error: "Enter a valid on-chain TransactionID" }, { status: 400 });
     }
-    if (requestedUserId !== actor.id && !isPermanentAdmin(actor)) {
+    if (requestedUserId !== actor.id && !await hasFreshPermanentAdmin(actor)) {
       return NextResponse.json({ error: "Only the permanent administrator can sync another member" }, { status: 403 });
     }
 
@@ -128,9 +128,6 @@ export async function POST(request: Request) {
 
     const now = nowSeconds();
     const paymentTime = smartPayRecordTimestamp(record.timestamp, now);
-    const current = await database().prepare("SELECT current_period_ends_at AS currentPeriodEnd FROM subscriptions WHERE user_id=? LIMIT 1")
-      .bind(member.id).first<{ currentPeriodEnd: number | null }>();
-    const window = subscriptionWindow({ now: paymentTime, months: subscriptionMonths(billingPlan), currentPeriodEnd: current?.currentPeriodEnd });
     const claimId = createId();
     const subscriptionId = createId();
     await database().prepare(`INSERT INTO smartpay5_payment_claims
@@ -154,19 +151,17 @@ export async function POST(request: Request) {
       );
     }
 
+    const subscriptionWrite = smartPay5SubscriptionUpsertValues({
+      contract, transactionId: paymentId, subscriptionId, userId: member.id,
+      cadence: billingPlan, months: subscriptionMonths(billingPlan), paymentTime, verifiedAt: now,
+    });
     const statements = [
-      database().prepare(`INSERT INTO subscriptions
-        (id,user_id,paypal_subscription_id,paypal_plan_id,cadence,status,trial_ends_at,current_period_ends_at,
-         cancel_at_period_end,referral_id,created_at,updated_at)
-        VALUES (?,?,NULL,NULL,?,'active',NULL,?,0,NULL,?,?)
-        ON CONFLICT(user_id) DO UPDATE SET cadence=excluded.cadence,status='active',current_period_ends_at=excluded.current_period_ends_at,
-          cancel_at_period_end=0,updated_at=excluded.updated_at`)
-        .bind(subscriptionId, member.id, billingPlan, window.end, paymentTime, now),
+      database().prepare(SMARTPAY5_SUBSCRIPTION_UPSERT_SQL).bind(...subscriptionWrite.values),
       database().prepare(`UPDATE smartpay5_payment_claims SET
-        entitlement_status='synced',current_period_ends_at=?,verified_at=?
+        entitlement_status='synced',current_period_ends_at=(SELECT current_period_ends_at FROM subscriptions WHERE user_id=?),verified_at=?
         WHERE lower(contract_address)=lower(?) AND lower(transaction_id)=lower(?)
-          AND user_id=?`)
-        .bind(window.end, now, contract, paymentId, member.id),
+          AND user_id=? AND entitlement_status='pending_sync'`)
+        .bind(member.id, now, contract, paymentId, member.id),
     ];
     if (member.id !== actor.id) {
       statements.push(database().prepare(`INSERT INTO crypto_payment_admin_audit
@@ -174,13 +169,18 @@ export async function POST(request: Request) {
         .bind(createId(), actor.id, setting.id, now));
     }
     await database().batch(statements);
-    await awardReferralForSubscription({ userId: member.id, subscriptionId, providerPaymentReference: paymentId });
+    const recorded = await database().prepare(`SELECT s.id AS subscriptionId,c.current_period_ends_at AS currentPeriodEnd
+      FROM smartpay5_payment_claims c JOIN subscriptions s ON s.user_id=c.user_id
+      WHERE lower(c.contract_address)=lower(?) AND lower(c.transaction_id)=lower(?)
+        AND c.user_id=? AND c.entitlement_status='synced' LIMIT 1`)
+      .bind(contract, paymentId, member.id).first<{ subscriptionId: string; currentPeriodEnd: number }>();
+    if (!recorded?.currentPeriodEnd) throw new Error("SMARTPAY5_SUBSCRIPTION_RECORD_CONFLICT");
+    await awardReferralForSubscription({ userId: member.id, subscriptionId: recorded.subscriptionId, providerPaymentReference: paymentId });
     return NextResponse.json({
       verified: true,
       paymentMode: "contract",
       paymentId,
-      currentPeriodStart: window.start,
-      currentPeriodEnd: window.end,
+      currentPeriodEnd: recorded.currentPeriodEnd,
       memberId: member.id
     });
   } catch (error) {
