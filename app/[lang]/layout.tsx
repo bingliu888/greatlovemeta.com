@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
 import { LanguageSync } from "../../components/LanguageMemory";
 import { LocaleRuntime } from "../../components/LocaleRuntime";
-import { safeSiteLanguage } from "../../lib/site-locale";
+import { isChineseLanguage, safeSiteLanguage } from "../../lib/site-locale";
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  if (lang !== "zh") return {};
+  if (!isChineseLanguage(safeSiteLanguage(lang))) return {};
   const title = "大爱元宇宙 — AI、RWA 与全球社区";
   const description = "连接 AI 智能体、现实世界资产、会员社区与 Web3 应用的中英双语大爱生态中心。";
   return {

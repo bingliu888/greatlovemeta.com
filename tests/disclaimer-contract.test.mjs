@@ -27,6 +27,8 @@ test("footer exposes localized disclaimer and public subscription contracts", as
     assert.match(copy, new RegExp(`\\n  ${locale}: \\{`));
     assert.match(subscriptionCopy, new RegExp(`\\n  ${locale}: `));
   }
+  assert.match(copy,/locale === "zh-tw"/);
+  assert.match(subscriptionCopy,/"zh-tw": "訂閱"/);
   assert.match(footer, /subscriptionLabelFor/);
   assert.doesNotMatch(subscriptionRoute, /redirect\([^)]*(?:auth|sign-?in|login)/i);
   assert.match(copy, /All payments are final and non-refundable/);

@@ -1,3 +1,5 @@
+import zhTwAuthTranslations from "./auth-copy-zh-tw.generated";
+
 // Generated from the reviewed portfolio identity copy.
 export const portfolioAuthTranslations: Record<string, Record<string, string>> = {
   "en": {
@@ -1263,6 +1265,8 @@ export const portfolioAuthTranslations: Record<string, Record<string, string>> =
 };
 
 export function portfolioAuthText(locale: string | null | undefined, english: string): string {
-  const normalized = (locale || "en").toLowerCase().split(/[-_]/)[0];
+  const raw = (locale || "en").toLowerCase().replace("_", "-");
+  if (raw === "zh-tw") return zhTwAuthTranslations[english] || portfolioAuthTranslations.zh[english] || portfolioAuthTranslations.en[english] || english;
+  const normalized = raw.split("-")[0];
   return portfolioAuthTranslations[normalized]?.[english] || portfolioAuthTranslations.en[english] || english;
 }

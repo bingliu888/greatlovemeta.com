@@ -114,6 +114,8 @@ jobs:
           verify_content https://greatlovemeta.com/contracts/SmartPay5.abi.json '"pay"' smartpay5-abi.json
           verify_content https://greatlovemeta.com/locales/public-interface/ja.json '"Copy RefID"' ja-interface.json
           verify_content https://greatlovemeta.com/locales/public-interface/ar.json '"Copy wallet address"' ar-interface.json
+          verify_content https://greatlovemeta.com/locales/public-interface/zh-tw.json '"Dashboard": "使用者面板"' zh-tw-interface.json
+          verify_content https://greatlovemeta.com/locales/public-interface/ur.json '"Dashboard": "ڈیش بورڈ"' ur-interface.json
           verify_content https://greatlovemeta.com/api/billing/status '"signedIn":false' billing-status.json
 
       - name: Verify production language menu release

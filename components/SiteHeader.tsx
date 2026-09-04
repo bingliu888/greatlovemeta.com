@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { HeaderLanguageMenu } from "./HeaderLanguageMenu";
 import { HeaderAccount } from "./HeaderAccount";
-import { shellCopyFor, type SiteLanguage } from "../lib/site-locale";
+import { interfaceText, shellCopyFor, type SiteLanguage } from "../lib/site-locale";
 
 const labels = {
   en: { academy: "BingAcademy", claw: "MyClaw", real: "WhatsReal" },
@@ -29,7 +29,7 @@ export function SiteHeader({ lang }: { lang: SiteLanguage }) {
     <header className="site-header">
       <Link className="brand" href={`/${lang}`} aria-label={shell.home}>
         <span className="brand-seal gc-brand-seal" aria-hidden="true">GL</span>
-        <span>{lang === "zh" ? "大爱元宇宙" : "GreatLoveMeta.com"}</span>
+        <span>{interfaceText(lang,"GreatLoveMeta.com","大爱元宇宙")}</span>
       </Link>
       <nav className="desktop-nav" aria-label={shell.primaryNav}>
         <GlobalLinks lang={lang}/>

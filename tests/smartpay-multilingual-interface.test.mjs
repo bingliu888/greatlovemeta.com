@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 
 const read = path => readFile(new URL(`../${path}`, import.meta.url), "utf8");
-const locales = ["ja", "ko", "es", "fr", "de", "ru", "it", "pt", "ar", "hi"];
+const locales = ["zh-tw", "ja", "ko", "es", "fr", "de", "ru", "it", "pt", "ar", "hi", "id", "bn", "ur", "pa", "ta", "te", "ne", "si", "tr"];
 
 test("account and subscription surfaces are included in every public locale dictionary", async () => {
   for (const locale of locales) {
@@ -24,7 +24,7 @@ test("public locale dictionaries exclude implementation and retired-term copy", 
   }
 });
 
-test("account menu, footer, legal and every subscription step keep the selected twelve-language runtime", async () => {
+test("account menu, footer, legal and every subscription step keep the selected twenty-two-language runtime", async () => {
   const [layout, header, footer, legal, pricing, crypto, locale] = await Promise.all([
     read("app/[lang]/layout.tsx"), read("components/HeaderAccount.tsx"), read("components/SiteFooter.tsx"),
     read("components/LegalPage.tsx"), read("app/[lang]/pricing/pricing-client.tsx"),

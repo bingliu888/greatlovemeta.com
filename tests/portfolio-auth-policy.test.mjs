@@ -17,6 +17,7 @@ test("portfolio identity core supports both localized sign-in methods and recove
   for (const locale of ["en","zh","ja","ko","es","fr","de","ru","it","pt","ar","hi","id","bn","ur","pa","ta","te","ne","si","tr"]) {
     assert.match(copy, new RegExp(`"${locale}": \\{`));
   }
+  assert.match(copy,/auth-copy-zh-tw\.generated/);
 });
 
 test("portfolio password settings distinguishes add and update modes", async () => {
@@ -34,6 +35,7 @@ test("portfolio password settings distinguishes add and update modes", async () 
 test("policy intro covers every portfolio locale without claiming a verification gate", async () => {
   const intro = await read("AuthPolicyIntro.tsx");
   for (const locale of ["en","zh","ja","ko","es","fr","de","ru","it","pt","ar","hi","id","bn","ur","pa","ta","te","ne","si","tr"]) assert.match(intro, new RegExp("\\b" + locale + ":"));
+  assert.match(intro,/"zh-tw":/);
   assert.match(intro, /Password is the default sign-in method/);
   assert.match(intro, /默认使用密码登录/);
   assert.doesNotMatch(intro, /Email code is the default/);

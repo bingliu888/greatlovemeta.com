@@ -21,13 +21,14 @@ test("all localized pages accept every supported site language", async () => {
 });
 
 test("the locale runtime preserves native language names and rewrites internal routes", async () => {
-  const runtime = await readFile(new URL("../components/LocaleRuntime.tsx", import.meta.url), "utf8");
-  for (const name of ["中文", "English", "Español", "日本語", "한국어", "Français", "Deutsch", "Русский", "Italiano", "Português", "العربية", "हिन्दी"]) assert.match(runtime, new RegExp(name));
+  const [runtime,locale] = await Promise.all([readFile(new URL("../components/LocaleRuntime.tsx", import.meta.url), "utf8"),readFile(new URL("../lib/site-locale.ts", import.meta.url), "utf8")]);
+  for (const name of ["中文（简体）", "中文（繁體）", "English", "Español", "日本語", "한국어", "Français", "Deutsch", "Русский", "Italiano", "Português", "العربية", "हिन्दी", "Bahasa Indonesia", "বাংলা", "اردو", "ਪੰਜਾਬੀ", "தமிழ்", "తెలుగు", "नेपाली", "සිංහල", "Türkçe"]) assert.match(locale, new RegExp(name));
+  assert.match(runtime,/siteLanguages\.map/);
   assert.match(runtime, /rewrite\(document, locale\)/);
   assert.match(runtime, /homeInterfaceTranslations\[locale\]/);
   assert.match(runtime, /parentElement\?\.closest\("script,style,textarea,\[data-no-auto-localize\],\[data-no-translate\]"\)/);
   assert.doesNotMatch(runtime, /base\.closest\("script,style,textarea,/);
   assert.match(runtime, /\["aria-label", "title", "placeholder", "alt"\]/);
   assert.match(runtime, /protectedValues\.has\(normalized\)/);
-  assert.match(runtime, /new Set\(Object\.values\(homeInterfaceTranslations\[locale\] \?\? \{\}\)\)/);
+  assert.match(runtime, /new Set\(\[\.\.\.Object\.values\(shared\), \.\.\.Object\.values\(homeInterfaceTranslations\[locale\] \?\? \{\}\)\]\)/);
 });

@@ -103,11 +103,11 @@ test("English and Chinese Eight Horses pages render locally", async () => {
   assert.doesNotMatch(chinese, /greatlovedao\.com/i);
 });
 
-test("all twelve locale collection URLs resolve to the collection page", async () => {
+test("all twenty-two locale collection URLs resolve to the collection page", async () => {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);
   workerUrl.searchParams.set("test", `all-local-collections-${process.pid}-${Date.now()}`);
   const { default: worker } = await import(workerUrl.href);
-  for (const lang of ["zh", "en", "es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi"]) {
+  for (const lang of ["zh", "zh-tw", "en", "es", "fr", "de", "ja", "ko", "it", "ar", "pt", "ru", "hi", "id", "bn", "ur", "pa", "ta", "te", "ne", "si", "tr"]) {
     const response = await worker.fetch(
       new Request(`http://localhost/${lang}/collections/eight-horses`, { headers: { accept: "text/html" } }),
       testEnv,

@@ -1,5 +1,5 @@
 export const SUBSCRIPTION_LOCALES = [
-  "zh", "en", "es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi",
+  "zh", "zh-tw", "en", "es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi",
   "id", "bn", "ur", "pa", "ta", "te", "ne", "si", "tr",
 ] as const;
 
@@ -7,6 +7,7 @@ export type SubscriptionLocale = (typeof SUBSCRIPTION_LOCALES)[number];
 
 const labels: Record<SubscriptionLocale, string> = {
   zh: "订阅",
+  "zh-tw": "訂閱",
   en: "Subscription",
   es: "Suscripción",
   ja: "サブスクリプション",

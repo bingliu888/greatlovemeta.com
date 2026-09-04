@@ -1,31 +1,31 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-smartpay5-20260903",
+  "releaseId": "greatlovemeta-com-22-language-interface-20260904",
   "site": "greatlovemeta.com",
-  "title": { "en": "Migrate GreatLoveMeta subscriptions to SmartPay5", "zh": "将 GreatLoveMeta 订阅迁移至 SmartPay5" },
+  "title": { "en": "Complete GreatLoveMeta static interface localization", "zh": "完成 GreatLoveMeta 全站静态界面多语言化" },
   "purpose": {
-    "en": "Bind subscription entitlement to the signed-in member PayerID while allowing any connected wallet to fund the payment, including fee-on-transfer tokens.",
-    "zh": "以登录会员的 PayerID 绑定订阅权益，同时允许任意连接钱包付款，并支持转账扣税代币。"
+    "en": "Give every public, account, membership, classroom, payment, administrator, and menu interface a consistent twenty-two-language experience, including a dedicated Traditional Chinese route.",
+    "zh": "让公共页面、账户、会员、课堂、付款、管理员及菜单界面统一支持 22 种语言，并新增独立的繁体中文路由。"
   },
   "features": {
-    "en": ["Pass the signed-in member RefID as PayerID and the permanent administrator RefID as product owner.", "Read payment history by PayerID while retaining the funding wallet only for audit.", "Accept fee-on-transfer tokens without recipient balance-delta or amount verification."],
-    "zh": ["以登录会员 RefID 作为 PayerID，并以永久管理员 RefID 作为产品所有者。", "按 PayerID 读取付款记录，付款钱包仅作审计。", "不校验收款余额差额或实际到账金额，从而支持转账扣税代币。"]
+    "en": ["Add Simplified Chinese, Traditional Chinese, English, Spanish, French, German, Japanese, Korean, Italian, Arabic, Portuguese, Russian, Hindi, Indonesian, Bengali, Urdu, Punjabi, Tamil, Telugu, Nepali, Sinhala, and Turkish navigation.", "Localize static text on deep routes as well as account and administrator dropdowns, form labels, accessibility labels, legal copy, membership, classroom, and SmartPay controls.", "Set the document language and right-to-left direction correctly for Arabic and Urdu while preserving native language names in the selector."],
+    "zh": ["新增简体中文、繁体中文、英语、西班牙语、法语、德语、日语、韩语、意大利语、阿拉伯语、葡萄牙语、俄语、印地语、印尼语、孟加拉语、乌尔都语、旁遮普语、泰米尔语、泰卢固语、尼泊尔语、僧伽罗语及土耳其语导航。", "将深层页面、账户与管理员下拉菜单、表单标签、无障碍标签、法律文案、会员、课堂及 SmartPay 控件的静态文字纳入本地化。", "为阿拉伯语及乌尔都语正确设置页面语言与从右至左方向，同时在语言选择器中保留各语言原生名称。"]
   },
   "affected": {
-    "en": ["GreatLoveMeta monthly and annual crypto subscriptions, account payment history, and administrator payment tools."],
-    "zh": ["GreatLoveMeta 月费及年费加密订阅、账户付款记录与管理员支付工具。"]
+    "en": ["All language-prefixed GreatLoveMeta routes and their shared header, footer, account controls, administrator controls, and static interface copy."],
+    "zh": ["GreatLoveMeta 所有带语言前缀的路由，以及共用页头、页尾、账户控件、管理员控件与静态界面文案。"]
   },
   "changes": {
-    "en": ["Publish a fresh site-owned SmartPay5 ABI and deployment path with GreatLoveMeta membership product IDs and empty SecondID.", "Claim subscriptions only after a successful confirmed SmartPay5 receipt and derive entitlement time from the clamped chain timestamp.", "Allow the funding wallet to differ from or be absent from the member profile, remove wallet uniqueness, normalize PayerID lookup case-insensitively, and pin fflate 0.8.3."],
-    "zh": ["发布全新本站 SmartPay5 ABI 与部署路径，采用 GreatLoveMeta 会员产品 ID 及空 SecondID。", "仅在 SmartPay5 回执成功且确认数充足后更新订阅，并以校正后的链上时间计算权益。", "允许付款钱包与会员资料钱包不同或资料中没有钱包，移除钱包唯一限制，PayerID 查询忽略大小写，并锁定 fflate 0.8.3。"]
+    "en": ["Introduce a deterministic checked-in interface dictionary generator with OpenCC Traditional Chinese conversion, reviewed terminology overrides, placeholder preservation, and stale-key pruning.", "Add static locale dictionaries for twenty non-base languages and reuse authored Chinese and English source copy without runtime translation services.", "Rewrite internal links to the active locale, protect already-localized values from a second translation pass, and extend language validation to application and game routes."],
+    "zh": ["新增可重复生成并提交到代码库的界面词典生成器，使用 OpenCC 转换繁体中文、校正常用术语、保护占位符并清理过期词条。", "为 20 种非基础语言加入静态词典，并复用人工编写的中英文源文案，不依赖运行时翻译服务。", "让站内链接保持当前语言，避免已翻译内容被二次翻译，并将语言校验扩展到应用与游戏路由。"]
   },
   "validation": {
-    "en": ["Compile and execute SmartPay5 contract tests including fee-on-transfer and case-insensitive PayerID coverage, apply every D1 migration to a fresh database, pass lint, build, full repository tests, deployment workflow, and production HTTP probes."],
-    "zh": ["编译并执行 SmartPay5 合约测试（含转账扣税与 PayerID 大小写无关场景），在全新数据库应用全部 D1 迁移，并通过代码规范、构建、全仓测试、部署流程及生产 HTTP 探测。"]
+    "en": ["Generate equal-size dictionaries, reject foreign-site and source-code contamination, pass lint, production build, full repository and SmartPay5 contract tests, artifact validation, deployment workflow, production HTTP probes, and representative Traditional Chinese, Japanese, and Urdu browser checks."],
+    "zh": ["生成词条数量一致的语言词典，排除其他站点及源代码污染，并通过代码规范、生产构建、全仓与 SmartPay5 合约测试、产物校验、部署流程、生产 HTTP 探测，以及繁体中文、日语和乌尔都语代表性浏览器检查。"]
   },
-  "deferred": { "en": ["Realtime browser testing is intentionally omitted at the user's request."], "zh": ["按用户要求，本次不执行实时浏览器测试。"] },
+  "deferred": { "en": ["User-authored and live classroom content remains in its authored language; this release localizes static product interface copy only.", "No live microphone or camera session is started because realtime media behavior is unchanged."], "zh": ["用户编写内容与实时课堂内容仍保留原始语言；本次仅本地化产品静态界面文案。", "实时音视频行为没有变化，因此本次不启动真实麦克风或摄像头会话。"] },
   "siteAdaptations": {
-    "en": ["Preserve GreatLoveMeta branding, header, footer, monthly and annual plans, Clerk, classrooms, RealtimeKit, referrals, R2, and independent infrastructure."],
-    "zh": ["保留 GreatLoveMeta 品牌、页头页尾、月费及年费套餐、Clerk、课堂、RealtimeKit、推荐系统、R2 与独立基础设施。"]
+    "en": ["Preserve GreatLoveMeta branding, authored English and Chinese home content, SmartPay5 subscriptions, Clerk identity, classrooms, RealtimeKit, referrals, R2, and independent infrastructure.", "No Solidity, ABI, payment rule, database schema, or deployed on-chain contract is changed or redeployed."],
+    "zh": ["保留 GreatLoveMeta 品牌、人工编写的中英文首页内容、SmartPay5 订阅、Clerk 身份系统、课堂、RealtimeKit、推荐系统、R2 与独立基础设施。", "本次不更改或重新部署 Solidity、ABI、付款规则、数据库结构或任何链上合约。"]
   }
 }

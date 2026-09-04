@@ -2,11 +2,12 @@ import assert from "node:assert/strict";
 import { readFile } from "node:fs/promises";
 import test from "node:test";
 
-test("all twelve routes use localized matching content", async () => {
+test("all twenty-two routes use localized matching content", async () => {
   const home = await readFile(new URL("../app/[lang]/page.tsx", import.meta.url), "utf8");
   assert.match(home, /en:\s*\{/);
   assert.match(home, /zh:\s*\{/);
-  assert.match(home, /translateInterface\(content\.en,lang\)/);
+  assert.match(home, /isChineseLanguage\(lang\)\?content\.zh:content\.en/);
+  assert.match(home, /translateInterface\(base,lang\)/);
   assert.match(home, /interfaceText\(lang,"MEMBERS","成员"\)/);
   assert.match(home, /interfaceText\(lang,"AI learning","AI 学习"\)/);
 });
@@ -24,8 +25,8 @@ test("Chinese surfaces consistently present the 大爱元宇宙 brand", async ()
   assert.match(home, /accessCommunityTitle: "大爱元宇宙社区"/);
   assert.match(home, /officialCommunityTitle: "大爱元宇宙会员名录"/);
   assert.match(home, /大爱艺术世界/);
-  assert.match(header, /lang === "zh" \? "大爱元宇宙" : "GreatLoveMeta\.com"/);
-  assert.match(footer, /lang === "zh" \? "大爱元宇宙" : "GreatLoveMeta\.com"/);
+  assert.match(header, /interfaceText\(lang,"GreatLoveMeta\.com","大爱元宇宙"\)/);
+  assert.match(footer, /interfaceText\(lang,"GreatLoveMeta\.com","大爱元宇宙"\)/);
   assert.match(legal, /关于大爱元宇宙/);
   assert.match(collections, /由大爱元宇宙本站呈现/);
   assert.match(pricing, /大爱元宇宙高级会员/);

@@ -1,13 +1,13 @@
 import { getSessionUser } from "../../../lib/auth";
+import { isSiteLanguage } from "../../../lib/site-locale";
 
 const gameKeys = new Set(["monopoly", "miner"]);
-const languages = new Set(["en", "zh"]);
 
 export async function GET(request: Request) {
   const url = new URL(request.url);
   const game = url.searchParams.get("game") || "";
   const lang = url.searchParams.get("lang") || "";
-  if (!gameKeys.has(game) || !languages.has(lang)) {
+  if (!gameKeys.has(game) || !isSiteLanguage(lang)) {
     return Response.json({ error: "Invalid game launch" }, { status: 400 });
   }
 

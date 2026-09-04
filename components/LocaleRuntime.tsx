@@ -2,12 +2,12 @@
 
 import { useEffect } from "react";
 import { homeInterfaceTranslations } from "../lib/home-interface-translations.generated";
-import type { SiteLanguage } from "../lib/site-locale";
+import { isSiteLanguage, languageHtmlTags, siteLanguages, type SiteLanguage } from "../lib/site-locale";
 
 type State = { source: string; rendered: string };
 const textState = new WeakMap<Text, State>();
 const attributeState = new WeakMap<Element, Map<string, State>>();
-const nativeNames = new Set(["中文", "English", "Español", "日本語", "한국어", "Français", "Deutsch", "Русский", "Italiano", "Português", "العربية", "हिन्दी"]);
+const nativeNames = new Set<string>(siteLanguages.map(([,label])=>label));
 
 function render(value: string, dictionary: Record<string, string>, protectedValues: Set<string>) {
   const trimmed = value.trim();
@@ -60,7 +60,7 @@ function rewrite(root: ParentNode, locale: SiteLanguage) {
     const url = new URL(anchor.href, window.location.href);
     if (url.origin !== window.location.origin) continue;
     const parts = url.pathname.split("/");
-    if (parts[1] && ["zh", "en", "es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi"].includes(parts[1])) parts[1] = locale;
+    if (parts[1] && isSiteLanguage(parts[1])) parts[1] = locale;
     else parts.splice(1, 0, locale);
     url.pathname = parts.join("/") || `/${locale}`;
     anchor.href = `${url.pathname}${url.search}${url.hash}`;
@@ -69,6 +69,8 @@ function rewrite(root: ParentNode, locale: SiteLanguage) {
 
 export function LocaleRuntime({ locale }: { locale: SiteLanguage }) {
   useEffect(() => {
+    document.documentElement.lang = languageHtmlTags[locale];
+    document.documentElement.dir = locale === "ar" || locale === "ur" ? "rtl" : "ltr";
     rewrite(document, locale);
     const linkObserver = new MutationObserver(records => records.forEach(record => record.addedNodes.forEach(node => { if (node instanceof Element) rewrite(node, locale); })));
     linkObserver.observe(document.body, { childList: true, subtree: true });
@@ -79,7 +81,7 @@ export function LocaleRuntime({ locale }: { locale: SiteLanguage }) {
       .then(shared => {
         if (cancelled) return;
         const dictionary = { ...shared, ...(homeInterfaceTranslations[locale] ?? {}) };
-        const protectedValues = new Set(Object.values(homeInterfaceTranslations[locale] ?? {}));
+        const protectedValues = new Set([...Object.values(shared), ...Object.values(homeInterfaceTranslations[locale] ?? {})]);
         localize(document, dictionary, protectedValues);
         observer = new MutationObserver(records => records.forEach(record => {
           record.addedNodes.forEach(node => localize(node, dictionary, protectedValues));

@@ -1,11 +1,21 @@
 import { homeInterfaceTranslations } from "./home-interface-translations.generated";
 
-export const siteLanguages = [["zh","中文"],["en","English"],["es","Español"],["ja","日本語"],["ko","한국어"],["fr","Français"],["de","Deutsch"],["ru","Русский"],["it","Italiano"],["pt","Português"],["ar","العربية"],["hi","हिन्दी"]] as const;
+export const siteLanguages = [
+  ["zh", "中文（简体）"], ["zh-tw", "中文（繁體）"], ["en", "English"], ["es", "Español"],
+  ["fr", "Français"], ["de", "Deutsch"], ["ja", "日本語"], ["ko", "한국어"],
+  ["it", "Italiano"], ["ar", "العربية"], ["pt", "Português"], ["ru", "Русский"],
+  ["hi", "हिन्दी"], ["id", "Bahasa Indonesia"], ["bn", "বাংলা"], ["ur", "اردو"],
+  ["pa", "ਪੰਜਾਬੀ"], ["ta", "தமிழ்"], ["te", "తెలుగు"], ["ne", "नेपाली"],
+  ["si", "සිංහල"], ["tr", "Türkçe"],
+] as const;
 export type SiteLanguage = typeof siteLanguages[number][0];
 const codes = new Set<string>(siteLanguages.map(([code]) => code));
 export const isSiteLanguage = (value:string): value is SiteLanguage => codes.has(value);
 export const safeSiteLanguage = (value:string): SiteLanguage => isSiteLanguage(value) ? value : "en";
-export const languageHtmlTags:Record<SiteLanguage,string>={zh:"zh-CN",en:"en",es:"es",ja:"ja",ko:"ko",fr:"fr",de:"de",ru:"ru",it:"it",pt:"pt",ar:"ar",hi:"hi"};
+export function siteLanguageRecord<T>(values:Partial<Record<SiteLanguage,T>>&Pick<Record<SiteLanguage,T>,"en"|"zh">):Record<SiteLanguage,T>{return Object.fromEntries(siteLanguages.map(([language])=>[language,values[language]??(language==="zh-tw"?values.zh:values.en)]))as Record<SiteLanguage,T>}
+export const languageHtmlTags:Record<SiteLanguage,string>={zh:"zh-CN","zh-tw":"zh-TW",en:"en",es:"es",fr:"fr",de:"de",ja:"ja",ko:"ko",it:"it",ar:"ar",pt:"pt",ru:"ru",hi:"hi",id:"id",bn:"bn",ur:"ur",pa:"pa",ta:"ta",te:"te",ne:"ne",si:"si",tr:"tr"};
+export const isChineseLanguage=(language:SiteLanguage)=>language==="zh"||language==="zh-tw";
+export const bilingualContentLanguage=(language:SiteLanguage):"zh"|"en"=>isChineseLanguage(language)?"zh":"en";
 
 export function translateInterface<T>(value:T, language:SiteLanguage):T {
   if (language === "en") return value;
@@ -17,7 +27,12 @@ export function translateInterface<T>(value:T, language:SiteLanguage):T {
   return value;
 }
 
-export const interfaceText=(language:SiteLanguage,en:string,zh:string)=>language==="zh"?zh:language==="en"?en:(homeInterfaceTranslations[language]?.[en]??en);
+export const interfaceText=(language:SiteLanguage,en:string,zh:string)=>{
+  if(language==="zh")return zh;
+  if(language==="en")return en;
+  const source=language==="zh-tw"?zh:en;
+  return homeInterfaceTranslations[language]?.[source]??homeInterfaceTranslations[language]?.[en]??source;
+};
 export const shellCopyFor=(language:SiteLanguage)=>({
   primaryNav:interfaceText(language,"Primary navigation","主导航"),
   openMenu:interfaceText(language,"Open menu","打开菜单"),
@@ -47,9 +62,9 @@ export const shellCopyFor=(language:SiteLanguage)=>({
   unread:interfaceText(language,"unread","未读"),
 });
 
-export const homeHeroTitles:Record<SiteLanguage,readonly string[]>={
+export const homeHeroTitles=siteLanguageRecord<readonly string[]>({
   zh:["欢迎来到大爱元宇宙。"],en:["Welcome to RWA.","GreatLove Metaverse."],
   es:["Bienvenido a RWA.","Metaverso GreatLove."],ja:["RWAへようこそ。","GreatLoveメタバース。"],ko:["RWA에 오신 것을 환영합니다.","GreatLove 메타버스."],
   fr:["Bienvenue dans les RWA.","Métavers GreatLove."],de:["Willkommen bei RWA.","GreatLove Metaverse."],ru:["Добро пожаловать в RWA.","Метавселенная GreatLove."],
   it:["Benvenuti in RWA.","Metaverso GreatLove."],pt:["Bem-vindo ao RWA.","Metaverso GreatLove."],ar:["مرحبًا بكم في RWA.","عالم GreatLove الافتراضي."],hi:["RWA में आपका स्वागत है।","GreatLove मेटावर्स।"],
-};
+});

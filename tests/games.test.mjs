@@ -123,12 +123,14 @@ test("game pages keep the shared header and expose a clean Lucky Wheel route", a
   assert.match(luckyWheelPage, /const frameSrc = `\/games\/monopoly\.html\?mode=\$\{mode\}&lang=\$\{lang\}`/);
   assert.match(luckyWheelPage, /<iframe src=\{frameSrc\} title=\{frameTitle\}\/>/);
   assert.match(luckyWheelPage, /Lucky Wheel/);
-  assert.match(gamePage, /modeLabels: Record<SiteLanguage/);
-  assert.match(luckyWheelPage, /modeLabels: Record<SiteLanguage/);
+  assert.match(gamePage, /modeLabels=siteLanguageRecord/);
+  assert.match(luckyWheelPage, /modeLabels=siteLanguageRecord/);
   for (const locale of ["zh", "en", "es", "ja", "ko", "fr", "de", "ru", "it", "pt", "ar", "hi"]) {
     assert.match(gamePage, new RegExp(`\\b${locale}: \\{ game:`));
     assert.match(luckyWheelPage, new RegExp(`\\b${locale}: \\{ game:`));
   }
+  assert.match(gamePage, /siteLanguageRecord/);
+  assert.match(luckyWheelPage, /siteLanguageRecord/);
   assert.match(gamePage, /interfaceText\(lang, games\[game as GameKey\]\.en, games\[game as GameKey\]\.zh\)/);
   assert.match(luckyWheelPage, /interfaceText\(lang, "Lucky Wheel", "幸运轮盘"\)/);
   assert.match(luckyWheelPage, /幸运轮盘/);

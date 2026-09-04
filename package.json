@@ -15,6 +15,7 @@
     "test": "npm run build && node --test tests/*.test.mjs",
     "validate:artifact": "bash scripts/validate-artifact.sh",
     "lint": "bash scripts/sites-env.sh -- eslint . --max-warnings 0",
+    "locales:generate": "node scripts/generate-public-interface-translations.mjs zh-tw es fr de ja ko it ar pt ru hi id bn ur pa ta te ne si tr && node scripts/generate-traditional-auth-copy.mjs",
     "db:generate": "bash scripts/sites-env.sh -- drizzle-kit generate"
   },
   "dependencies": {
@@ -29,6 +30,7 @@
     "jszip": "^3.10.1",
     "mammoth": "^1.11.0",
     "next": "16.2.6",
+    "opencc-js": "1.4.2",
     "pdfjs-dist": "^5.5.207",
     "react": "19.2.6",
     "react-dom": "19.2.6",

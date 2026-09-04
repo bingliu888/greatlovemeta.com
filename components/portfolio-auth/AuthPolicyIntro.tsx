@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 const policyCopy: Record<string, string> = {
   en: "Password is the default sign-in method. You can switch to an email verification code below.",
   zh: "默认使用密码登录；也可在下方改用邮箱验证码。",
+  "zh-tw": "預設使用密碼登入；也可在下方改用電子郵件驗證碼。",
   ja: "デフォルトはパスワードログインです。下でメール認証コードに切り替えられます。",
   ko: "기본 로그인 방법은 비밀번호입니다. 아래에서 이메일 인증 코드로 전환할 수 있습니다.",
   es: "La contraseña es el método de acceso predeterminado. Puedes cambiar al código de verificación por correo abajo.",

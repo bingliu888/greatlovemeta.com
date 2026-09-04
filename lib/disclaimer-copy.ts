@@ -268,5 +268,6 @@ const copies: Record<DisclaimerLocale, DisclaimerCopy> = {
 };
 
 export function disclaimerFor(locale: string | null | undefined): DisclaimerCopy {
+  if (locale === "zh-tw") return copies.zh;
   return copies[(DISCLAIMER_LOCALES as readonly string[]).includes(locale ?? "") ? locale as DisclaimerLocale : "en"];
 }

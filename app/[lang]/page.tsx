@@ -5,7 +5,7 @@ import { redirect } from "next/navigation";
 import { SiteHeader } from "../../components/SiteHeader";
 import { SiteFooter } from "../../components/SiteFooter";
 import { LanguageSync } from "../../components/LanguageMemory";
-import { homeHeroTitles, interfaceText, isSiteLanguage, safeSiteLanguage, siteLanguages, translateInterface } from "../../lib/site-locale";
+import { homeHeroTitles, interfaceText, isChineseLanguage, isSiteLanguage, safeSiteLanguage, siteLanguages, translateInterface } from "../../lib/site-locale";
 
 const content = {
   en: {
@@ -186,15 +186,18 @@ const content = {
 
 export async function generateMetadata({ params }: { params: Promise<{ lang: string }> }): Promise<Metadata> {
   const { lang } = await params;
-  const language=safeSiteLanguage(lang); const t=language==="zh"?content.zh:language==="en"?content.en:translateInterface(content.en,language);
+  const language=safeSiteLanguage(lang);
+  const base=isChineseLanguage(language)?content.zh:content.en;
+  const t=language==="zh"||language==="en"?base:translateInterface(base,language);
   return { title: { absolute: t.metaTitle }, alternates: { languages: Object.fromEntries(siteLanguages.map(([code])=>[code,`/${code}`])) } };
 }
 
 export default async function LanguageHome({ params }: { params: Promise<{ lang: string }> }) {
   const { lang } = await params;
   if (!isSiteLanguage(lang)) redirect("/");
-  const t = lang === "zh" ? content.zh : lang === "en" ? content.en : translateInterface(content.en,lang);
-  const heroTitle=homeHeroTitles[lang];
+  const base=isChineseLanguage(lang)?content.zh:content.en;
+  const t = lang === "zh" || lang === "en" ? base : translateInterface(base,lang);
+  const heroTitle=lang === "zh" || lang === "en" ? homeHeroTitles[lang] : translateInterface(homeHeroTitles[lang],lang);
   return <main>
     <LanguageSync lang={lang}/>
     <div className="hero-shell">

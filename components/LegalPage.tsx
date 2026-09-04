@@ -1,6 +1,6 @@
 import { SiteFooter } from "./SiteFooter";
 import { SiteHeader } from "./SiteHeader";
-import type { SiteLanguage } from "../lib/site-locale";
+import { isChineseLanguage, translateInterface, type SiteLanguage } from "../lib/site-locale";
 import { disclaimerFor } from "../lib/disclaimer-copy";
 type PageKind = "about" | "privacy" | "terms" | "disclaimer";
 const copy = {
@@ -17,4 +17,4 @@ const copy = {
     zh: { eyebrow: "使用条款", title: "安全、友善、建设性地参与。", intro: "生效日期：2026 年 7 月 23 日。使用本平台即表示您同意以下服务与社区条款。", sections: [["平台服务", "功能可能持续调整或暂时中断。智能助手回答与社区内容仅供参考，不构成任何结果或权利保证。"], ["账户与行为", "请保护账户、尊重其他会员，不得骚扰、冒充、发布违法资料、操纵平台系统或干扰他人使用。"], ["用户内容", "您保留所提交内容的权利，并授权平台在提供服务所需范围内存储、展示、传输、管理该内容。"], ["项目与活动", "项目方与活动主办方对其规则、资格、安全、资金与成果负责；在作出重要承诺前请自行核实。"], ["数字资产", "任何页面或 AI 回答均不构成投资、法律、税务或财务意见。可选的钱包与凭证功能绝不会要求披露私钥或助记词。"]] },
   },
 } as const;
-export function LegalPage({ lang, kind }: { lang: SiteLanguage; kind: PageKind }) { const page = kind === "disclaimer" ? disclaimerFor(lang) : copy[kind][lang === "zh" ? "zh" : "en"]; return <main className="legal-page"><SiteHeader lang={lang}/><article className="legal-main"><p className="section-kicker">{page.eyebrow}</p><h1>{page.title}</h1><p className="legal-intro">{page.intro}</p><div className="legal-sections">{page.sections.map(([title,body])=><section key={title}><h2>{title}</h2><p>{body}</p></section>)}</div></article><SiteFooter lang={lang}/></main>; }
+export function LegalPage({ lang, kind }: { lang: SiteLanguage; kind: PageKind }) { const base=kind==="disclaimer"?disclaimerFor(lang):copy[kind][isChineseLanguage(lang)?"zh":"en"];const page=lang==="zh"||lang==="en"||kind==="disclaimer"&&lang!=="zh-tw"?base:translateInterface(base,lang);return <main className="legal-page"><SiteHeader lang={lang}/><article className="legal-main"><p className="section-kicker">{page.eyebrow}</p><h1>{page.title}</h1><p className="legal-intro">{page.intro}</p><div className="legal-sections">{page.sections.map(([title,body])=><section key={title}><h2>{title}</h2><p>{body}</p></section>)}</div></article><SiteFooter lang={lang}/></main>; }
