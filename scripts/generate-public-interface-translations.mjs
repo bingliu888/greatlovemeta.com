@@ -31,6 +31,7 @@ const runtimeInterfaceStrings = [
   "Payment options available", "Active through", "Copy RefID", "Copy wallet address",
   "verified source items",
 ];
+const serverInterfaceKeys = new Set(runtimeInterfaceStrings);
 
 function literalValue(raw) {
   return raw.trim().replace(/\\n/g, "\n").replace(/\\(["'`\\])/g, "$1").replace(/\s+/g, " ");
@@ -63,8 +64,20 @@ function collectTraditionalPairs(source, target = strings) {
   }
 }
 
+function collectInterfaceTextPairs(source, target = strings) {
+  for (const match of source.matchAll(/interfaceText\([^,]+,\s*(["'`])((?:\\.|(?!\1)[\s\S])*)\1\s*,\s*(["'`])((?:\\.|(?!\3)[\s\S])*)\3\s*\)/g)) {
+    addString(match[2], target);
+    addString(match[4], target);
+    if (target === strings) {
+      addString(match[2], serverInterfaceKeys);
+      addString(match[4], serverInterfaceKeys);
+    }
+  }
+}
+
 function collectSource(source, includeAllLiterals = false, target = strings) {
   collectTraditionalPairs(source, target);
+  collectInterfaceTextPairs(source, target);
   for (const match of source.matchAll(/>([^<>{}]+)</g)) addString(match[1], target);
   for (const match of source.matchAll(new RegExp(`${visibleAttributes}\\s*=\\s*(["'\\x60])((?:\\\\.|(?!\\1)[\\s\\S])*)\\1`, "g"))) addString(match[2], target);
   for (const match of source.matchAll(/\b(?:label|title|titleEn|titleZh|description|descriptionEn|descriptionZh|subtitle|eyebrow|placeholder|message|empty|success|error|helperText|summary|body|name)\s*:\s*(["'`])((?:\\.|(?!\1)[\s\S])*)\1/g)) addString(match[2], target);
@@ -97,6 +110,11 @@ for (const sourcePath of [
 ]) {
   collectSource(await fs.readFile(new URL(`../${sourcePath}`, import.meta.url), "utf8"), true);
 }
+for (const sourcePath of ["app/[lang]/page.tsx", "components/LegalPage.tsx", "lib/auth-interface-copy.ts", "lib/disclaimer-copy.ts"]) {
+  collectSource(await fs.readFile(new URL(`../${sourcePath}`, import.meta.url), "utf8"), true, serverInterfaceKeys);
+}
+collectInterfaceTextPairs(await fs.readFile(new URL("../lib/site-locale.ts", import.meta.url), "utf8"), serverInterfaceKeys);
+for (const source of serverInterfaceKeys) strings.add(source);
 runtimeInterfaceStrings.forEach(value => strings.add(value));
 
 const portfolioAuthSource = await fs.readFile(new URL("../components/portfolio-auth/auth-copy.generated.ts", import.meta.url), "utf8");
@@ -206,6 +224,7 @@ const localeOverrides = {
     "Sign in or register": "登入或註冊", "Sign out": "登出", "Primary navigation": "主要導覽",
     "Project": "專案", "Privacy": "隱私權", "Terms": "條款", "Crypto payments": "加密貨幣付款",
     "GreatLoveMeta.com home": "大愛元宇宙首頁", "Great Love · Intelligence · Sustainability": "大愛 · 智慧 · 永續",
+    "主导航": "主要導覽", "页脚导航": "頁尾導覽",
   },
 };
 
@@ -261,13 +280,14 @@ for (const target of targets) {
     const polishTraditional = value => toTraditionalChinese(value)
       .replaceAll("電子郵箱", "電子郵件")
       .replaceAll("郵箱", "電子郵件")
-      .replaceAll("賬戶", "帳戶");
+      .replaceAll("賬戶", "帳戶")
+      .replaceAll("賬號", "帳號");
     for (const [source, value] of Object.entries(dictionary)) dictionary[source] = polishTraditional(restorePlaceholders(source, value));
     for (const [english, simplified] of traditionalPairs) if (strings.has(english)) dictionary[english] = polishTraditional(simplified);
   }
   Object.assign(dictionary, localeOverrides[target] || {});
   dictionaries[target] = dictionary;
-  home[target] = Object.fromEntries([...homeKeys].map(source => [source, dictionary[source] || source]));
+  home[target] = Object.fromEntries([...new Set([...homeKeys, ...serverInterfaceKeys])].map(source => [source, dictionary[source] || source]));
   await fs.writeFile(new URL(`${target}.json`, publicDirectory), `${JSON.stringify(dictionary, null, 2)}\n`);
   process.stdout.write(`Generated ${target}: ${Object.keys(dictionary).length} strings (${missing.length} added, ${target === "zh-tw" ? traditionalPairs.size : 0} paired)\n`);
 }

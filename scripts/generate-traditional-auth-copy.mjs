@@ -12,7 +12,8 @@ const convert = OpenCC.Converter({ from: "cn", to: "twp" });
 const polishTraditional = value => convert(value)
   .replaceAll("電子郵箱", "電子郵件")
   .replaceAll("郵箱", "電子郵件")
-  .replaceAll("賬戶", "帳戶");
+  .replaceAll("賬戶", "帳戶")
+  .replaceAll("賬號", "帳號");
 const traditional = Object.fromEntries(Object.entries(dictionaries.zh).map(([key, value]) => [key, polishTraditional(value)]));
 await fs.writeFile(outputUrl, `// Generated static Traditional Chinese identity copy. No runtime translation request.\nexport default ${JSON.stringify(traditional, null, 2)} as Record<string, string>;\n`);
 process.stdout.write(`zh-tw auth: ${Object.keys(traditional).length} phrases\n`);

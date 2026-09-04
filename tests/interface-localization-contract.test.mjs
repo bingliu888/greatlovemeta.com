@@ -28,8 +28,11 @@ test("GreatLoveMeta exposes the complete twenty-two-language static interface",a
 test("Traditional Chinese and Japanese core interface copy does not fall back to English",async()=>{
   const traditional=JSON.parse(await read("public/locales/public-interface/zh-tw.json"));
   const japanese=JSON.parse(await read("public/locales/public-interface/ja.json"));
+  const home=await read("lib/home-interface-translations.generated.ts");
   assert.equal(traditional["Dashboard"],"使用者面板");
   assert.equal(traditional["Admin dashboard"],"管理員面板");
+  for(const phrase of ["大愛元宇宙首頁","主要導覽","選擇語言","登入或註冊","頁尾導覽","關於我們","開啟智慧助手","我的帳戶","帳戶選單"])assert.match(home,new RegExp(phrase));
+  assert.doesNotMatch(home,/賬戶|賬號|電子郵箱/);
   assert.notEqual(japanese["Dashboard"],"Dashboard");
   assert.notEqual(japanese["Account menu"],"Account menu");
 });
