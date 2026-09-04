@@ -52,6 +52,21 @@ function addString(raw, target = strings) {
   target.add(value);
 }
 
+function addLegalProse(raw, target = strings) {
+  const value = literalValue(raw);
+  if (value.length < 2 || value.length > 500 || !/[A-Za-z\u3400-\u9fff]/.test(value)) return;
+  if (/^(?:\.{1,2}\/|\/|@\/|https?:)/.test(value) || /^[a-z0-9_.-]+$/.test(value)) return;
+  target.add(value);
+}
+
+function collectLegalPageStrings(source, target = strings) {
+  const start = source.indexOf("const copy = {");
+  const end = source.indexOf("} as const;", start);
+  if (start < 0 || end < 0) throw new Error("LegalPage copy object was not found");
+  const copySource = source.slice(start, end);
+  for (const match of copySource.matchAll(/(["'`])((?:\\.|(?!\1)[^\\])*)\1/g)) addLegalProse(match[2], target);
+}
+
 function collectTraditionalPairs(source, target = strings) {
   for (const match of source.matchAll(/\?\s*(["'`])((?:\\.|(?!\1)[\s\S])*)\1\s*:\s*(["'`])((?:\\.|(?!\3)[\s\S])*)\3/g)) {
     const simplified = literalValue(match[2]);
@@ -110,9 +125,10 @@ for (const sourcePath of [
 ]) {
   collectSource(await fs.readFile(new URL(`../${sourcePath}`, import.meta.url), "utf8"), true);
 }
-for (const sourcePath of ["app/[lang]/page.tsx", "components/LegalPage.tsx", "lib/auth-interface-copy.ts", "lib/disclaimer-copy.ts"]) {
+for (const sourcePath of ["app/[lang]/page.tsx", "lib/auth-interface-copy.ts", "lib/disclaimer-copy.ts"]) {
   collectSource(await fs.readFile(new URL(`../${sourcePath}`, import.meta.url), "utf8"), true, serverInterfaceKeys);
 }
+collectLegalPageStrings(await fs.readFile(new URL("../components/LegalPage.tsx", import.meta.url), "utf8"), serverInterfaceKeys);
 collectInterfaceTextPairs(await fs.readFile(new URL("../lib/site-locale.ts", import.meta.url), "utf8"), serverInterfaceKeys);
 for (const source of serverInterfaceKeys) strings.add(source);
 runtimeInterfaceStrings.forEach(value => strings.add(value));

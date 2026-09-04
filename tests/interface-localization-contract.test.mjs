@@ -16,6 +16,13 @@ test("GreatLoveMeta exposes the complete twenty-two-language static interface",a
     assert.ok(dictionarySize>=2500,"complete interface corpus");
     assert.equal(Object.keys(dictionary).length,dictionarySize,`${language} dictionary size`);
     for(const phrase of ["Dashboard","Admin dashboard","Account menu","GreatLoveMeta.com home","Copy wallet address"])assert.equal(typeof dictionary[phrase],"string",`${language}: ${phrase}`);
+    for(const phrase of [
+      "Wallet binding is optional. A wallet is linked only after an explicit signature challenge; we do not request or store private keys or seed phrases.",
+      "You can update profile preferences and request access, correction, export, or deletion of eligible account data through the published contact process.",
+    ]){
+      assert.equal(typeof dictionary[phrase],"string",`${language}: legal paragraph`);
+      assert.notEqual(dictionary[phrase],phrase,`${language}: legal paragraph translated`);
+    }
     assert.equal(Object.keys(dictionary).some(key=>/CatMeDAO|CATMEDAO|猫迷/.test(key)),false,`${language} excludes foreign-site history`);
   }
   assert.match(home,/"zh-tw"\s*:/);

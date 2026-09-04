@@ -21,6 +21,7 @@ test("public locale dictionaries exclude implementation and retired-term copy", 
     const runtimeDictionary = JSON.parse(await read(`public/locales/public-interface/${locale}.json`));
     assert.equal(runtimeDictionary["6-month subscription"], undefined);
     assert.equal(Object.keys(runtimeDictionary).some(key => key.startsWith("SELECT ") || key.includes("/api/billing/crypto/")), false);
+    assert.equal(Object.keys(runtimeDictionary).some(key => /;\s*(?:return|if\s*\(|searchParams)|\b(?:useState|useRef)\s*\(|mimeType\.startsWith|=>/.test(key)), false);
   }
 });
 
