@@ -1,13 +1,79 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-gold3-v1-settlement-20260904-r1",
+  "releaseId": "greatlovemeta-com-smartpay5-product-control-20260905",
   "site": "greatlovemeta.com",
-  "title": { "en": "Correct Gold 3 v1 SmartPay5 settlement", "zh": "修正 Gold 3 v1 SmartPay5 结算" },
-  "purpose": { "en": "Correct SmartPay5 receipt reconciliation, concurrent renewal, and administrator identity for production settlement.", "zh": "修正生产结算中的 SmartPay5 回执对账、并发续期与管理员身份。" },
-  "features": { "en": ["Decode the contract's internal TransactionID from a confirmed receipt before subscription claim.", "Trust only an active Clerk user's exact primary email when bridging a web session."], "zh": ["从已确认回执解码合约内部 TransactionID 后再认领订阅。", "桥接网页会话时仅信任未封禁、未锁定 Clerk 用户的精确主邮箱。"] },
-  "affected": { "en": ["Crypto verification, SmartPay5 claims and records, subscription renewal, and administrator payment tools."], "zh": ["影响加密付款核验、SmartPay5 认领与记录、订阅续期及管理员付款工具。"] },
-  "changes": { "en": ["Use a claim-gated atomic upsert for cumulative, replay-safe subscription periods.", "Require fresh verified Clerk primary-email ownership for the permanent administrator without coupling it to a legacy local ID."], "zh": ["使用受认领状态约束的原子更新，安全累加订阅期限并防止重放。", "永久管理员必须即时验证当前 Clerk 主邮箱所有权，且不与旧本地 ID 耦合。"] },
-  "validation": { "en": ["Run receipt decoding, future-block confirmation, bounded-body/RPC ordering, full administrator-entry enumeration, legacy-ID admin, leap-boundary calendar renewal, replay, protected-navigation, repository test, lint, and build gates."], "zh": ["运行回执解码、未来区块确认数、有界请求与 RPC 顺序、全部管理员入口枚举、旧 ID 管理员、闰年边界日历续期、防重放、受保护导航、仓库测试、lint 与构建门禁。"] },
-  "deferred": { "en": ["No contract, payment configuration, translation dictionary, classroom feature, header, footer, or production content is changed; no real payment is submitted."], "zh": ["不修改合约、付款配置、翻译词典、课堂功能、页头、页脚或生产内容；不提交真实付款。"] },
-  "siteAdaptations": { "en": ["Preserve GreatLoveMeta branding, 22-language interface, site-owned infrastructure, and existing products and data."], "zh": ["保留 GreatLoveMeta 品牌、22 语言界面、站点独立基础设施及现有产品与数据。"] }
+  "title": {
+    "en": "SmartPay5 product confirmation control",
+    "zh": "SmartPay5 付款项目确认控制"
+  },
+  "purpose": {
+    "en": "Make the database the single fail-closed source for whether each current SmartPay5 payment preset is selectable.",
+    "zh": "让数据库成为每个当前 SmartPay5 付款预设是否可选的唯一默认关闭状态来源。"
+  },
+  "features": {
+    "en": [
+      "Administrators can Stop an enabled product without a wallet or contract transaction.",
+      "A stopped, missing, or stale product must be confirmed on-chain before it becomes selectable again."
+    ],
+    "zh": [
+      "管理员可在不调用钱包或合约的情况下 Stop 已启用项目。",
+      "已停止、无记录或指纹失效的项目必须经链上重新确认后才恢复可选。"
+    ]
+  },
+  "affected": {
+    "en": [
+      "SmartPay5 administrator product controls, checkout option discovery, payment preparation, D1 state, and deployment ordering."
+    ],
+    "zh": [
+      "影响 SmartPay5 管理员项目控制、付款选项读取、付款准备、D1 状态及部署顺序。"
+    ]
+  },
+  "changes": {
+    "en": [
+      "Store an exact fingerprint of mode, token addresses, mainID, secondID, atomic prices, and threshold.",
+      "Fail closed when no matching enabled record exists; any preset change invalidates the old confirmation.",
+      "Use one shared server checkout reader for both displayed options and payment preparation.",
+      "Remove the obsolete global pause-payment control without changing the SmartPay5 contract."
+    ],
+    "zh": [
+      "保存付款模式、代币地址、mainID、secondID、原子价格及门槛的精确指纹。",
+      "没有匹配的 enabled 记录时默认不可付款；预设任何变化都会使旧确认失效。",
+      "显示付款选项与付款准备共同复用同一个服务端结账读取器。",
+      "移除无用的全局暂停付款控件，不修改 SmartPay5 合约。"
+    ]
+  },
+  "validation": {
+    "en": [
+      "Run focused fail-closed, stale-fingerprint, database-only Stop, shared-reader, migration replay, repository tests, lint, and production build gates."
+    ],
+    "zh": [
+      "运行默认关闭、指纹失效、Stop 仅数据库、共享读取器、迁移重放、仓库测试、lint 与生产构建门禁。"
+    ]
+  },
+  "deferred": {
+    "en": [
+      "No SmartPay5 Solidity, ABI, deployed address, token, payout wallet, price, product identity, site header/footer, or production record is changed; no real payment is submitted."
+    ],
+    "zh": [
+      "不修改 SmartPay5 Solidity、ABI、已部署地址、代币、收款钱包、价格、产品身份、站点页头/页脚或生产记录；不提交真实付款。"
+    ]
+  },
+  "siteAdaptations": {
+    "en": [
+      "Preserve greatlovemeta.com branding, products, product-owner mapping, existing features, data, and independent infrastructure."
+    ],
+    "zh": [
+      "保留 greatlovemeta.com 品牌、产品、产品所有者映射、既有功能、数据及独立基础设施。"
+    ]
+  },
+  "dataMigration": {
+    "included": true,
+    "migrations": [
+      "drizzle/0126_smartpay5_payment_item_states.sql"
+    ],
+    "rollback": {
+      "en": "Roll back the runtime release and drop smartpay5_payment_item_states only if its product-control history is no longer required.",
+      "zh": "回滚运行版本；只有确认不再需要付款项目控制历史时才删除 smartpay5_payment_item_states。"
+    }
+  }
 }

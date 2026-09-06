@@ -22,6 +22,7 @@ import {
 } from "../lib/smartpay-deployment";
 import { GREATLOVEMETA_WALLET_CONNECT } from "../lib/greatlovemeta-commerce";
 import { SMARTPAY5_ABI } from "../lib/smartpay5";
+import { smartPay5ConfirmationControl } from "../lib/smartpay5-confirmation-control";
 import { smartPayTransactionNeedsReconciliation } from "../lib/smartpay-reconciliation";
 import {
   smartPay5RulePresets,
@@ -143,6 +144,10 @@ export function SmartPayAdminConsole({
   const [publicationRevision, setPublicationRevision] = useState(0);
   const [busy, setBusy] = useState("");
   const [message, setMessage] = useState("");
+  const [enabledPresetKeys, setEnabledPresetKeys] = useState<Set<string>>(() => new Set());
+  const [knownPresetKeys, setKnownPresetKeys] = useState<Set<string>>(() => new Set());
+  const [stalePresetKeys, setStalePresetKeys] = useState<Set<string>>(() => new Set());
+  const [confirmationStateChainId, setConfirmationStateChainId] = useState<number | null>(null);
 
   const lastPayoutIndex = payouts.reduce((last, row, index) => row.wallet.trim() ? index : last, -1);
   const activePayouts = lastPayoutIndex >= 0 ? payouts.slice(0, lastPayoutIndex + 1) : [];
@@ -155,6 +160,7 @@ export function SmartPayAdminConsole({
   const transactionReadReady = Boolean(contractState);
   const ownerWalletButton = smartPayOwnerWalletButton(locale, busy, connectedWallet);
   const selectedChainId = selected?.chainId;
+  const confirmationStateReady = Boolean(selectedChainId && confirmationStateChainId === selectedChainId);
   const smartPay5Rules = useMemo(() => contractState?.rules || [], [contractState?.rules]);
   const smartPay5Presets = useMemo(() => smartPay5RulePresets(settings, selectedChainId), [settings, selectedChainId]);
   const smartPay5PresetRows = useMemo(() => smartPay5Presets.map(preset => ({
@@ -184,6 +190,29 @@ export function SmartPayAdminConsole({
     setWithdrawToken(nextToken);
     setWithdrawTokenState(nextToken ? value.tokens[nextToken] : null);
   }, [defaultWallet, withdrawToken]);
+
+  useEffect(() => {
+    let cancelled = false;
+    if (!selectedChainId) return () => { cancelled = true; };
+    void fetch(`/api/admin/crypto-payments/rules?chainId=${selectedChainId}`, { cache: "no-store" })
+      .then(response => response.ok ? response.json() : Promise.reject(new Error("READ_FAILED")))
+      .then((data: { enabledPresetKeys?: string[]; knownPresetKeys?: string[]; stalePresetKeys?: string[] }) => {
+        if (cancelled) return;
+        setEnabledPresetKeys(new Set(data.enabledPresetKeys || []));
+        setKnownPresetKeys(new Set(data.knownPresetKeys || []));
+        setStalePresetKeys(new Set(data.stalePresetKeys || []));
+        setConfirmationStateChainId(selectedChainId);
+      })
+      .catch(() => {
+        if (cancelled) return;
+        setEnabledPresetKeys(new Set());
+        setKnownPresetKeys(new Set());
+        setStalePresetKeys(new Set());
+        setConfirmationStateChainId(null);
+        setMessage(zh ? "无法读取付款项目确认状态；停用与确认操作已暂时锁定。" : "Payment-item confirmation state is unavailable; Stop and confirmation actions are temporarily locked.");
+      });
+    return () => { cancelled = true; };
+  }, [selectedChainId, zh]);
 
   useEffect(() => {
     let cancelled = false;
@@ -633,9 +662,11 @@ export function SmartPayAdminConsole({
   }
 
   async function confirmSmartPay5Preset(preset: SmartPay5RulePreset) {
-    const status = smartPay5RulePresetStatus(preset, smartPay5Rules);
-    if (status.state === "configured") return;
-    await sendOwnerTransaction(
+    if (enabledPresetKeys.has(preset.key)) {
+      setMessage(zh ? "请先点击停用；停用只会从本站付款选择中隐藏该项目，不会调用钱包或合约。" : "Click Stop first. Stop only hides this item from this site's payment selection; it does not call the wallet or contract.");
+      return;
+    }
+    const completed = await sendOwnerTransaction(
       "setPaymentRule",
       [
         preset.primaryTokenAddress as Address,
@@ -656,6 +687,39 @@ export function SmartPayAdminConsole({
           ? `请在 Owner 钱包确认写入 ${preset.months} 个月 100% ${preset.primaryTokenSymbol} 单币付款项目。`
           : `Confirm the ${preset.months}-month 100% ${preset.primaryTokenSymbol} single-token rule in the Owner wallet.`)
     );
+    if (!completed) return;
+    try {
+      const response = await fetch("/api/admin/crypto-payments/rules", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ chainId: preset.chainId, presetKey: preset.key, action: "confirm" }) });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(data.error || "CONFIRM_STATE_FAILED");
+      setEnabledPresetKeys(current => new Set(current).add(preset.key));
+      setKnownPresetKeys(current => new Set(current).add(preset.key));
+      setStalePresetKeys(current => { const next = new Set(current); next.delete(preset.key); return next; });
+      setMessage(zh ? "链上规则已重新确认；此项目已恢复到付款选择。" : "The on-chain rule is re-confirmed and this item is available in payment selection again.");
+    } catch {
+      setMessage(zh ? "链上交易已确认，但服务器复核未完成；此项目仍不会出现在付款选择中，请再次点击重新确认。" : "The on-chain transaction confirmed, but server verification did not finish. This item remains hidden from payment selection; click Re-confirm again.");
+    }
+  }
+
+  async function stopSmartPay5Preset(preset: SmartPay5RulePreset) {
+    const key = `stop-preset:${preset.key}`;
+    setBusy(key);
+    setMessage(zh ? "正在从本站付款选择中隐藏此项目；不会调用钱包或合约。" : "Hiding this item from this site's payment selection. The wallet and contract will not be called.");
+    try {
+      const response = await fetch("/api/admin/crypto-payments/rules", { method: "PATCH", headers: { "content-type": "application/json" }, body: JSON.stringify({ chainId: preset.chainId, presetKey: preset.key, action: "stop" }) });
+      const data = await response.json().catch(() => ({})) as { error?: string };
+      if (!response.ok) throw new Error(data.error || "STOP_STATE_FAILED");
+      setEnabledPresetKeys(current => { const next = new Set(current); next.delete(preset.key); return next; });
+      setKnownPresetKeys(current => new Set(current).add(preset.key));
+      setStalePresetKeys(current => { const next = new Set(current); next.delete(preset.key); return next; });
+      setMessage(zh ? "已停用：此项目不会出现在付款选择中。点击重新确认才会再次调用合约并恢复。" : "Stopped: this item is hidden from payment selection. Only Re-confirm will call the contract and restore it.");
+    } catch {
+      setMessage(zh ? "停用未完成；付款项目状态没有改变。" : "Stop did not complete; the payment-item state was not changed.");
+    } finally {
+      setBusy("");
+    }
+
+
   }
 
   async function syncMember(member: MatchedMember, records: TransactionRecord[]) {
@@ -817,7 +881,7 @@ export function SmartPayAdminConsole({
       {ownerWalletButton.visible ? <button type="button" className="button primary" onClick={() => void connectWallet()} disabled={ownerWalletButton.disabled}>{busy === "connect" ? "…" : ownerWalletButton.label}</button> : <p className="smartpay-connected-wallet"><span className="rule-enabled">{zh ? "钱包已连接" : "Wallet connected"}</span> {shortAddress(connectedWallet)}</p>}
       <dl className="smartpay-state-list"><div><dt>{zh ? "链上 Owner" : "On-chain Owner"}</dt><dd>{contractState?.owner || "—"}</dd></div><div><dt>{zh ? "已连接" : "Connected"}</dt><dd>{connectedWallet || "—"}</dd></div><div><dt>{zh ? "Owner 转移" : "Owner transfer"}</dt><dd>{zh ? "单步即时" : "Immediate one-step"}</dd></div><div><dt>{zh ? "付款状态" : "Payment state"}</dt><dd>{contractState?.paused ? (zh ? "已暂停" : "Paused") : (zh ? "可付款" : "Active")}</dd></div></dl>
       <label><span>{zh ? "新 Owner 钱包" : "New Owner wallet"}</span><input value={newOwner} onChange={event => setNewOwner(event.target.value.trim())} placeholder="0x…"/></label>
-      <div className="smartpay-console-actions"><button type="button" onClick={() => void transferOwner()} disabled={!contractState || Boolean(busy)}>{zh ? "立即转移 Owner" : "Transfer Owner now"}</button><button type="button" onClick={() => void sendOwnerTransaction(contractState?.paused ? "unpause" : "pause", [], "pause", zh ? "请确认更改付款暂停状态。" : "Confirm the payment pause state change.")} disabled={!contractState || Boolean(busy)}>{contractState?.paused ? (zh ? "恢复付款" : "Resume payments") : (zh ? "暂停付款" : "Pause payments")}</button></div>
+      <div className="smartpay-console-actions"><button type="button" onClick={() => void transferOwner()} disabled={!contractState || Boolean(busy)}>{zh ? "立即转移 Owner" : "Transfer Owner now"}</button></div>
     </section>
 
     <section className="smartpay-console-card smartpay-wide-card">
@@ -849,7 +913,12 @@ export function SmartPayAdminConsole({
       <p>{zh ? "SmartPay5 的 USDT 项目在链上保存 100% USDT、100% 等值 GLC 与 10 亿 GLC 门槛，实际 USDT 比例保存在数据库；所有非 USDT 项目按后台金额写为 100% 单币规则。" : "SmartPay5 stores full USDT/GLC equivalents and the 1-billion-GLC threshold for USDT items, while the active USDT ratio stays in the database. Every non-USDT item is stored as a 100% single-token rule."}</p>
       {smartPay5PresetRows.length ? <div className="smartpay-rule-list smartpay-preset-list">{smartPay5PresetRows.map(({ preset, status }) => {
         const key = `preset:${preset.key}`;
-        return <article key={preset.key}><div><strong>{preset.months} {zh ? "个月" : "months"} · {preset.mode === "dual" ? `${preset.primaryTokenSymbol} / ${preset.secondaryTokenSymbol}` : preset.primaryTokenSymbol}</strong><small>{preset.mainId} / {preset.secondId || "—"}</small></div><div><b>{preset.mode === "dual" ? `${preset.primaryTokenAmount} ${preset.primaryTokenSymbol} ↔ ${preset.secondaryTokenAmount} ${preset.secondaryTokenSymbol}` : `${preset.primaryTokenAmount} ${preset.primaryTokenSymbol}`}</b><small>{preset.mode === "dual" ? `${zh ? `当前本站：${preset.primaryPercent}% / ${preset.secondaryPercent}%` : `Current site: ${preset.primaryPercent}% / ${preset.secondaryPercent}%`} · ${zh ? `门槛 ${preset.minimumSecondaryBalance} GLC` : `Threshold ${preset.minimumSecondaryBalance} GLC`}` : (zh ? "非 USDT · 100% 单币付款" : "Non-USDT · 100% single-token payment")}</small></div><span className={status.state === "configured" ? "rule-enabled" : "rule-disabled"}>{status.state === "configured" ? (zh ? "链上已配置" : "Configured") : status.state === "missing" ? (zh ? "链上缺失" : "Missing") : (zh ? "需要更新" : "Update needed")}</span>{status.state !== "configured" ? <button type="button" className="button primary" onClick={() => void confirmSmartPay5Preset(preset)} disabled={!contractState || Boolean(busy)}>{busy === key ? "…" : (zh ? "确认写入" : "Confirm on-chain")}</button> : null}</article>;
+        const stopKey = `stop-preset:${preset.key}`;
+        const databaseState = enabledPresetKeys.has(preset.key) ? "enabled" as const : stalePresetKeys.has(preset.key) ? "stale" as const : knownPresetKeys.has(preset.key) ? "stopped" as const : "unconfirmed" as const;
+        const control = smartPay5ConfirmationControl(status.state, databaseState);
+        const statusLabel = databaseState === "stopped" ? (zh ? "待重新确认 · 付款不可选" : "Awaiting Re-confirm · unavailable") : databaseState === "stale" ? (zh ? "数据库价格已变 · 需重新确认 · 付款不可选" : "Database price changed · Re-confirm required · unavailable") : databaseState === "unconfirmed" ? (zh ? "尚未确认 · 付款不可选" : "Not confirmed · unavailable") : status.state === "missing" ? (zh ? "数据库已启用 · 链上缺失" : "Database enabled · missing on-chain") : null;
+        const stopLabel = status.state === "different" ? (zh ? "价格已改变 · 停用" : "Price changed · Stop") : status.state === "configured" ? (zh ? "已确认 · 停用" : "Confirmed · Stop") : (zh ? "数据库已启用 · 停用" : "Database enabled · Stop");
+        return <article key={preset.key}><div><strong>{preset.months} {zh ? "个月" : "months"} · {preset.mode === "dual" ? `${preset.primaryTokenSymbol} / ${preset.secondaryTokenSymbol}` : preset.primaryTokenSymbol}</strong><small>{preset.mainId} / {preset.secondId || "—"}</small></div><div><b>{preset.mode === "dual" ? `${preset.primaryTokenAmount} ${preset.primaryTokenSymbol} ↔ ${preset.secondaryTokenAmount} ${preset.secondaryTokenSymbol}` : `${preset.primaryTokenAmount} ${preset.primaryTokenSymbol}`}</b><small>{preset.mode === "dual" ? `${zh ? `当前本站：${preset.primaryPercent}% / ${preset.secondaryPercent}%` : `Current site: ${preset.primaryPercent}% / ${preset.secondaryPercent}%`} · ${zh ? `门槛 ${preset.minimumSecondaryBalance} GLC` : `Threshold ${preset.minimumSecondaryBalance} GLC`}` : (zh ? "非 USDT · 100% 单币付款" : "Non-USDT · 100% single-token payment")}</small></div>{control.showStop ? <button type="button" className={status.state === "configured" ? "rule-enabled" : "rule-disabled"} title={zh ? "仅从本站付款选择中隐藏；不调用钱包或合约" : "Hide only from this site's payment selection; no wallet or contract call"} onClick={() => void stopSmartPay5Preset(preset)} disabled={!confirmationStateReady || Boolean(busy)}>{busy === stopKey ? "…" : stopLabel}</button> : statusLabel ? <span className="rule-disabled">{statusLabel}</span> : null}{control.showConfirm ? <button type="button" className="button primary" onClick={() => void confirmSmartPay5Preset(preset)} disabled={!confirmationStateReady || !contractState || Boolean(busy)}>{busy === key ? "…" : control.confirmKind === "reconfirm" ? (zh ? "重新确认" : "Re-confirm") : (zh ? "确认写入" : "Confirm on-chain")}</button> : null}</article>;
       })}</div> : <p>{zh ? "所选链尚无可写入 SmartPay5 的后台付款项目。" : "No dashboard payment item is available for SmartPay5 on this chain."}</p>}
     </section>
 

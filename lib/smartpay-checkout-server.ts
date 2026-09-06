@@ -1,35 +1,22 @@
 import type { Address } from "viem";
 import { atomicTokenAmountToDisplay } from "./crypto-amount";
-import { cryptoRpcUrl } from "./crypto-rpc";
 import { activeCryptoSettings, type CryptoPaymentSetting } from "./crypto-settings";
-import { availableSmartPayCheckoutIdentity, configuredSmartPay5CheckoutScopes, type SmartPayCheckoutOption } from "./smartpay-checkout";
+import { smartPay5EnabledPresets } from "./smartpay5-confirmation-control";
+import { smartPay5PaymentItemDatabaseState } from "./smartpay5-confirmation-store";
+import { configuredSmartPay5CheckoutScopes, type SmartPayCheckoutOption } from "./smartpay-checkout";
 import type { CryptoSubscriptionPlan } from "./crypto-subscription";
-import { smartPay5RulePresets, smartPay5RulePresetStatus } from "./smartpay5-presets";
-import {
-  smartPay5PaymentRules,
-  smartPay5PayoutConfigurationRaw,
-  verifySmartPay5Identity
-} from "./smartpay5-server";
+import { smartPay5RulePresets } from "./smartpay5-presets";
 
 export async function currentSmartPayCheckoutOptions(inputSettings?: readonly CryptoPaymentSetting[]) {
   const settings = inputSettings ? [...inputSettings] : await activeCryptoSettings();
   const smartPay5Options = (await Promise.all(configuredSmartPay5CheckoutScopes(settings).map(async scope => {
-    const rpcUrl = await cryptoRpcUrl(scope.chainId);
-    if (!rpcUrl) return [] as SmartPayCheckoutOption[];
     const contractAddress = scope.contractAddress as Address;
-    const identity = await availableSmartPayCheckoutIdentity(() => verifySmartPay5Identity(rpcUrl, contractAddress));
-    if (!identity || identity.paused) return [] as SmartPayCheckoutOption[];
-    const [payouts, rules] = await Promise.all([
-      smartPay5PayoutConfigurationRaw(rpcUrl, contractAddress),
-      smartPay5PaymentRules(rpcUrl, contractAddress)
-    ]);
-    if (!payouts.length) return [] as SmartPayCheckoutOption[];
-    return smartPay5RulePresets(settings, scope.chainId).flatMap(preset => {
-      const status = smartPay5RulePresetStatus(preset, rules);
-      const rule = status.rule;
-      if (!rule?.enabled || BigInt(rule.primaryTokenAmount) <= 0n) return [];
-      const fullPrimaryAtomic = BigInt(rule.primaryTokenAmount);
-      const fullSecondaryAtomic = BigInt(rule.secondaryTokenAmount);
+    const presets = smartPay5RulePresets(settings, scope.chainId);
+    const state = await smartPay5PaymentItemDatabaseState(scope.chainId, presets);
+    return smartPay5EnabledPresets(presets, state.enabledPresetKeys).flatMap(preset => {
+      const fullPrimaryAtomic = BigInt(preset.primaryTokenAmountAtomic);
+      const fullSecondaryAtomic = BigInt(preset.secondaryTokenAmountAtomic);
+      if (fullPrimaryAtomic <= 0n) return [];
       if (preset.mode === "dual" && fullSecondaryAtomic <= 0n) return [];
       if (preset.mode === "single" && fullSecondaryAtomic !== 0n) return [];
       const primaryNumerator = fullPrimaryAtomic * BigInt(preset.primaryPercent);
@@ -60,8 +47,8 @@ export async function currentSmartPayCheckoutOptions(inputSettings?: readonly Cr
         secondaryTokenAmountAtomic: secondaryAtomic.toString(),
         secondaryTokenAmount: atomicTokenAmountToDisplay(secondaryAtomic, preset.secondaryTokenDecimals),
         secondaryPercent: preset.secondaryPercent,
-        minimumSecondaryBalanceAtomic: rule.minimumSecondaryBalance,
-        minimumSecondaryBalance: atomicTokenAmountToDisplay(BigInt(rule.minimumSecondaryBalance), preset.secondaryTokenDecimals),
+        minimumSecondaryBalanceAtomic: preset.minimumSecondaryBalanceAtomic,
+        minimumSecondaryBalance: atomicTokenAmountToDisplay(BigInt(preset.minimumSecondaryBalanceAtomic), preset.secondaryTokenDecimals),
         mainId: preset.mainId,
         secondId: preset.secondId,
         minConfirmations
