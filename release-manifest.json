@@ -1,79 +1,77 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-smartpay5-product-control-20260905",
+  "releaseId": "greatlovemeta-com-realtimekit-media-stability-20260909",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "SmartPay5 product confirmation control",
-    "zh": "SmartPay5 付款项目确认控制"
+    "en": "RealtimeKit media stability",
+    "zh": "RealtimeKit 音视频稳定性"
   },
   "purpose": {
-    "en": "Make the database the single fail-closed source for whether each current SmartPay5 payment preset is selectable.",
-    "zh": "让数据库成为每个当前 SmartPay5 付款预设是否可选的唯一默认关闭状态来源。"
+    "en": "Keep microphone, camera, and speaker indicators aligned with real browser media state while recovering stalled remote subscriptions within a bounded grace period.",
+    "zh": "让麦克风、摄像头和扬声器图标与浏览器真实媒体状态一致，并在有限宽限时间后恢复卡住的远端订阅。"
   },
   "features": {
     "en": [
-      "Administrators can Stop an enabled product without a wallet or contract transaction.",
-      "A stopped, missing, or stale product must be confirmed on-chain before it becomes selectable again."
+      "Show orange while microphone, camera, or speaker playback is still being confirmed, and green only after a live local track or real remote playback is observed.",
+      "Rebuild stale remote audio and video subscriptions after a six-second grace period.",
+      "Serialize rapid media toggles and rebuild both publisher tracks when Safari grants a second device."
     ],
     "zh": [
-      "管理员可在不调用钱包或合约的情况下 Stop 已启用项目。",
-      "已停止、无记录或指纹失效的项目必须经链上重新确认后才恢复可选。"
+      "麦克风、摄像头或扬声器仍在确认时显示橙色；仅在检测到真实本机轨道或远端实际播放后显示绿色。",
+      "远端音频或视频订阅失效超过六秒后自动重建。",
+      "串行处理快速媒体开关；Safari 授权第二个设备时重建两条发布轨道。"
     ]
   },
   "affected": {
     "en": [
-      "SmartPay5 administrator product controls, checkout option discovery, payment preparation, D1 state, and deployment ordering."
+      "Classroom and meeting microphone, camera, speaker, publisher-track, and receiver-subscription state."
     ],
     "zh": [
-      "影响 SmartPay5 管理员项目控制、付款选项读取、付款准备、D1 状态及部署顺序。"
+      "影响课堂及会议中的麦克风、摄像头、扬声器、发布轨道和接收订阅状态。"
     ]
   },
   "changes": {
     "en": [
-      "Store an exact fingerprint of mode, token addresses, mainID, secondID, atomic prices, and threshold.",
-      "Fail closed when no matching enabled record exists; any preset change invalidates the old confirmation.",
-      "Use one shared server checkout reader for both displayed options and payment preparation.",
-      "Remove the obsolete global pause-payment control without changing the SmartPay5 contract."
+      "Check local MediaStreamTrack readiness every two seconds and clear stale enabled state after six seconds.",
+      "Confirm remote audio from actual element playback and retry missing or ended receiver tracks.",
+      "Keep device changes ordered so fast clicks cannot leave UI and publisher state out of sync."
     ],
     "zh": [
-      "保存付款模式、代币地址、mainID、secondID、原子价格及门槛的精确指纹。",
-      "没有匹配的 enabled 记录时默认不可付款；预设任何变化都会使旧确认失效。",
-      "显示付款选项与付款准备共同复用同一个服务端结账读取器。",
-      "移除无用的全局暂停付款控件，不修改 SmartPay5 合约。"
+      "每两秒检查本机 MediaStreamTrack 状态，并在失效六秒后清除过期的启用状态。",
+      "根据媒体元素实际播放确认远端音频，并重试缺失或已结束的接收轨道。",
+      "按顺序执行设备变更，避免快速点击造成界面与发布状态不同步。"
     ]
   },
   "validation": {
     "en": [
-      "Run focused fail-closed, stale-fingerprint, database-only Stop, shared-reader, migration replay, repository tests, lint, and production build gates."
+      "Run focused media-health and receiver-recovery tests, stability contract checks, repository lint/tests, production build, deployment, and exact project evidence."
     ],
     "zh": [
-      "运行默认关闭、指纹失效、Stop 仅数据库、共享读取器、迁移重放、仓库测试、lint 与生产构建门禁。"
+      "运行媒体健康与接收恢复测试、稳定性契约检查、仓库 lint/测试、生产构建、部署及精确项目证据。"
     ]
   },
   "deferred": {
     "en": [
-      "No SmartPay5 Solidity, ABI, deployed address, token, payout wallet, price, product identity, site header/footer, or production record is changed; no real payment is submitted."
+      "The requested multi-user realtime browser session is waived for this shared RealtimeKit fix; no brand, product, payment, data, or infrastructure behavior changes."
     ],
     "zh": [
-      "不修改 SmartPay5 Solidity、ABI、已部署地址、代币、收款钱包、价格、产品身份、站点页头/页脚或生产记录；不提交真实付款。"
+      "按要求免除本次共享 RealtimeKit 修复的多人实时浏览器会话；不改变品牌、产品、付款、数据或基础设施行为。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Preserve greatlovemeta.com branding, products, product-owner mapping, existing features, data, and independent infrastructure."
+      "Preserve greatlovemeta.com branding, data, session/API behavior, existing features, and independent infrastructure."
     ],
     "zh": [
-      "保留 greatlovemeta.com 品牌、产品、产品所有者映射、既有功能、数据及独立基础设施。"
+      "保留 greatlovemeta.com 的品牌、数据、会话/API 行为、既有功能及独立基础设施。"
     ]
   },
   "dataMigration": {
-    "included": true,
-    "migrations": [
-      "drizzle/0126_smartpay5_payment_item_states.sql"
-    ],
+    "included": false,
+    "migrations": [],
     "rollback": {
-      "en": "Roll back the runtime release and drop smartpay5_payment_item_states only if its product-control history is no longer required.",
-      "zh": "回滚运行版本；只有确认不再需要付款项目控制历史时才删除 smartpay5_payment_item_states。"
+      "en": "Roll back the application release; no data migration is required.",
+      "zh": "回滚应用版本；无需数据迁移。"
     }
   }
 }

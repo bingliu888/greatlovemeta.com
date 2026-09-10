@@ -6,7 +6,7 @@ test("shared header uses the SmartClass hamburger drawer and twenty-two text lan
  const [header,languages,account,css]=await Promise.all([read("../components/SiteHeader.tsx"),read("../components/HeaderLanguageMenu.tsx"),read("../components/HeaderAccount.tsx"),read("../components/header-menu.css")]);
  assert.match(header,/aria-controls="mobile-header-menu"/); assert.match(header,/hamburger-button/); assert.equal((header.match(/<HeaderAccount lang=\{lang\}\/\>/g)??[]).length,2);
  assert.match(languages,/HEADER_LANGUAGES\.map/);
- assert.doesNotMatch(languages,/GlobeIcon|⌄/); assert.match(languages,/▾/);
+ assert.doesNotMatch(languages,/⌄/); assert.match(languages,/GlobeIcon/); assert.match(languages,/▾/);
  assert.ok(header.indexOf("<HeaderLanguageMenu lang={lang}/>") < header.indexOf("<HeaderAccount lang={lang}/>") , "desktop language control must precede account");
  const locale=await read("../lib/site-locale.ts");
  for(const label of ["中文（简体）","中文（繁體）","English","Español","Français","Deutsch","日本語","한국어","Italiano","العربية","Português","Русский","हिन्दी","Bahasa Indonesia","বাংলা","اردو","ਪੰਜਾਬੀ","தமிழ்","తెలుగు","नेपाली","සිංහල","Türkçe"])assert.match(locale,new RegExp(label));
