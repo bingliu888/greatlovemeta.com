@@ -1,77 +1,73 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-realtimekit-media-stability-20260909",
+  "releaseId": "greatlovemeta-com-responsive-shell-spacing-20260910",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "RealtimeKit media stability",
-    "zh": "RealtimeKit 音视频稳定性"
+    "en": "Responsive header and footer spacing",
+    "zh": "响应式页眉与页脚间距调整"
   },
   "purpose": {
-    "en": "Keep microphone, camera, and speaker indicators aligned with real browser media state while recovering stalled remote subscriptions within a bounded grace period.",
-    "zh": "让麦克风、摄像头和扬声器图标与浏览器真实媒体状态一致，并在有限宽限时间后恢复卡住的远端订阅。"
+    "en": "Keep the shared mobile menu control visually distinct and give the global footer balanced spacing on phone and desktop layouts.",
+    "zh": "让共享移动菜单按钮保持清晰可辨，并在手机与桌面布局中提供均衡的全局页脚间距。"
   },
   "features": {
     "en": [
-      "Show orange while microphone, camera, or speaker playback is still being confirmed, and green only after a live local track or real remote playback is observed.",
-      "Rebuild stale remote audio and video subscriptions after a six-second grace period.",
-      "Serialize rapid media toggles and rebuild both publisher tracks when Safari grants a second device."
+      "Give the hamburger control a visible border, light surface and readable foreground color.",
+      "Normalize footer section, identity and navigation gaps across responsive breakpoints.",
+      "Reserve footer navigation space for the fixed AI assistant control."
     ],
     "zh": [
-      "麦克风、摄像头或扬声器仍在确认时显示橙色；仅在检测到真实本机轨道或远端实际播放后显示绿色。",
-      "远端音频或视频订阅失效超过六秒后自动重建。",
-      "串行处理快速媒体开关；Safari 授权第二个设备时重建两条发布轨道。"
+      "为汉堡菜单按钮提供清晰边框、浅色背景及易读前景色。",
+      "统一不同响应式断点下的页脚区域、品牌标识及导航间距。",
+      "为固定显示的 AI 助手按钮预留页脚导航空间。"
     ]
   },
   "affected": {
     "en": [
-      "Classroom and meeting microphone, camera, speaker, publisher-track, and receiver-subscription state."
+      "Shared site header menu control and global footer layout."
     ],
     "zh": [
-      "影响课堂及会议中的麦克风、摄像头、扬声器、发布轨道和接收订阅状态。"
+      "影响共享站点页眉菜单控件及全局页脚布局。"
     ]
   },
   "changes": {
     "en": [
-      "Check local MediaStreamTrack readiness every two seconds and clear stale enabled state after six seconds.",
-      "Confirm remote audio from actual element playback and retry missing or ended receiver tracks.",
-      "Keep device changes ordered so fast clicks cannot leave UI and publisher state out of sync."
+      "Apply the existing shared-shell spacing rules and prevent the floating assistant from covering the final footer link without changing navigation destinations, copy, branding, authentication or commerce behavior."
     ],
     "zh": [
-      "每两秒检查本机 MediaStreamTrack 状态，并在失效六秒后清除过期的启用状态。",
-      "根据媒体元素实际播放确认远端音频，并重试缺失或已结束的接收轨道。",
-      "按顺序执行设备变更，避免快速点击造成界面与发布状态不同步。"
+      "应用现有共享外壳间距规则，并防止浮动助手遮挡最后一个页脚链接；不修改导航目的地、文案、品牌、身份验证或商业功能。"
     ]
   },
   "validation": {
     "en": [
-      "Run focused media-health and receiver-recovery tests, stability contract checks, repository lint/tests, production build, deployment, and exact project evidence."
+      "Run the repository validation workflow and verify the production header and footer at phone and desktop widths in Chinese and English."
     ],
     "zh": [
-      "运行媒体健康与接收恢复测试、稳定性契约检查、仓库 lint/测试、生产构建、部署及精确项目证据。"
+      "运行仓库验证工作流，并以中文和英文在手机及桌面宽度检查生产页眉与页脚。"
     ]
   },
   "deferred": {
     "en": [
-      "The requested multi-user realtime browser session is waived for this shared RealtimeKit fix; no brand, product, payment, data, or infrastructure behavior changes."
+      "No product, data, payment, identity, provider or infrastructure behavior changes."
     ],
     "zh": [
-      "按要求免除本次共享 RealtimeKit 修复的多人实时浏览器会话；不改变品牌、产品、付款、数据或基础设施行为。"
+      "不修改产品、数据、付款、身份、供应商或基础设施行为。"
     ]
   },
   "siteAdaptations": {
     "en": [
-      "Preserve greatlovemeta.com branding, data, session/API behavior, existing features, and independent infrastructure."
+      "Preserve greatlovemeta.com branding, typography, navigation and site-owned infrastructure."
     ],
     "zh": [
-      "保留 greatlovemeta.com 的品牌、数据、会话/API 行为、既有功能及独立基础设施。"
+      "保留 greatlovemeta.com 的品牌、字体、导航及站点独立基础设施。"
     ]
   },
   "dataMigration": {
     "included": false,
     "migrations": [],
     "rollback": {
-      "en": "Roll back the application release; no data migration is required.",
-      "zh": "回滚应用版本；无需数据迁移。"
+      "en": "Restore the preceding application release; no data migration is required.",
+      "zh": "恢复上一应用版本即可；无需数据迁移。"
     }
   }
 }
