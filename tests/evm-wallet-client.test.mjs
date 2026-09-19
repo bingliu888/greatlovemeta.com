@@ -1,0 +1,3 @@
+import assert from "node:assert/strict"; import test from "node:test"; import { currentEvmWalletAddress, sendEvmWalletTransaction } from "../lib/evm-wallet-client.ts";
+test("wallet owns the final gas limit",async()=>{let request;const provider={async request(input){request=input;return"0xabc"}};assert.equal(await sendEvmWalletTransaction(provider,{from:"0x1111111111111111111111111111111111111111",to:"0x2222222222222222222222222222222222222222",data:"0x12",gas:"0xe8b0"}),"0xabc");assert.equal(request.params[0].gas,undefined);});
+test("current wallet is read before send",async()=>{const provider={async request(){return["0x1111111111111111111111111111111111111111"]}};assert.match(await currentEvmWalletAddress(provider),/^0x1{40}$/);});

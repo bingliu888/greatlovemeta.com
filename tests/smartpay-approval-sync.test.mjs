@@ -1,0 +1,3 @@
+import assert from "node:assert/strict"; import test from "node:test"; import { waitForSmartPayApprovalTransition } from "../lib/smartpay-approval-sync.ts";
+test("approval transition requires a new explicit action",async()=>{let reads=0;const result=await waitForSmartPayApprovalTransition({previousAction:"approve-primary",read:async()=>({nextAction:++reads>1?"pay":"approve-primary"}),wait:async()=>undefined});assert.equal(result.transitioned,true);});
+test("stale allowance prevents duplicate approval",async()=>{const result=await waitForSmartPayApprovalTransition({previousAction:"approve-secondary",read:async()=>({nextAction:"approve-secondary"}),attempts:2,wait:async()=>undefined});assert.equal(result.transitioned,false);});

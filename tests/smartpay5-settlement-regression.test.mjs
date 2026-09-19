@@ -63,6 +63,8 @@ test("verify and claim bound input and authenticate/rate-limit before RPC", asyn
   assert.match(verifyRoute, /receiptBlock <= latestBlock \? latestBlock - receiptBlock \+ 1n : 0n/);
   assert.match(claimRoute, /receiptBlock <= latestBlock[\s\S]*?latestBlock - receiptBlock \+ 1n[\s\S]*?: 0n/);
   assert.doesNotMatch(verifyRoute, /paymentId:\s*input\??\.txHash/);
+  assert.match(verifyRoute, /paymentId, transactionHash: txHash/);
+  assert.match(claimRoute, /transactionHash:\s*transactionHash \? transactionHash as Hex : undefined/);
   await assert.rejects(
     () => boundedJsonBody(new Request("https://example.invalid", { method: "POST", body: "x".repeat(8_193) }), 8_192),
     error => error instanceof Response && error.status === 413,

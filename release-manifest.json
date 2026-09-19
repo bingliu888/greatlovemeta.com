@@ -1,73 +1,17 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-responsive-shell-spacing-20260910",
+  "releaseId": "greatlovemeta-wallet-payment-reliability-20260919-r1",
   "site": "greatlovemeta.com",
-  "title": {
-    "en": "Responsive header and footer spacing",
-    "zh": "响应式页眉与页脚间距调整"
-  },
-  "purpose": {
-    "en": "Keep the shared mobile menu control visually distinct and give the global footer balanced spacing on phone and desktop layouts.",
-    "zh": "让共享移动菜单按钮保持清晰可辨，并在手机与桌面布局中提供均衡的全局页脚间距。"
-  },
+  "title": { "en": "Separate wallet approval from payment and repair Polygon reconciliation", "zh": "分离钱包授权与付款并修复 Polygon 入账" },
+  "purpose": { "en": "Prevent duplicate or missing wallet confirmations and reliably synchronize successful GreatLoveMeta SmartPay5 payments into membership.", "zh": "防止钱包确认页遗漏或重复，并可靠地把 GreatLoveMeta SmartPay5 成功付款同步为会员权益。" },
   "features": {
-    "en": [
-      "Give the hamburger control a visible border, light surface and readable foreground color.",
-      "Normalize footer section, identity and navigation gaps across responsive breakpoints.",
-      "Reserve footer navigation space for the fixed AI assistant control."
-    ],
-    "zh": [
-      "为汉堡菜单按钮提供清晰边框、浅色背景及易读前景色。",
-      "统一不同响应式断点下的页脚区域、品牌标识及导航间距。",
-      "为固定显示的 AI 助手按钮预留页脚导航空间。"
-    ]
+    "en": ["Make token approval and payment separate explicit wallet actions and prevent duplicate approval while allowance data propagates.", "Keep balance, allowance, contract simulation and gas preflight while letting the connected wallet choose the final gas limit.", "Use current Polygon RPC endpoints with independent public-provider failover.", "Forward the wallet transaction hash through verification into SmartPay5 receipt reconciliation."],
+    "zh": ["把代币授权与付款设为独立、明确的钱包操作，并在授权额度传播期间防止重复授权。", "保留余额、授权额度、合约模拟与 Gas 预检，同时让已连接钱包决定最终 gas limit。", "Polygon 服务端核验使用当前 RPC，并在独立公共服务商之间自动故障转移。", "把钱包交易哈希经验证路由传入 SmartPay5 回执核销。"]
   },
-  "affected": {
-    "en": [
-      "Shared site header menu control and global footer layout."
-    ],
-    "zh": [
-      "影响共享站点页眉菜单控件及全局页脚布局。"
-    ]
-  },
-  "changes": {
-    "en": [
-      "Apply the existing shared-shell spacing rules and prevent the floating assistant from covering the final footer link without changing navigation destinations, copy, branding, authentication or commerce behavior."
-    ],
-    "zh": [
-      "应用现有共享外壳间距规则，并防止浮动助手遮挡最后一个页脚链接；不修改导航目的地、文案、品牌、身份验证或商业功能。"
-    ]
-  },
-  "validation": {
-    "en": [
-      "Run the repository validation workflow and verify the production header and footer at phone and desktop widths in Chinese and English."
-    ],
-    "zh": [
-      "运行仓库验证工作流，并以中文和英文在手机及桌面宽度检查生产页眉与页脚。"
-    ]
-  },
-  "deferred": {
-    "en": [
-      "No product, data, payment, identity, provider or infrastructure behavior changes."
-    ],
-    "zh": [
-      "不修改产品、数据、付款、身份、供应商或基础设施行为。"
-    ]
-  },
-  "siteAdaptations": {
-    "en": [
-      "Preserve greatlovemeta.com branding, typography, navigation and site-owned infrastructure."
-    ],
-    "zh": [
-      "保留 greatlovemeta.com 的品牌、字体、导航及站点独立基础设施。"
-    ]
-  },
-  "dataMigration": {
-    "included": false,
-    "migrations": [],
-    "rollback": {
-      "en": "Restore the preceding application release; no data migration is required.",
-      "zh": "恢复上一应用版本即可；无需数据迁移。"
-    }
-  }
+  "affected": { "en": ["GreatLoveMeta membership crypto checkout, SmartPay5 verification and claim routes, wallet transaction submission, and Polygon RPC reads."], "zh": ["影响 GreatLoveMeta 会员加密结账、SmartPay5 核验与 claim 路由、钱包交易提交及 Polygon RPC 读取。"] },
+  "changes": { "en": ["Preserve this site's plans, prices, contracts, tokens, payout settings, member data and Cloudflare resources; reject a changed connected wallet and retain idempotent historical PayerID recovery."], "zh": ["保留本站套餐、价格、合约、代币、收款设置、会员数据及 Cloudflare 资源；拒绝连接后切换的钱包，并保留幂等的历史 PayerID 恢复。"] },
+  "validation": { "en": ["Run the complete build and test suite, zero-warning ESLint, shared policy and architecture contracts, then verify production checkout and Project evidence without sending a real payment."], "zh": ["运行完整构建与测试、零警告 ESLint、共享策略和架构契约，再验证生产结账页及 Project 证据；不发送真实付款。"] },
+  "deferred": { "en": ["No real payment is sent and no realtime audio/video test is started."], "zh": ["未发送真实付款，未启动实时音视频测试。"] },
+  "siteAdaptations": { "en": ["Preserve GreatLoveMeta branding, local membership catalog, login-protected navigation rules, referral identifiers and site-owned SmartPay5 configuration."], "zh": ["保留 GreatLoveMeta 品牌、本地会员目录、登录受保护导航规则、推荐标识及站点独立 SmartPay5 配置。"] },
+  "dataMigration": { "included": false, "migrations": [], "rollback": { "en": "Roll back the application release; no data migration is required.", "zh": "回滚应用版本；无需数据迁移。" } }
 }

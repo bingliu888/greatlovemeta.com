@@ -64,7 +64,7 @@ export async function POST(request: Request) {
       "content-type": "application/json",
       cookie: request.headers.get("cookie") || ""
     },
-    body: JSON.stringify({ settingId: input?.settingId, paymentId })
+    body: JSON.stringify({ settingId: input?.settingId, paymentId, transactionHash: txHash })
   });
   return claimSmartPay5Transaction(forwarded);
   } catch (error) {

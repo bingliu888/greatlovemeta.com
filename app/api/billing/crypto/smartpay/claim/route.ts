@@ -26,6 +26,7 @@ export async function POST(request: Request) {
     const input = await boundedJsonBody<{
       settingId?: string;
       paymentId?: string;
+      transactionHash?: string;
       memberId?: string;
     }>(request, 8 * 1024);
     const actor = await requireMember(request);
@@ -45,10 +46,12 @@ export async function POST(request: Request) {
     });
     if (limited) return limited;
     const paymentId = String(input?.paymentId || "").trim().toLowerCase();
+    const transactionHash = String(input?.transactionHash || "").trim().toLowerCase();
     const requestedUserId = String(input?.memberId || actor.id);
     if (!/^0x[a-f0-9]{64}$/.test(paymentId)) {
       return NextResponse.json({ error: "Enter a valid on-chain TransactionID" }, { status: 400 });
     }
+    if (transactionHash && !/^0x[a-f0-9]{64}$/.test(transactionHash)) return NextResponse.json({ error: "Enter a valid transaction hash" }, { status: 400 });
     if (requestedUserId !== actor.id && !await hasFreshPermanentAdmin(actor)) {
       return NextResponse.json({ error: "Only the permanent administrator can sync another member" }, { status: 403 });
     }
@@ -112,6 +115,7 @@ export async function POST(request: Request) {
       contract,
       transactionId: paymentId as Hex,
       timestamp: record.timestamp,
+      transactionHash: transactionHash ? transactionHash as Hex : undefined,
     });
     const latestBlock = BigInt(await cryptoRpc<string>(rpcUrl, "eth_blockNumber", []));
     const receiptBlock = BigInt(receipt.blockNumber!);

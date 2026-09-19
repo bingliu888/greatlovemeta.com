@@ -8,14 +8,16 @@ import { explorerUrl } from "../lib/crypto-explorer";
 import { ERC20_ABI } from "../lib/erc20";
 import { verifyCryptoPaymentWithConfirmations } from "../lib/crypto-payment-verification";
 import { existingPaymentAction, includeClaimedPaymentForLookup, type PaymentLookupContext } from "../lib/crypto-payment-user-flow";
-import { assertProviderChain, connectEvmWallet, waitForTransactionReceipt, walletChain, type EthereumProvider } from "../lib/evm-wallet-client";
+import { assertProviderChain, connectEvmWallet, currentEvmWalletAddress, sendEvmWalletTransaction, waitForTransactionReceipt, walletChain, type EthereumProvider } from "../lib/evm-wallet-client";
 import type { SiteLanguage } from "../lib/site-locale";
 import { smartPayAvailablePlans, smartPayCheckoutDisplayAmount, smartPayOptionsForPlan, type SmartPayCheckoutOption } from "../lib/smartpay-checkout";
 import { GREATLOVEMETA_WALLET_CONNECT } from "../lib/greatlovemeta-commerce";
 import type { CryptoSubscriptionPlan } from "../lib/crypto-subscription";
 import type { SubscriptionPlan } from "../lib/subscription-plans";
 import { SMARTPAY5_ABI } from "../lib/smartpay5";
+import { waitForSmartPayApprovalTransition } from "../lib/smartpay-approval-sync";
 import { readSmartPay5WalletPreflight, type SmartPay5WalletPreflight } from "../lib/smartpay5-wallet-preflight";
+import { walletRpcErrorCode } from "../lib/wallet-rpc";
 
 type Plan = CryptoSubscriptionPlan;
 type Status = { signedIn: boolean; wallet?: string | null; cryptoSettings?: CryptoPaymentSetting[]; plans?: SubscriptionPlan[] };
@@ -54,6 +56,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
   const [connected, setConnected] = useState(false);
   const [walletProvider, setWalletProvider] = useState<EthereumProvider | null>(null);
   const [smartPay5Preflight, setSmartPay5Preflight] = useState<SmartPay5WalletPreflight | null>(null);
+  const [approvalHash, setApprovalHash] = useState("");
   const [smartPay5UsingCombo, setSmartPay5UsingCombo] = useState(false);
   const [preflightBusy, setPreflightBusy] = useState(false);
   const [txHash, setTxHash] = useState("");
@@ -143,6 +146,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       setBusy("connect");
       setMessage("");
       setSmartPay5Preflight(null);
+      setApprovalHash("");
       const result = await connectEvmWallet({
         setting: selected,
         projectId: GREATLOVEMETA_WALLET_CONNECT.projectId,
@@ -295,6 +299,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       const result = await readCurrentSmartPay5Preflight(provider, address, prepared);
       setSmartPay5Preflight(result.preflight);
       setSmartPay5UsingCombo(result.usingCombo);
+      if (result.preflight.nextAction === "pay" || result.preflight.nextAction !== smartPay5Preflight?.nextAction) setApprovalHash("");
       setMessage(!result.preflight.primaryEnough
           ? (zh ? `钱包 ${offer.primaryTokenSymbol} 余额不足；不会发送授权或付款交易。` : `The wallet ${offer.primaryTokenSymbol} balance is insufficient. No approval or payment will be sent.`)
           : !result.preflight.eligibilityMet
@@ -322,8 +327,11 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       return;
     }
     let submittedHash = "";
+    let submittedApprovalHash = "";
     try {
       setBusy("send");
+      const activeWallet = await currentEvmWalletAddress(provider);
+      if (!activeWallet || activeWallet.toLowerCase() !== wallet.toLowerCase()) throw new Error("WALLET_CHANGED");
       setMessage(zh ? "正在按当前账户付款人 ID 检查尚未入账的同项目付款…" : "Checking this account PayerID for an unreconciled matching payment…");
       const previous = await lookupExistingPayment("new-payment");
       if (previous) {
@@ -340,7 +348,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       const offer = prepared.smartPay5Offer;
       if (!offer) throw new Error("RULE_UNAVAILABLE");
         const mode = await readCurrentSmartPay5Preflight(provider, wallet, prepared);
-        let preflight = mode.preflight;
+        const preflight = mode.preflight;
         setSmartPay5Preflight(preflight);
         setSmartPay5UsingCombo(mode.usingCombo);
         const primaryRequired = mode.usingCombo ? BigInt(offer.primaryTokenAmountAtomic) : BigInt(prepared.tokenAmountAtomic);
@@ -349,21 +357,32 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
         if (!preflight.eligibilityMet) throw new Error("INSUFFICIENT_GLC_BALANCE");
         if (preflight.gasEnough === false) throw new Error("INSUFFICIENT_NATIVE_BALANCE");
         if (preflight.simulationError || !preflight.gasLimit) throw new Error("PAYMENT_SIMULATION_FAILED");
-        for (let approvals = 0; preflight.nextAction !== "pay" && approvals < 2; approvals += 1) {
+        if (approvalHash && preflight.nextAction !== "pay") {
+          setMessage(zh ? "授权交易已发送，但钱包节点尚未显示新额度。请稍后刷新授权状态，不要重复授权。" : "The approval was submitted, but the wallet node still shows the old allowance. Refresh approval status shortly; do not approve again.");
+          return;
+        }
+        if (preflight.nextAction !== "pay") {
           const primary = preflight.nextAction === "approve-primary";
           const tokenAddress = (primary ? offer.primaryTokenAddress : offer.secondaryTokenAddress) as Address;
           const amount = primary ? primaryRequired : secondaryRequired;
           const symbol = primary ? offer.primaryTokenSymbol : offer.secondaryTokenSymbol;
           setMessage(zh ? `请在钱包确认 ${symbol} 授权。` : `Confirm the ${symbol} approval in your wallet.`);
           const approvalData = encodeFunctionData({ abi: ERC20_ABI, functionName: "approve", args: [prepared.contractAddress as Address, amount] });
-          const approvalHash = await provider.request({ method: "eth_sendTransaction", params: [{ from: wallet, to: tokenAddress, data: approvalData, gas: preflight.gasLimit }] });
-          if (typeof approvalHash !== "string") throw new Error("NO_APPROVAL_HASH");
-          await waitForTransactionReceipt(provider, approvalHash);
-          preflight = await readSmartPay5PreflightForAmounts(provider, wallet, prepared, primaryRequired, secondaryRequired);
-          if (!preflight.primaryEnough || !preflight.eligibilityMet || preflight.gasEnough === false
-            || preflight.simulationError || !preflight.gasLimit) throw new Error("PAYMENT_SIMULATION_FAILED");
+          const hash = await sendEvmWalletTransaction(provider, { from: wallet, to: tokenAddress, data: approvalData, gas: preflight.gasLimit });
+          if (typeof hash !== "string") throw new Error("NO_APPROVAL_HASH");
+          submittedApprovalHash = hash;
+          setApprovalHash(hash);
+          await waitForTransactionReceipt(provider, hash);
+          const transition = await waitForSmartPayApprovalTransition({ previousAction: preflight.nextAction, read: () => readSmartPay5PreflightForAmounts(provider, wallet, prepared, primaryRequired, secondaryRequired), onRead: state => setSmartPay5Preflight(state) });
+          if (!transition.transitioned) {
+            setMessage(zh ? "授权已上链，但钱包节点仍在更新额度。请稍后刷新授权状态，不要重复授权。" : "The approval is on-chain, but the wallet node is still updating the allowance. Refresh approval status shortly; do not approve again.");
+            return;
+          }
+          setApprovalHash("");
+          setMessage(transition.state.nextAction === "pay" ? (zh ? "授权已确认。请再次点击付款按钮打开付款确认。" : "Approval confirmed. Click the payment button again to open payment confirmation.") : (zh ? "第一种代币授权已确认。请再次点击以授权第二种代币。" : "The first token approval is confirmed. Click again to approve the second token."));
+          return;
         }
-        if (preflight.nextAction !== "pay") throw new Error("PAYMENT_SIMULATION_FAILED");
+        setApprovalHash("");
         setMessage(primaryRequired > 0n && secondaryRequired > 0n
           ? (zh ? "两种代币授权已确认；请在钱包确认双币付款。" : "Both token approvals are ready. Confirm the two-token payment in your wallet.")
           : secondaryRequired > 0n
@@ -374,7 +393,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
           functionName: "pay",
           args: [offer.primaryTokenAddress as Address, offer.secondaryTokenAddress as Address, prepared.mainId, prepared.secondId, primaryRequired, prepared.refId, prepared.payerId]
         });
-        const hash = await provider.request({ method: "eth_sendTransaction", params: [{ from: wallet, to: prepared.contractAddress, data: payData, gas: preflight.gasLimit }] });
+        const hash = await sendEvmWalletTransaction(provider, { from: wallet, to: prepared.contractAddress, data: payData, gas: preflight.gasLimit });
         if (typeof hash !== "string") throw new Error("NO_HASH");
         submittedHash = hash;
         setTxHash(hash);
@@ -385,6 +404,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
         return;
     } catch (error) {
       const reason = error instanceof Error ? error.message : "";
+      const code = walletRpcErrorCode(error);
       setMessage(submittedHash
         ? (zh ? `付款请求已发送（${submittedHash.slice(0, 10)}…），但订阅尚未完成核对。请勿重复付款；使用“查找或核对已有付款”继续。` : `The payment was submitted (${submittedHash.slice(0, 10)}…), but subscription reconciliation is still pending. Do not pay again; use “Find or verify an existing payment” to continue.`)
         : reason === "WRONG_CHAIN"
@@ -401,6 +421,14 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
               ? (zh ? `钱包 ${walletChain(selected).nativeCurrency.symbol} Gas 余额不足，未发送交易。` : `The wallet does not have enough ${walletChain(selected).nativeCurrency.symbol} for gas. No transaction was sent.`)
               : reason === "PAYMENT_SIMULATION_FAILED"
                   ? (zh ? "付款模拟已回滚，未打开钱包确认；这不是 Gas 余额提示。请管理员检查合约状态。" : "The payment simulation reverted, so wallet confirmation was not opened. This is not a gas-balance warning; ask an administrator to inspect the contract.")
+                : reason === "WALLET_CHANGED"
+                  ? (zh ? "钱包账户已切换。请重新连接后再继续。" : "The wallet account changed. Reconnect before continuing.")
+                : submittedApprovalHash
+                  ? (zh ? `授权 ${submittedApprovalHash.slice(0, 10)}… 已发送。请刷新授权状态，不要重复授权。` : `Approval ${submittedApprovalHash.slice(0, 10)}… was submitted. Refresh approval status; do not approve again.`)
+                : code === 4001
+                  ? (zh ? "您已在钱包中取消本次操作。" : "You rejected this wallet action.")
+                : code === -32002
+                  ? (zh ? "钱包已有待处理请求。请先在钱包中完成或关闭它。" : "The wallet already has a pending request. Complete or close it first.")
                   : (zh ? "交易未发送或未完成。请检查钱包授权、余额和网络。" : "The transaction was not sent or completed. Check wallet approval, balance, and network."));
       void loadOptions().catch(() => undefined);
     } finally {
@@ -476,6 +504,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
     setPlan(nextPlan);
     setSettingId(options.find(option => option.plan === nextPlan)?.settingId || "");
     setSmartPay5Preflight(null);
+    setApprovalHash("");
     setSmartPay5UsingCombo(false);
     setExistingPayment(null);
     setPendingPaymentHash("");
@@ -499,7 +528,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
       <h2>{zh ? "步骤 2：选择链上付款项目" : "Step 2: Choose an on-chain payment option"}</h2>
       <p className="flow-intro">{zh ? "这里只显示链上已启用的付款规则；代币金额以合约当前返回值为准。" : "Only enabled on-chain payment rules are shown. Current contract values are authoritative for token amounts."}</p>
       {planOptions.length ? <div className="radio-list">{planOptions.map(option => {
-        return <label key={option.key}><input type="radio" checked={selectedOption?.key === option.key} onChange={() => { setSettingId(option.settingId); setSmartPay5Preflight(null); setSmartPay5UsingCombo(false); setExistingPayment(null); setPendingPaymentHash(""); setConfirmedUntil(null); }}/><span className="plan-option-copy"><strong>{option.tokenSymbol}</strong><small>{option.chainName}</small></span><span className="plan-option-price"><b>{smartPayCheckoutDisplayAmount(option)}</b><small>{zh ? "链上原价" : "On-chain price"}</small></span></label>;
+        return <label key={option.key}><input type="radio" checked={selectedOption?.key === option.key} onChange={() => { setSettingId(option.settingId); setSmartPay5Preflight(null); setApprovalHash(""); setSmartPay5UsingCombo(false); setExistingPayment(null); setPendingPaymentHash(""); setConfirmedUntil(null); }}/><span className="plan-option-copy"><strong>{option.tokenSymbol}</strong><small>{option.chainName}</small></span><span className="plan-option-price"><b>{smartPayCheckoutDisplayAmount(option)}</b><small>{zh ? "链上原价" : "On-chain price"}</small></span></label>;
       })}</div> : <p>{zh ? "此服务期当前没有链上付款项目。" : "This term has no current on-chain payment option."}</p>}
       <button className="button primary" disabled={!selectedOption} onClick={() => { if (!ensureLogin()) return; setStep(3); if (connected && walletProvider && wallet) void refreshConnectedPreflight(walletProvider, wallet); }}>{zh ? "下一步：付款钱包" : "Next: payment wallet"} →</button>
     </section> : null}
@@ -522,7 +551,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
               <div><span>{zh ? "下一笔钱包操作" : "Next wallet action"}</span><strong>{smartPay5Preflight ? (smartPay5Preflight.nextAction === "approve-primary" ? `${smartPay5Offer.primaryTokenSymbol} approval` : smartPay5Preflight.nextAction === "approve-secondary" ? `${smartPay5Offer.secondaryTokenSymbol} approval` : (zh ? "付款" : "Payment")) : "—"}</strong><small>{smartPay5Preflight?.gasLimit ? `Gas limit ${BigInt(smartPay5Preflight.gasLimit).toString()} · ≤ ${displayAtomic(smartPay5Preflight.estimatedFeeAtomic || "0", 18, 8)} ${nativeTokenSymbol}` : smartPay5Preflight?.simulationError ? (zh ? "模拟回滚，不会发送" : "Simulation reverted; not sent") : (zh ? "尚未预估" : "Not estimated")}</small></div>
             </> : null}
           </div>
-          <button type="button" className="button ghost" disabled={preflightBusy || Boolean(busy)} onClick={() => walletProvider && void refreshConnectedPreflight(walletProvider, wallet)}>{preflightBusy ? "…" : (zh ? "刷新余额与 Gas" : "Refresh balances & gas")}</button>
+          <button type="button" className="button ghost" disabled={preflightBusy || Boolean(busy)} onClick={() => walletProvider && void refreshConnectedPreflight(walletProvider, wallet)}>{preflightBusy ? "…" : approvalHash ? (zh ? "刷新授权状态" : "Refresh approval status") : (zh ? "刷新余额与 Gas" : "Refresh balances & gas")}</button>
           {existingPayment ? <div className={`existing-crypto-payment${existingPayment.claimed ? " confirmed" : ""}`} role="status">
             <strong>{existingPayment.claimed ? (zh ? "已找到已确认付款" : "Confirmed payment found") : (zh ? "已找到尚未入账付款" : "Unreconciled payment found")}</strong>
             <span>{existingPayment.timestamp ? new Date(existingPayment.timestamp * 1000).toLocaleString(locale) : (zh ? "链上付款" : "On-chain payment")} · {existingPayment.txHash.slice(0, 12)}…</span>
@@ -533,7 +562,7 @@ export function CryptoCheckout({ lang: locale, initialPlan }: { lang: SiteLangua
             <span>{pendingPaymentHash.slice(0, 12)}…</span>
             <small>{zh ? "请勿重复付款。系统已按 10 秒间隔重试三次。" : "Do not pay again. The system already retried three times at 10-second intervals."}</small>
             <button type="button" className="button primary" disabled={Boolean(busy)} onClick={() => void verify(pendingPaymentHash)}>{busy === "verify" ? "…" : (zh ? "重新核对已发送付款" : "Retry submitted payment reconciliation")}</button>
-          </div> : confirmedUntil ? <div className="existing-crypto-payment confirmed" role="status"><strong>{zh ? "付款与订阅已确认" : "Payment and subscription confirmed"}</strong><small>{zh ? `订阅至 ${new Date(confirmedUntil * 1000).toLocaleDateString(locale)}` : `Subscription through ${new Date(confirmedUntil * 1000).toLocaleDateString(locale)}`}</small></div> : <button className="button primary" disabled={Boolean(busy) || preflightBusy} onClick={() => void sendPayment()}>{busy === "send" ? "…" : (zh ? "核对余额并付款" : "Check balances & pay")}</button>}
+          </div> : confirmedUntil ? <div className="existing-crypto-payment confirmed" role="status"><strong>{zh ? "付款与订阅已确认" : "Payment and subscription confirmed"}</strong><small>{zh ? `订阅至 ${new Date(confirmedUntil * 1000).toLocaleDateString(locale)}` : `Subscription through ${new Date(confirmedUntil * 1000).toLocaleDateString(locale)}`}</small></div> : <button className="button primary" disabled={Boolean(busy) || preflightBusy || Boolean(approvalHash)} onClick={() => void sendPayment()}>{busy === "send" ? "…" : approvalHash ? (zh ? "请先刷新授权状态" : "Refresh approval status first") : smartPay5Preflight?.nextAction === "approve-primary" ? (zh ? `授权 ${smartPay5Offer?.primaryTokenSymbol || "代币"}` : `Approve ${smartPay5Offer?.primaryTokenSymbol || "token"}`) : smartPay5Preflight?.nextAction === "approve-secondary" ? (zh ? `授权 ${smartPay5Offer?.secondaryTokenSymbol || "代币"}` : `Approve ${smartPay5Offer?.secondaryTokenSymbol || "token"}`) : (zh ? "立即付款" : "Pay now")}</button>}
         </div> : <button className="button primary" disabled={busy === "connect"} onClick={() => void connectWallet()}>{busy === "connect" ? "…" : (zh ? "连接钱包" : "Connect wallet")}</button>}
         <button className="text-button direct-link" onClick={() => setDirect(true)}>{zh ? "查找或核对已有付款" : "Find or verify an existing payment"} →</button>
       </> : <div className="direct-payment"><p>{zh ? "按当前登录账户的付款人 ID 读取近期付款，并应用产品所有者 RefID 与套餐匹配的未入账交易；无需连接钱包、签名或支付 Gas。" : "Read recent payments by this signed-in account's PayerID and apply unclaimed transactions matching the product-owner RefID and package. No wallet connection, signature, or gas is required."}</p><label><span>{zh ? "交易哈希（可选）" : "Transaction hash (optional)"}</span><input value={txHash} onChange={event => setTxHash(event.target.value.trim())} placeholder="0x…"/><small>{zh ? "留空会按当前账户查找近期匹配的链上付款。" : "Leave blank to find a recent matching on-chain payment for this account."}</small></label><button className="button primary" disabled={busy === "verify"} onClick={() => void verify()}>{busy === "verify" ? "…" : (zh ? `读取交易并更新 ${selectedPlan.months} 个月订阅` : `Read transaction & update ${selectedPlan.months}-month subscription`)}</button></div>}

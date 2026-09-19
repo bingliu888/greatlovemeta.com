@@ -24,7 +24,9 @@ test("footer and pricing publish one GreatLoveMeta-local monthly and annual plan
 
 test("SmartPay5 checkout and administrator controls are complete", async () => {
   const [flow, admin, dashboard, migration, verify, consoleSource] = await Promise.all([read("components/CryptoCheckout.tsx"), read("components/AdminCryptoSettings.tsx"), read("components/AdminDashboard.tsx"), read("drizzle/0125_smartpay5_payerid_fee_token.sql"), read("app/api/billing/crypto/smartpay/claim/route.ts"), read("components/SmartPayAdminConsole.tsx")]);
-  for(const marker of ["Connect wallet","connectWallet","eth_sendTransaction","Transaction hash (optional)","prepared.refId","verifyCryptoPaymentWithConfirmations"])assert.ok(flow.includes(marker),`missing ${marker}`);
+  for(const marker of ["Connect wallet","connectWallet","sendEvmWalletTransaction","waitForSmartPayApprovalTransition","Transaction hash (optional)","prepared.refId","verifyCryptoPaymentWithConfirmations"])assert.ok(flow.includes(marker),`missing ${marker}`);
+  assert.doesNotMatch(flow,/for \(let approvals/);
+  assert.doesNotMatch(flow,/provider\.request\(\{ method: "eth_sendTransaction"/);
   assert.doesNotMatch(flow,/WalletConnect QR|connectInjected|connectWalletConnect|@walletconnect\/ethereum-provider/);
   assert.match(admin, /WalletConnect Project ID/);
   assert.match(dashboard, /admin\/crypto-payments/);
