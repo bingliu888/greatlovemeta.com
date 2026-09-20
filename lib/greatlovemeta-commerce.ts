@@ -1,5 +1,5 @@
 export const GREATLOVEMETA_WALLET_CONNECT = {
-  projectId: "0d850a98123d379c16d0d9f2555d39bb",
+  projectId: "d80a9b985c7086328f1c42a7ff7bdf46",
   scriptId: "greatlovemeta-wallet-connector",
   checkout: {
     appName: "GreatLoveMeta.com",

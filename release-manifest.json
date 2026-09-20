@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-wallet-refresh-icon-20260919-r2",
+  "releaseId": "greatlovemeta-reown-managed-project-20260920-r1",
   "site": "greatlovemeta.com",
-  "title": { "en": "Keep wallet refresh compact and payment actions prominent", "zh": "将钱包刷新改为紧凑图标并突出付款操作" },
-  "purpose": { "en": "Place a standard refresh icon beside the connected wallet address so members focus on the primary approval or payment action.", "zh": "在已连接的钱包地址旁放置标准刷新图标，让会员聚焦主要的授权或付款操作。" },
+  "title": { "en": "Move every wallet surface to the managed Reown project", "zh": "将全部钱包界面迁移到可管理的 Reown 项目" },
+  "purpose": { "en": "Replace the retired shared WalletConnect project identifier in membership, AutoSwap, and StableSwap while preserving site-isolated commerce resources.", "zh": "在会员、AutoSwap 与 StableSwap 中替换停用的共享 WalletConnect 项目标识，同时保留站点隔离的商务资源。" },
   "features": {
-    "en": ["Replace the full-width balance refresh button with a compact accessible refresh icon beside the connected wallet address.", "Keep token and gas balances, the next wallet action, approval, payment, and recovery behavior unchanged.", "Preserve approval and payment as separate explicit wallet confirmations."],
-    "zh": ["把全宽余额刷新按钮替换为已连接钱包地址旁的紧凑、无障碍刷新图标。", "保持代币与 Gas 余额、下一步钱包操作、授权、付款及恢复行为不变。", "继续把授权与付款保留为两个明确、独立的钱包确认步骤。"]
+    "en": ["Use the Reown project managed by bingliu@cybeye.com for membership, AutoSwap, and StableSwap WalletConnect sessions.", "Keep injected-wallet and WalletConnect paths available with each existing site-owned contract.", "Add a contract test covering all three wallet entry points and rejecting the retired project identifier."],
+    "zh": ["会员、AutoSwap 与 StableSwap 的 WalletConnect 会话改用由 bingliu@cybeye.com 管理的 Reown 项目。", "保留注入式钱包与 WalletConnect 路径，并继续使用各自既有的本站合约。", "新增覆盖三个钱包入口的契约测试，禁止重新引入停用的项目标识。"]
   },
-  "affected": { "en": ["GreatLoveMeta membership crypto checkout connected-wallet controls."], "zh": ["影响 GreatLoveMeta 会员加密结账中的已连接钱包控件。"] },
-  "changes": { "en": ["Preserve this site's plans, prices, contracts, tokens, payout settings, member data and Cloudflare resources; only the refresh control placement and presentation change."], "zh": ["保留本站套餐、价格、合约、代币、收款设置、会员数据及 Cloudflare 资源；仅调整刷新控件的位置与呈现。"] },
-  "validation": { "en": ["Run the complete build and test suite, zero-warning ESLint, and a dedicated refresh-icon contract, then verify production checkout and Project evidence without sending a real payment."], "zh": ["运行完整构建与测试、零警告 ESLint及专用刷新图标契约，再验证生产结账页及 Project 证据；不发送真实付款。"] },
+  "affected": { "en": ["GreatLoveMeta membership checkout, AutoSwap, StableSwap, and admin wallet connections."], "zh": ["影响 GreatLoveMeta 会员结账、AutoSwap、StableSwap 与管理员钱包连接。"] },
+  "changes": { "en": ["Change only the public Reown project identifier; preserve this site's plans, prices, contracts, tokens, payout settings, member data and Cloudflare resources."], "zh": ["仅变更公开的 Reown 项目标识；保留本站套餐、价格、合约、代币、收款设置、会员数据及 Cloudflare 资源。"] },
+  "validation": { "en": ["Run the complete build and test suite, zero-warning ESLint, and the dedicated Reown contract, then verify production bundles and Project evidence without sending a real payment."], "zh": ["运行完整构建与测试、零警告 ESLint及专用 Reown 契约，再验证生产资源包及 Project 证据；不发送真实付款。"] },
   "deferred": { "en": ["No real payment is sent and no realtime audio/video test is started."], "zh": ["未发送真实付款，未启动实时音视频测试。"] },
   "siteAdaptations": { "en": ["Preserve GreatLoveMeta branding, local membership catalog, login-protected navigation rules, referral identifiers and site-owned SmartPay5 configuration."], "zh": ["保留 GreatLoveMeta 品牌、本地会员目录、登录受保护导航规则、推荐标识及站点独立 SmartPay5 配置。"] },
   "dataMigration": { "included": false, "migrations": [], "rollback": { "en": "Roll back the application release; no data migration is required.", "zh": "回滚应用版本；无需数据迁移。" } }

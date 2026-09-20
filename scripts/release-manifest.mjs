@@ -5,6 +5,7 @@ import { pathToFileURL } from "node:url";
 
 const REQUIRED_SECTIONS = ["features", "affected", "changes", "validation", "deferred", "siteAdaptations"];
 const GENERIC_TITLES = new Set(["production release", "deployment", "maintenance", "successful deployment"]);
+const GIT_BINARY = process.env.GIT_BINARY || "git";
 
 const text = (value, label) => {
   const result = String(value || "").trim();
@@ -47,10 +48,10 @@ export function releaseNotes(manifest, language = "en") {
 }
 
 function requireCurrentCommitManifest(manifest) {
-  const changed = execFileSync("git", ["diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "HEAD", "--", "release-manifest.json"], { encoding: "utf8" }).trim();
+  const changed = execFileSync(GIT_BINARY, ["diff-tree", "--root", "--no-commit-id", "--name-only", "-r", "HEAD", "--", "release-manifest.json"], { encoding: "utf8" }).trim();
   if (!changed) throw new Error("release-manifest.json must be updated in the deployment commit.");
   try {
-    const previous = JSON.parse(execFileSync("git", ["show", "HEAD^:release-manifest.json"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }));
+    const previous = JSON.parse(execFileSync(GIT_BINARY, ["show", "HEAD^:release-manifest.json"], { encoding: "utf8", stdio: ["ignore", "pipe", "ignore"] }));
     if (previous.releaseId === manifest.releaseId) throw new Error("releaseId must change for every new deployment.");
   } catch (error) {
     if (error instanceof Error && error.message === "releaseId must change for every new deployment.") throw error;

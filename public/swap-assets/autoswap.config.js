@@ -3,7 +3,7 @@ window.GREATLOVE_AUTOSWAP_CONFIG = {
   walletMethods: {
     walletconnect: {
       enabled: true,
-      projectId: '0d850a98123d379c16d0d9f2555d39bb',
+      projectId: 'd80a9b985c7086328f1c42a7ff7bdf46',
       version: 2,
       requiredChains: [137],
       dappUrl: 'https://greatlovemeta.com'
