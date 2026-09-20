@@ -1,16 +1,16 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-wallet-payment-reliability-20260919-r1",
+  "releaseId": "greatlovemeta-wallet-refresh-icon-20260919-r2",
   "site": "greatlovemeta.com",
-  "title": { "en": "Separate wallet approval from payment and repair Polygon reconciliation", "zh": "分离钱包授权与付款并修复 Polygon 入账" },
-  "purpose": { "en": "Prevent duplicate or missing wallet confirmations and reliably synchronize successful GreatLoveMeta SmartPay5 payments into membership.", "zh": "防止钱包确认页遗漏或重复，并可靠地把 GreatLoveMeta SmartPay5 成功付款同步为会员权益。" },
+  "title": { "en": "Keep wallet refresh compact and payment actions prominent", "zh": "将钱包刷新改为紧凑图标并突出付款操作" },
+  "purpose": { "en": "Place a standard refresh icon beside the connected wallet address so members focus on the primary approval or payment action.", "zh": "在已连接的钱包地址旁放置标准刷新图标，让会员聚焦主要的授权或付款操作。" },
   "features": {
-    "en": ["Make token approval and payment separate explicit wallet actions and prevent duplicate approval while allowance data propagates.", "Keep balance, allowance, contract simulation and gas preflight while letting the connected wallet choose the final gas limit.", "Use current Polygon RPC endpoints with independent public-provider failover.", "Forward the wallet transaction hash through verification into SmartPay5 receipt reconciliation."],
-    "zh": ["把代币授权与付款设为独立、明确的钱包操作，并在授权额度传播期间防止重复授权。", "保留余额、授权额度、合约模拟与 Gas 预检，同时让已连接钱包决定最终 gas limit。", "Polygon 服务端核验使用当前 RPC，并在独立公共服务商之间自动故障转移。", "把钱包交易哈希经验证路由传入 SmartPay5 回执核销。"]
+    "en": ["Replace the full-width balance refresh button with a compact accessible refresh icon beside the connected wallet address.", "Keep token and gas balances, the next wallet action, approval, payment, and recovery behavior unchanged.", "Preserve approval and payment as separate explicit wallet confirmations."],
+    "zh": ["把全宽余额刷新按钮替换为已连接钱包地址旁的紧凑、无障碍刷新图标。", "保持代币与 Gas 余额、下一步钱包操作、授权、付款及恢复行为不变。", "继续把授权与付款保留为两个明确、独立的钱包确认步骤。"]
   },
-  "affected": { "en": ["GreatLoveMeta membership crypto checkout, SmartPay5 verification and claim routes, wallet transaction submission, and Polygon RPC reads."], "zh": ["影响 GreatLoveMeta 会员加密结账、SmartPay5 核验与 claim 路由、钱包交易提交及 Polygon RPC 读取。"] },
-  "changes": { "en": ["Preserve this site's plans, prices, contracts, tokens, payout settings, member data and Cloudflare resources; reject a changed connected wallet and retain idempotent historical PayerID recovery."], "zh": ["保留本站套餐、价格、合约、代币、收款设置、会员数据及 Cloudflare 资源；拒绝连接后切换的钱包，并保留幂等的历史 PayerID 恢复。"] },
-  "validation": { "en": ["Run the complete build and test suite, zero-warning ESLint, shared policy and architecture contracts, then verify production checkout and Project evidence without sending a real payment."], "zh": ["运行完整构建与测试、零警告 ESLint、共享策略和架构契约，再验证生产结账页及 Project 证据；不发送真实付款。"] },
+  "affected": { "en": ["GreatLoveMeta membership crypto checkout connected-wallet controls."], "zh": ["影响 GreatLoveMeta 会员加密结账中的已连接钱包控件。"] },
+  "changes": { "en": ["Preserve this site's plans, prices, contracts, tokens, payout settings, member data and Cloudflare resources; only the refresh control placement and presentation change."], "zh": ["保留本站套餐、价格、合约、代币、收款设置、会员数据及 Cloudflare 资源；仅调整刷新控件的位置与呈现。"] },
+  "validation": { "en": ["Run the complete build and test suite, zero-warning ESLint, and a dedicated refresh-icon contract, then verify production checkout and Project evidence without sending a real payment."], "zh": ["运行完整构建与测试、零警告 ESLint及专用刷新图标契约，再验证生产结账页及 Project 证据；不发送真实付款。"] },
   "deferred": { "en": ["No real payment is sent and no realtime audio/video test is started."], "zh": ["未发送真实付款，未启动实时音视频测试。"] },
   "siteAdaptations": { "en": ["Preserve GreatLoveMeta branding, local membership catalog, login-protected navigation rules, referral identifiers and site-owned SmartPay5 configuration."], "zh": ["保留 GreatLoveMeta 品牌、本地会员目录、登录受保护导航规则、推荐标识及站点独立 SmartPay5 配置。"] },
   "dataMigration": { "included": false, "migrations": [], "rollback": { "en": "Roll back the application release; no data migration is required.", "zh": "回滚应用版本；无需数据迁移。" } }
