@@ -36,13 +36,17 @@ export function LoneParticipantGuard({ active, locale, confirmStillAlone, onExpi
       setCycle(0);
       return;
     }
+    let cancelled = false;
     const timer = window.setTimeout(async () => {
-      if (await confirmRef.current()) {
+      let stillAlone = false;
+      try { stillAlone = await confirmRef.current(); } catch { /* retry after a failed refresh */ }
+      if (cancelled) return;
+      if (stillAlone) {
         setSeconds(CONFIRM_SECONDS);
         setConfirming(true);
-      }
+      } else setCycle((value) => value + 1);
     }, cycle === 0 ? PROMPT_MS : 60_000);
-    return () => window.clearTimeout(timer);
+    return () => { cancelled = true; window.clearTimeout(timer); };
   }, [active, cycle]);
 
   useEffect(() => {

@@ -19,6 +19,7 @@ import {
 } from "@/components/class-screen-share";
 import { MediaActivityGuard } from "@/components/MediaActivityGuard";
 import { LoneParticipantGuard } from "@/components/LoneParticipantGuard";
+import { loneClassParticipantConfirmed } from "@/lib/class-lone-participant-recheck";
 import {
   formatConnectionDuration,
   mediaGridLayout,
@@ -1481,13 +1482,17 @@ export function ClassRoomClient({
     window.location.assign(`/${lang}/classes/${room.code}`);
   }, [disconnect, lang, room.code]);
   const confirmStillAlone = useCallback(async () => {
-    const response = await fetch(
-      `/api/classes/${room.code}/media?identity=${encodeURIComponent(identity)}`,
-      { cache: "no-store" },
-    );
-    if (!response.ok) return false;
-    const state = (await response.json()) as Media;
-    return !state.users.some((user) => user.identity !== identity);
+    try {
+      const response = await fetch(
+        `/api/classes/${room.code}/media?identity=${encodeURIComponent(identity)}`,
+        { cache: "no-store" },
+      );
+      if (!response.ok) return false;
+      const state = (await response.json()) as Media;
+      return loneClassParticipantConfirmed(state.users, identity);
+    } catch {
+      return false;
+    }
   }, [identity, room.code]);
   useEffect(() => {
     let alive = true;
