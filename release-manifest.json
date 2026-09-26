@@ -1,77 +1,59 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-classroom-lone-recheck-20260924",
+  "releaseId": "greatlovemeta-com-v2-gold-rooms-20260925",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Retry inconclusive classroom lone-participant checks",
-    "zh": "课堂单人状态未确认时继续复核"
+    "en": "Bring SmartMeeting v2 Gold behavior to GreatLoveMeta course rooms",
+    "zh": "将 SmartMeeting v2 Gold 会议室体验迁移至 GreatLoveMeta 课程教室"
   },
   "purpose": {
-    "en": "Keep a live greatlovemeta.com classroom connected when a presence refresh fails or omits the caller, then retry the check.",
-    "zh": "greatlovemeta.com 课堂在线状态读取失败或漏掉当前用户时保留连接，并在下一周期重新复核。"
+    "en": "Make member presence, private support chat and RealtimeKit media lifecycle in GreatLoveMeta course rooms match the reviewed SmartMeeting v2 Gold contract.",
+    "zh": "让 GreatLoveMeta 课程教室的会员在线状态、私密支持聊天及 RealtimeKit 媒体生命周期符合已验证的 SmartMeeting v2 Gold 规则。"
   },
   "features": {
     "en": [
-      "Require a successful presence snapshot containing exactly the current participant before the idle prompt or automatic exit.",
-      "Retry an inconclusive or failed snapshot without acting on a cancelled guard result."
+      "Count signed-in members from room entry, enforce one active tab per member, and show arrivals and departures in the room ticker.",
+      "Wait for a second distinct member before beginning audio or A/V streaming; retain listener connections while a speaker is muted and retire idle provider rooms after the grace period.",
+      "Use one responsive room action row, verified speaker state and timer, and private member-to-host/co-host chat.",
+      "Provide site-owned course materials, audio notes and local text-to-speech without enabling visual sharing controls."
     ],
     "zh": [
-      "只有成功读取且快照恰好包含当前参与者时才进入闲置提示或自动离开。",
-      "快照不完整或请求失败时继续复核，不使用已停用保护组件的过期结果。"
+      "从进入教室起统计已登录会员、限制同一会员只开一个活跃标签页，并用滚动条显示进入和离开。",
+      "等第二位不同会员进入后才启动音频或音视频传输；静音时保留收听连接，空闲宽限期后关闭提供商房间。",
+      "使用单行响应式操作栏、经播放确认的扬声器状态与计时器，以及会员对主持团队的私密聊天。",
+      "提供本站独立的课程附件、音频笔记和本地文字转语音，同时隐藏视觉分享控制。"
     ]
   },
   "affected": {
-    "en": [
-      "greatlovemeta.com live classroom Group Call and Webinar lone-participant prompts."
-    ],
-    "zh": [
-      "greatlovemeta.com 直播课堂群组通话和网络研讨会的单人提示。"
-    ]
+    "en": ["GreatLoveMeta course-room page and its presence, chat, media, material and audio-note APIs."],
+    "zh": ["GreatLoveMeta 课程教室页面及在线状态、聊天、媒体、附件和音频笔记接口。"]
   },
   "changes": {
-    "en": [
-      "Reuse the production-verified Mahj classroom adapter of SmartMeeting's guard retry state machine; keep this site's class admission and media publishing behavior."
-    ],
-    "zh": [
-      "复用已在 Mahj 生产验证的 SmartMeeting 提示重试适配；保留本站课堂准入与媒体发布行为。"
-    ]
+    "en": ["Reuse the reviewed SmartFi adaptation of SmartMeeting v2 Gold, while preserving GreatLoveMeta locale routes and its own subscription, identity, RealtimeKit and R2 bindings."],
+    "zh": ["复用已经过验证的 SmartFi 版 SmartMeeting v2 Gold 适配，同时保留 GreatLoveMeta 自己的语言路由、订阅、身份、RealtimeKit 与 R2 绑定。"]
   },
   "validation": {
-    "en": [
-      "Run behavioral regression, repository tests, TypeScript, lint, production build, shared gates, exact-commit deployment, production availability and Project evidence checks."
-    ],
-    "zh": [
-      "运行行为回归、仓库测试、TypeScript、lint、生产构建、共享检查、精确提交部署、生产可用性及 Project 记录核验。"
-    ]
+    "en": ["Run fresh D1 migration and room-behavior contracts, complete site tests, lint and production build; verify the exact deployment and production Project report."],
+    "zh": ["运行全新 D1 迁移及教室行为契约测试、完整站点测试、lint 与生产构建，并核对精确部署及 Project 发布记录。"]
   },
   "deferred": {
-    "en": [
-      "This cross-site correction does not repeat interactive multi-device RealtimeKit tests on every target; media publishing code is unchanged."
-    ],
-    "zh": [
-      "此次跨站修正不逐站重复多设备 RealtimeKit 测试；媒体发布代码未变。"
-    ]
+    "en": ["This portfolio migration does not repeat interactive multi-device RealtimeKit acceptance on every target; automated lifecycle contracts and production availability are checked."],
+    "zh": ["本次跨站迁移不逐站重复多设备 RealtimeKit 交互验收；执行自动化生命周期契约及生产可用性检查。"]
   },
   "siteAdaptations": {
-    "en": [
-      "Preserve GreatLoveMeta branding, local membership catalog, login-protected navigation rules, referral identifiers and site-owned SmartPay5 configuration.",
-      "Preserve greatlovemeta.com product access, locale routing and site-owned cloud resources."
-    ],
-    "zh": [
-      "保留 GreatLoveMeta 品牌、本地会员目录、登录受保护导航规则、推荐标识及站点独立 SmartPay5 配置。",
-      "保留 greatlovemeta.com 的产品准入、语言路由及本站云资源。"
-    ]
+    "en": ["Keep GreatLoveMeta's independent brand, locale-prefixed class routes, active site subscription for audio-note eligibility, verified-email lookup, and site-specific provider title and preset namespaces.", "Keep the existing team-managed Reown project, production domain allowlist and all site-owned cloud resources unchanged."],
+    "zh": ["保留 GreatLoveMeta 独立品牌、带语言前缀的课程路径、本站有效订阅判断录音资格、邮箱验证查询，以及本站独立的提供商标题与预设命名空间。", "保留现有团队可管理的 Reown 项目、生产域名白名单及全部本站云资源，不作改动。"]
   },
   "dataMigration": {
-    "included": false,
-    "migrations": [],
+    "included": true,
+    "migrations": ["0128_class_v2_room_presence_private_chat.sql", "0129_class_provider_room_claim.sql", "0130_class_room_audio_notes.sql", "0131_class_provider_teardown.sql", "0132_class_provider_create_recovery.sql"],
     "rollback": {
-      "en": "Roll back the application commit; no data migration is required.",
-      "zh": "回滚应用提交；无需数据库迁移。"
+      "en": "Roll back the application commit; retain forward-only production D1 migration history and site-owned room data.",
+      "zh": "回滚应用提交；保留只能前进的生产 D1 迁移记录及本站教室数据。"
     }
   },
   "productionVerification": {
-    "en": "Verify the exact GitHub Actions run, production availability, and matching current Project release record.",
-    "zh": "核对精确 GitHub Actions 运行、生产可用性和本次 Project 发布记录。"
+    "en": "Verify the exact GitHub Actions run, apex and www availability, and matching current Project release record.",
+    "zh": "核对精确的 GitHub Actions 运行、主域名与 www 可用性及相符的 Project 发布记录。"
   }
 }

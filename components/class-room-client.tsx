@@ -9,6 +9,12 @@ import {
 import type RTKClient from "@cloudflare/realtimekit";
 import Hls from "hls.js";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { ClassPrivateChat, type ClassPrivateChatHandle } from "@/components/ClassPrivateChat";
+import { ClassRoomResources } from "@/components/ClassRoomResources";
+import { RoomPresenceTicker, type RoomPresenceEvent } from "@/components/RoomPresenceTicker";
+import { roomPresenceChanges, shouldJoinGroupAudioLobby } from "@/lib/group-audio-lobby";
+import { speakerControlAppearance, speakerPlaybackState } from "@/lib/meeting-speaker-state";
+import { createRemoteMediaRecovery } from "@/lib/remote-media-recovery";
 import { ClassPlaylistPlayer } from "@/components/ClassPlaylistPlayer";
 import { ClassPlaylistManager } from "@/components/ClassPlaylistManager";
 import {
@@ -29,7 +35,6 @@ import {
   createLocalMediaHealthMonitor,
   publishedLocalTrackIsLive,
 } from "@/lib/local-media-health";
-import { createRemoteMediaRecovery } from "@/lib/remote-media-recovery";
 
 type RealtimeMode = "group_call" | "webinar" | "livestream";
 type Room = {
@@ -47,6 +52,7 @@ type MediaUser = {
   cameraOn: number;
   isManager: boolean;
 };
+type OnlineMember = {userId:string;displayName:string;enteredAt:number};
 type StageRequest = {
   identity: string;
   displayName: string;
@@ -68,12 +74,6 @@ type Media = {
   requests: StageRequest[];
   speakers: Array<{ email: string }>;
 };
-type Message = {
-  id: string;
-  senderName: string;
-  body: string;
-  createdAt: number;
-};
 type Role = "viewer" | "member" | "host";
 type PlaylistState = { active: number; currentItemId: string | null };
 type PlaylistResponse = {
@@ -81,6 +81,18 @@ type PlaylistResponse = {
   state: PlaylistState | null;
 };
 type PlaylistWindow = Window;
+const SHOW_ADVANCED_SHARE_BUTTONS = false;
+type ResourcePanel = "recordings" | "files" | null;
+
+function AudioFileIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="M5 3h9l5 5v13H5zM14 3v5h5M10 15v3a2 2 0 1 1-2-2M10 15l5-1v3a2 2 0 1 1-2-2v-5l-5 1v5"/></svg>}
+function PaperclipIcon(){return <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round"><path d="m8 12 6-6a4 4 0 0 1 6 6l-8 8a6 6 0 0 1-9-9l8-8"/></svg>}
+
+function ClassRoomMembers({members,lang,onClose}:{members:OnlineMember[];lang:"en"|"zh";onClose:()=>void}){
+  return <aside className="class-members-drawer" role="dialog" aria-modal="true" aria-label={lang==="zh"?"会议用户":"Room members"}>
+    <header><h2>{lang==="zh"?`会议用户 · 在线 ${members.length}`:`Room members · ${members.length} online`}</h2><button type="button" onClick={onClose} aria-label={lang==="zh"?"关闭用户列表":"Close members"}>×</button></header>
+    <div>{members.map(member=><article key={member.userId}>{member.displayName}</article>)}</div>
+  </aside>;
+}
 
 function MicIcon() {
   return (
@@ -207,15 +219,37 @@ function AudioTrack({
 function ParticipantsAudio({
   client,
   enabled,
+  manualReady,
   onBlocked,
   onPlaybackChange,
 }: {
   client: RTKClient;
   enabled: boolean;
+  manualReady: boolean;
   onBlocked: () => void;
   onPlaybackChange: (id: string, playing: boolean) => void;
 }) {
   const [revision, setRevision] = useState(0);
+  const subscribed=useRef(new Set<string>());
+  useEffect(()=>{
+    if(!manualReady)return;
+    const recovery=createRemoteMediaRecovery({
+      peers:()=>client.participants.joined.toArray()
+        .filter(peer=>peer.id!==client.self.id)
+        .map(peer=>({id:peer.id,enabled:peer.audioEnabled,
+          track:(client.participants.audioSubscribed.get(peer.id)||peer).audioTrack})),
+      subscribed:subscribed.current,
+      subscribe:ids=>client.participants.subscribe(ids,["audio"]),
+      unsubscribe:ids=>client.participants.unsubscribe(ids,["audio"]),
+    });
+    const reconcile=()=>{void recovery.reconcile();};
+    const maps=[client.participants.joined,client.participants.audioSubscribed];
+    maps.forEach(map=>{map.on("participantJoined",reconcile);map.on("audioUpdate",reconcile);});
+    document.addEventListener("visibilitychange",reconcile);
+    const timer=window.setInterval(reconcile,3_000);reconcile();
+    return()=>{recovery.stop();window.clearInterval(timer);document.removeEventListener("visibilitychange",reconcile);
+      maps.forEach(map=>{map.off("participantJoined",reconcile);map.off("audioUpdate",reconcile);});};
+  },[client,manualReady]);
   useEffect(() => {
     const timer = window.setInterval(
       () => setRevision((value) => value + 1),
@@ -231,7 +265,10 @@ function ParticipantsAudio({
     client.participants.audioSubscribed,
   ].forEach((map) =>
     map.toArray().forEach((peer) => {
-      if (peer.audioEnabled && peer.audioTrack)
+      if (
+        peer.audioTrack &&
+        (peer.audioEnabled || peer.audioTrack.readyState === "live")
+      )
         peers.set(peer.id, {
           id: peer.id,
           track: peer.audioTrack as MediaStreamTrack,
@@ -466,10 +503,12 @@ function VideoGrid({
   client,
   localName,
   mediaUsers,
+  manualReady,
 }: {
   client: RTKClient;
   localName: string;
   mediaUsers: MediaUser[];
+  manualReady: boolean;
 }) {
   const local = useRealtimeKitSelector((current) => ({
     enabled: current.self.videoEnabled,
@@ -479,7 +518,9 @@ function VideoGrid({
     [discovered, setDiscovered] = useState<string[]>([]);
   const ref = useRef<HTMLVideoElement>(null),
     [full, setFull] = useState<string | null>(null),
+    [page,setPage] = useState(0),
     [facing, setFacing] = useState<"user" | "environment">("user");
+  const subscribedVideos=useRef(new Set<string>()),desiredVideos=useRef(new Set<string>());
   useEffect(() => {
     const timer = window.setInterval(
       () => setRevision((value) => value + 1),
@@ -488,30 +529,31 @@ function VideoGrid({
     return () => window.clearInterval(timer);
   }, [client]);
   useEffect(() => {
-    let alive = true;
-    const discover = async () => {
+    let cancelled=false;
+    let running=false;
+    let timer:number|undefined;
+    const delays=[0,1_500,4_000];
+    const discover=async(attempt:number)=>{
+      if(cancelled||running)return;
+      if(document.hidden){timer=window.setTimeout(()=>void discover(attempt),30_000);return;}
+      running=true;
+      let succeeded=false;
       try {
-        const peers = await client.participants.getAllJoinedPeers("", 100, 0),
-          ids = peers
-            .map((peer) => peer.id)
-            .filter((id) => Boolean(id) && id !== client.self.id)
-            .sort();
-        if (!alive) return;
-        setDiscovered((current) =>
-          current.length === ids.length &&
-          current.every((id, index) => id === ids[index])
-            ? current
-            : ids,
-        );
-        setRevision((value) => value + 1);
-      } catch {}
+        const peers=await client.participants.getAllJoinedPeers("",100,0);
+        if(cancelled)return;
+        const ids=peers.map(peer=>peer.id).filter(id=>Boolean(id)&&id!==client.self.id).sort();
+        setDiscovered(current=>current.length===ids.length&&current.every((id,index)=>id===ids[index])?current:ids);
+        setRevision(value=>value+1);
+        succeeded=true;
+      } catch { /* Retry only during the bounded startup window. */ }
+      finally {running=false;}
+      if(!cancelled&&!succeeded&&attempt+1<delays.length)
+        timer=window.setTimeout(()=>void discover(attempt+1),delays[attempt+1]);
     };
-    void discover();
-    const timer = window.setInterval(() => void discover(), 1500);
-    return () => {
-      alive = false;
-      window.clearInterval(timer);
-    };
+    timer=window.setTimeout(()=>void discover(0),0);
+    const onVisible=()=>{if(!document.hidden)setRevision(value=>value+1);};
+    document.addEventListener("visibilitychange",onVisible);
+    return()=>{cancelled=true;if(timer!==undefined)window.clearTimeout(timer);document.removeEventListener("visibilitychange",onVisible);};
   }, [client]);
   void revision;
   const peerMap = new Map<string, { id: string; name?: string; videoEnabled?: boolean; videoTrack?: MediaStreamTrack }>();
@@ -544,7 +586,38 @@ function VideoGrid({
   const peers = [...peerMap.values()].filter((peer) =>
     Boolean(peer.videoEnabled || peer.videoTrack?.readyState === "live"),
   );
-  const tileCount = (local.enabled && local.track ? 1 : 0) + peers.length;
+  const totalPages=Math.max(1,Math.ceil(peers.length/9));
+  const visiblePeers=peers.slice(Math.min(page,totalPages-1)*9,(Math.min(page,totalPages-1)+1)*9);
+  const desiredKey=visiblePeers.map(peer=>peer.id).join("|");
+  useEffect(()=>{desiredVideos.current=new Set(desiredKey?desiredKey.split("|"):[]);},[desiredKey]);
+  useEffect(()=>{
+    if(!manualReady)return;
+    const recovery=createRemoteMediaRecovery({
+      peers:()=>[...desiredVideos.current].map(id=>({id,enabled:true,
+        track:(client.participants.videoSubscribed.get(id)||client.participants.joined.get(id))?.videoTrack})),
+      subscribed:subscribedVideos.current,
+      subscribe:ids=>client.participants.subscribe(ids,["video"]),
+      unsubscribe:ids=>client.participants.unsubscribe(ids,["video"]),
+      pruneAbsent:false,
+    });
+    const reconcile=async()=>{
+      const extra=[...subscribedVideos.current].filter(id=>!desiredVideos.current.has(id));
+      if(extra.length){await client.participants.unsubscribe(extra,["video"]).catch(()=>undefined);
+        extra.forEach(id=>subscribedVideos.current.delete(id));}
+      await recovery.reconcile();
+    };
+    const refresh=()=>{void reconcile();};
+    const maps=[client.participants.joined,client.participants.videoSubscribed];
+    maps.forEach(map=>{map.on("participantJoined",refresh);map.on("videoUpdate",refresh);});
+    document.addEventListener("visibilitychange",refresh);
+    const timer=window.setInterval(refresh,3_000);refresh();
+    return()=>{recovery.stop();window.clearInterval(timer);document.removeEventListener("visibilitychange",refresh);
+      maps.forEach(map=>{map.off("participantJoined",refresh);map.off("videoUpdate",refresh);});};
+  },[client,manualReady]);
+  useEffect(()=>{if(manualReady){const extra=[...subscribedVideos.current].filter(id=>!desiredVideos.current.has(id));
+    void client.participants.unsubscribe(extra,["video"]).then(()=>{extra.forEach(id=>subscribedVideos.current.delete(id));}).catch(()=>undefined);}
+  },[client,desiredKey,manualReady]);
+  const tileCount = (local.enabled && local.track ? 1 : 0) + visiblePeers.length;
   useEffect(() => {
     const element = ref.current,
       track = local.track;
@@ -592,7 +665,7 @@ function VideoGrid({
           <span>{localName}</span>
         </button>
       )}
-      {peers.map((peer) => (
+      {visiblePeers.map((peer) => (
         <RemoteVideo
           key={peer.id}
           client={client}
@@ -602,6 +675,7 @@ function VideoGrid({
           onOpen={() => setFull(peer.id)}
         />
       ))}
+      {totalPages>1&&<div className="class-video-pages"><button type="button" disabled={page<=0} onClick={()=>setPage(value=>Math.max(0,value-1))}>←</button><span>{Math.min(page,totalPages-1)+1}/{totalPages}</span><button type="button" disabled={page>=totalPages-1} onClick={()=>setPage(value=>Math.min(totalPages-1,value+1))}>→</button></div>}
       {full && (
         <div className="class-video-full-actions">
           {full === "local" && (
@@ -635,6 +709,14 @@ function ConnectedRoom({
   lang,
   onMedia,
   onLeave,
+  onlineCount,
+  presenceEvents,
+  roomTabId,
+  onlineMembers,
+  speakerEnabled,
+  onSpeakerEnabled,
+  resourcePanel,
+  onResourcePanelChange,
 }: {
   client: RTKClient;
   room: Room;
@@ -649,27 +731,45 @@ function ConnectedRoom({
   lang: "en" | "zh";
   onMedia: (mic: boolean, camera: boolean) => Promise<void>;
   onLeave: () => void;
+  onlineCount: number;
+  presenceEvents: RoomPresenceEvent[];
+  roomTabId: string;
+  onlineMembers: OnlineMember[];
+  speakerEnabled: boolean;
+  onSpeakerEnabled: (enabled: boolean) => void;
+  resourcePanel: ResourcePanel;
+  onResourcePanelChange: (panel: ResourcePanel) => void;
 }) {
   const [media, setMedia] = useState<Media | null>(null),
-    [messages, setMessages] = useState<Message[]>([]),
-    [body, setBody] = useState(""),
     [error, setError] = useState(""),
-    [listening, setListening] = useState(true),
     [blocked, setBlocked] = useState(false),
     [speakerEmail, setSpeakerEmail] = useState(""),
     [connectedSeconds, setConnectedSeconds] = useState(0),
     [confirmLeave, setConfirmLeave] = useState(false),
+    [usersOpen,setUsersOpen] = useState(false),
     [changingMedia, setChangingMedia] = useState(false),
     [pendingMedia, setPendingMedia] = useState<{
       mic: boolean;
       camera: boolean;
     } | null>(null),
     [playbackConfirmed, setPlaybackConfirmed] = useState(false);
-  const audioSubscribedPeers = useRef(new Set<string>()),
-    videoSubscribedPeers = useRef(new Set<string>()),
+  const [manualReady,setManualReady]=useState(false);
+  const chatRef = useRef<ClassPrivateChatHandle>(null),
     cameraBeforeScreenShare = useRef(false),
     changingMediaRef = useRef(false),
     playingSources = useRef(new Set<string>());
+  const listening = speakerEnabled;
+  const setListening = onSpeakerEnabled;
+  const speakerState = speakerPlaybackState({
+    enabled: listening,
+    blocked,
+    confirmed: playbackConfirmed,
+    audioOnly: room.streamingMode === "audio",
+    interactionMode: room.realtimeMode,
+    joined: true,
+    hasOtherParticipant: onlineCount > 1,
+  });
+  const speakerAppearance = speakerControlAppearance(speakerState);
   const onPlaybackChange = useCallback((id: string, playing: boolean) => {
     if (playing) playingSources.current.add(id);
     else playingSources.current.delete(id);
@@ -688,82 +788,19 @@ function ConnectedRoom({
   }, []);
   useEffect(() => {
     if (room.realtimeMode === "livestream" && role === "viewer") return;
-    let alive = true;
-    const setViewMode = client.participants.setViewMode;
-    const peers = (kind: "audio" | "video") => {
-      const map = new Map<
-        string,
-        {
-          id: string;
-          enabled?: boolean;
-          track?: MediaStreamTrack;
-        }
-      >();
-      [
-        client.participants.joined,
-        client.participants.active,
-        client.participants.audioSubscribed,
-        client.participants.videoSubscribed,
-      ].forEach((participants) =>
-        participants.toArray().forEach((peer) => {
-          if (!peer.id || peer.id === client.self.id) return;
-          map.set(peer.id, {
-            id: peer.id,
-            enabled:
-              kind === "audio" ? peer.audioEnabled : peer.videoEnabled,
-            track: (kind === "audio"
-              ? peer.audioTrack
-              : peer.videoTrack) as MediaStreamTrack | undefined,
-          });
-        }),
-      );
-      return [...map.values()];
-    };
-    const audioRecovery = createRemoteMediaRecovery({
-        peers: () => peers("audio"),
-        subscribed: audioSubscribedPeers.current,
-        subscribe: (ids) => client.participants.subscribe(ids, ["audio"]),
-        unsubscribe: (ids) => client.participants.unsubscribe(ids, ["audio"]),
-      }),
-      videoRecovery = createRemoteMediaRecovery({
-        peers: () => peers("video"),
-        subscribed: videoSubscribedPeers.current,
-        subscribe: (ids) => client.participants.subscribe(ids, ["video"]),
-        unsubscribe: (ids) => client.participants.unsubscribe(ids, ["video"]),
-      }),
-      reconcile = () => {
-        if (!alive) return;
-        void audioRecovery.reconcile();
-        void videoRecovery.reconcile();
-      };
-    void (async () => {
-      if (typeof setViewMode === "function")
-        await setViewMode
-          .call(client.participants, "MANUAL")
-          .catch(() => undefined);
-      reconcile();
-    })();
-    const timer = window.setInterval(
-      reconcile,
-      2000,
-    );
-    return () => {
-      alive = false;
-      audioRecovery.stop();
-      videoRecovery.stop();
-      window.clearInterval(timer);
-    };
+    let active=true;
+    void client.participants.setViewMode("MANUAL")
+      .then(()=>{if(active)setManualReady(true);})
+      .catch(()=>{if(active){setManualReady(false);
+        void client.participants.setViewMode("ACTIVE_GRID").catch(()=>undefined);}});
+    return()=>{active=false;};
   }, [client, role, room.realtimeMode]);
   const load = useCallback(async () => {
-    const [m, c] = await Promise.all([
-      fetch(
-        `/api/classes/${room.code}/media?identity=${encodeURIComponent(identity)}`,
-        { cache: "no-store" },
-      ),
-      fetch(`/api/classes/${room.code}/chat`, { cache: "no-store" }),
-    ]);
+    const m = await fetch(
+      `/api/classes/${room.code}/media?identity=${encodeURIComponent(identity)}`,
+      { cache: "no-store" },
+    );
     if (m.ok) setMedia(await m.json());
-    if (c.ok) setMessages((await c.json()).messages || []);
     await fetch(`/api/classes/${room.code}/media`, {
       method: "POST",
       headers: { "content-type": "application/json" },
@@ -804,7 +841,6 @@ function ConnectedRoom({
       if (
         !manager &&
         role === "viewer" &&
-        room.classType !== "private" &&
         room.realtimeMode === "webinar" &&
         !media?.canPublish &&
         (nextMic || nextCamera)
@@ -843,19 +879,6 @@ function ConnectedRoom({
       setPendingMedia(null);
     }
   }
-  async function send(event: React.FormEvent) {
-    event.preventDefault();
-    if (!body.trim()) return;
-    const response = await fetch(`/api/classes/${room.code}/chat`, {
-      method: "POST",
-      headers: { "content-type": "application/json" },
-      body: JSON.stringify({ body }),
-    });
-    if (response.ok) {
-      setBody("");
-      await load();
-    } else setError("Sign in as a member to send messages.");
-  }
   async function review(request: StageRequest, approve: boolean) {
     await fetch(`/api/classes/${room.code}/media`, {
       method: "POST",
@@ -888,20 +911,9 @@ function ConnectedRoom({
   return (
     <>
       <header className="class-room-controls">
-        <div>
-          <i className="live" />
-          <b>{lang === "zh" ? "直播课程" : "Live course room"}</b>
-          <small>
-            {room.realtimeMode === "group_call"
-              ? "Group call · 100"
-              : room.realtimeMode === "webinar"
-                ? "Webinar · 9 on stage"
-                : "Livestream · 9 speakers"}
-            {` · ${formatConnectionDuration(connectedSeconds)}`}
-          </small>
-        </div>
+        <span className="sr-only">{room.title}</span>
         <nav>
-          <button
+          {(room.realtimeMode !== "livestream" || manager) && <button
             className={
               (pendingMedia?.mic ?? mic)
                 ? !pendingMedia && micLive
@@ -916,8 +928,8 @@ function ConnectedRoom({
             aria-label={lang === "zh" ? "麦克风" : "Microphone"}
           >
             <MicIcon />
-          </button>
-          {room.streamingMode === "video" && (
+          </button>}
+          {(room.realtimeMode !== "livestream" || manager) && room.streamingMode === "video" && (
             <button
               className={
                 (pendingMedia?.camera ?? camera)
@@ -935,7 +947,7 @@ function ConnectedRoom({
               <CameraIcon />
             </button>
           )}
-          {room.streamingMode === "audio" &&
+          {SHOW_ADVANCED_SHARE_BUTTONS && room.streamingMode === "audio" &&
           room.realtimeMode !== "livestream" ? (
             <ClassAudioScreenShare
               code={room.code}
@@ -946,7 +958,7 @@ function ConnectedRoom({
               onError={setError}
               apiBase="/api/classes"
             />
-          ) : (
+          ) : SHOW_ADVANCED_SHARE_BUTTONS ? (
             <ClassScreenShareButton
               client={client}
               manager={manager && room.streamingMode === "video"}
@@ -962,8 +974,8 @@ function ConnectedRoom({
                 }
               }}
             />
-          )}{" "}
-          {room.streamingMode === "video" && (
+          ) : null}{" "}
+          {SHOW_ADVANCED_SHARE_BUTTONS && room.streamingMode === "video" && (
             <ClassVideoContentShare
               client={client}
               code={room.code}
@@ -978,22 +990,29 @@ function ConnectedRoom({
             />
           )}
           <button
-            className={
-              listening ? (playbackConfirmed ? "on" : "pending") : ""
-            }
+            className={speakerAppearance.green ? "on" : speakerAppearance.orange ? "pending" : ""}
             onClick={() => {
-              setListening((value) => !value);
+              setListening(!listening);
               setBlocked(false);
             }}
             aria-label={lang === "zh" ? "扬声器" : "Device speaker"}
+            aria-pressed={speakerAppearance.pressed}
           >
             <SpeakerIcon off={!listening} />
+            {listening && playbackConfirmed ? <span>{formatConnectionDuration(connectedSeconds)}</span> : null}
+            {listening && !playbackConfirmed && onlineCount <= 1 ? <span className="sr-only">{lang === "zh" ? "等待加入" : "Waiting for members"}</span> : null}
           </button>
-          <button className="leave" onClick={() => setConfirmLeave(true)}>
-            {lang === "zh" ? "离开" : "Leave"}
+          <button type="button" onClick={()=>{setUsersOpen(false);onResourcePanelChange(resourcePanel==="recordings"?null:"recordings");}} aria-label={lang==="zh"?"课程录音":"Course recordings"}><AudioFileIcon/></button>
+          <button type="button" onClick={()=>{setUsersOpen(false);onResourcePanelChange(resourcePanel==="files"?null:"files");}} aria-label={lang==="zh"?"课程附件":"Course attachments"}><PaperclipIcon/></button>
+          <button type="button" onClick={()=>{onResourcePanelChange(null);setUsersOpen(true);}} aria-label={lang==="zh"?`用户，在线 ${onlineMembers.length}`:`Members, ${onlineMembers.length} online`}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M15 15c3 0 5 2 5 5" fill="none" stroke="currentColor" strokeWidth="1.8"/></svg>
+          </button>
+          <button className="leave" onClick={() => setConfirmLeave(true)} aria-label={lang === "zh" ? "挂断并离开" : "Hang up and leave"}>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.2 11.3a15.4 15.4 0 0 1 19.6 0c.7.6.8 1.7.2 2.4l-1.8 2.2a1.7 1.7 0 0 1-2.1.4l-2.9-1.5a1.7 1.7 0 0 1-.9-1.5v-1.8a14 14 0 0 0-4.6 0v1.8a1.7 1.7 0 0 1-.9 1.5l-2.9 1.5a1.7 1.7 0 0 1-2.1-.4L2 13.7c-.6-.7-.5-1.8.2-2.4Z" fill="currentColor" stroke="none" /></svg>
           </button>
         </nav>
       </header>
+      {usersOpen&&<ClassRoomMembers members={onlineMembers} lang={lang} onClose={()=>setUsersOpen(false)}/>}
       {confirmLeave && (
         <div className="media-idle-backdrop" role="presentation">
           <section className="media-idle-dialog" role="dialog" aria-modal="true">
@@ -1010,6 +1029,7 @@ function ConnectedRoom({
           {error}
         </p>
       )}
+      {room.streamingMode === "audio" && room.realtimeMode === "group_call" && <RoomPresenceTicker scope={room.code} events={presenceEvents} fallback={lang === "zh" ? "等待成员进入会议室" : "Waiting for members to enter the room"}/>}
       {blocked && (
         <button
           className="class-audio-unlock"
@@ -1021,7 +1041,7 @@ function ConnectedRoom({
           {lang === "zh" ? "开始收听" : "Start listening"}
         </button>
       )}
-      {room.streamingMode === "video" && (
+      {room.streamingMode === "video" && onlineCount > 1 && (
         <ClassScreenShareStage
           client={client}
           lang={lang}
@@ -1040,14 +1060,16 @@ function ConnectedRoom({
           <ParticipantsAudio
             client={client}
             enabled={listening}
+            manualReady={manualReady}
             onBlocked={onPlaybackBlocked}
             onPlaybackChange={onPlaybackChange}
           />
-          {room.streamingMode === "video" && (
+          {room.streamingMode === "video" && onlineCount > 1 && (
             <VideoGrid
               client={client}
               localName={displayName}
               mediaUsers={media?.users || []}
+              manualReady={manualReady}
             />
           )}
         </>
@@ -1096,31 +1118,18 @@ function ConnectedRoom({
           ))}
         </section>
       )}
+      <div className="class-streaming-users" role="group" aria-label={lang === "zh" ? "正在推流的会员" : "Members streaming"}>
+        {(media?.users || []).filter(user => user.micOn || user.cameraOn).map(user => (
+          <button key={user.identity} type="button" onClick={() => chatRef.current?.mention(user.displayName)}>
+            {user.displayName.trim()}
+          </button>
+        ))}
+      </div>
       <section className="class-chat">
-        <header>
-          <h2>Course chat</h2>
-          <span>{media?.users.length || 0} online</span>
-        </header>
-        <div>
-          {messages.map((message) => (
-            <article key={message.id}>
-              <b>{message.senderName}</b>
-              <p>{message.body}</p>
-              <small>
-                {new Date(message.createdAt * 1000).toLocaleTimeString()}
-              </small>
-            </article>
-          ))}
-        </div>
-        <form onSubmit={send}>
-          <textarea
-            value={body}
-            onChange={(event) => setBody(event.target.value)}
-            placeholder={lang === "zh" ? "输入消息…" : "Write a message…"}
-          />
-          <button>{lang === "zh" ? "发送" : "Send"}</button>
-        </form>
+        <header><h2>{lang === "zh" ? "私密支持聊天" : "Private support chat"}</h2><small>{lang === "zh" ? "仅发送者与主持团队可见" : "Visible to sender and host team only"}</small></header>
+        <ClassPrivateChat ref={chatRef} code={room.code} tabId={roomTabId} locale={lang} supportAgent={manager} reportError={setError}/>
       </section>
+      <p className="class-chat-retention">{lang === "zh" ? "聊天消息仅保留 7 天，请提前保存需要的内容。" : "Chat messages are retained for seven days only. Save anything you need beforehand."}</p>
     </>
   );
 }
@@ -1138,6 +1147,18 @@ export function ClassRoomClient({
 }) {
   const [client, initClient] = useRealtimeKitClient({ resetOnLeave: true }),
     [joined, setJoined] = useState(false),
+    [roomTabId] = useState(() => crypto.randomUUID()),
+    [onlineCount, setOnlineCount] = useState(0),
+    [presenceConfirmed,setPresenceConfirmed] = useState(false),
+    [presenceRevision,setPresenceRevision] = useState(0),
+    [onlineMembers,setOnlineMembers] = useState<OnlineMember[]>([]),
+    [waitingUsersOpen,setWaitingUsersOpen] = useState(false),
+    [speakerEnabled,setSpeakerEnabled] = useState(true),
+    [resourcePanel,setResourcePanel] = useState<ResourcePanel>(null),
+    [resourceBusy,setResourceBusy] = useState(false),
+    [presenceEvents, setPresenceEvents] = useState<RoomPresenceEvent[]>([]),
+    [roomAdmissionError, setRoomAdmissionError] = useState(""),
+    [waitingIntent, setWaitingIntent] = useState<{mic:boolean;camera:boolean}|null>(null),
     [localPublisherStarted, setLocalPublisherStarted] = useState(false),
     [role, setRole] = useState<Role>("viewer"),
     [mic, setMic] = useState(false),
@@ -1157,7 +1178,55 @@ export function ClassRoomClient({
     }),
     joining = useRef(false),
     mediaOperationBusy = useRef(false),
-    mediaIntent = useRef({ mic: false, camera: false });
+    mediaIntent = useRef({ mic: false, camera: false }),
+    previousOnlineMembers = useRef(new Map<string,string>()),
+    presenceSequence = useRef(0),
+    lastWaitingJoinAttempt = useRef(0),
+    leavingRoom = useRef(false),
+    presenceInFlight = useRef<Promise<void>|null>(null);
+  useEffect(() => {
+    let active=true;
+    const endpoint=`/api/classes/${room.code}/room-presence`;
+    const poll=()=>{
+      if(presenceInFlight.current||leavingRoom.current)return;
+      const task=(async()=>{try {
+        const claim=await fetch(endpoint,{method:"POST",headers:{"content-type":"application/json"},body:JSON.stringify({action:"heartbeat",tabId:roomTabId}),cache:"no-store"});
+        if(!active)return;
+        if(!claim.ok){
+          setPresenceConfirmed(false);
+          const failure=await claim.json().catch(()=>({})) as {errorCode?:string};
+          setRoomAdmissionError(failure.errorCode==="ALREADY_IN_ROOM"?(lang==="zh"?"此账号已在另一设备进入该课程。":"This account is already in the room on another device."):(lang==="zh"?"无法确认在线状态，请重试。":"Could not verify room presence. Try again."));
+          return;
+        }
+        const status=await fetch(endpoint,{cache:"no-store"});
+        if(active&&status.ok){
+          setPresenceConfirmed(true);
+          setRoomAdmissionError("");
+          const snapshot=await status.json() as {onlineCount:number;members:OnlineMember[]};
+          setOnlineCount(Number(snapshot.onlineCount||0));
+          setPresenceRevision(value=>value+1);
+          setOnlineMembers(snapshot.members||[]);
+          const next=new Map((snapshot.members||[]).map(member=>[member.userId,member.displayName]));
+          const changes=roomPresenceChanges(previousOnlineMembers.current,next,presenceSequence.current,lang==="zh");
+          previousOnlineMembers.current=next;
+          if(changes.length){presenceSequence.current=changes.at(-1)!.sequence;setPresenceEvents(current=>[...current,...changes].slice(-20));}
+        } else if(active) {
+          setPresenceConfirmed(false);
+          setRoomAdmissionError(lang==="zh"?"无法确认在线人数，请重试。":"Could not verify room members. Try again.");
+        }
+      } catch {if(active){setPresenceConfirmed(false);setRoomAdmissionError(lang==="zh"?"在线状态连接中断。":"Room presence connection was interrupted.");}}})();
+      presenceInFlight.current=task;
+      void task.finally(()=>{if(presenceInFlight.current===task)presenceInFlight.current=null;});
+    };
+    poll();
+    const timer=window.setInterval(poll,3_000);
+    const visible=()=>{if(document.visibilityState==="visible")poll();};
+    document.addEventListener("visibilitychange",visible);
+    return()=>{active=false;window.clearInterval(timer);document.removeEventListener("visibilitychange",visible);
+      const body=new Blob([JSON.stringify({action:"leave",tabId:roomTabId})],{type:"application/json"});
+      if(!navigator.sendBeacon(endpoint,body))void fetch(endpoint,{method:"POST",body,keepalive:true});
+    };
+  },[lang,room.code,roomTabId]);
   useEffect(() => {
     mediaIntent.current = { mic, camera };
   }, [camera, mic]);
@@ -1218,6 +1287,7 @@ export function ClassRoomClient({
       preparedVideoTrack?: MediaStreamTrack;
     } = {}) => {
       if (joining.current) return;
+      if (roomAdmissionError) return;
       joining.current = true;
       setConnecting(true);
       setError("");
@@ -1227,11 +1297,11 @@ export function ClassRoomClient({
             method: "POST",
             headers: { "content-type": "application/json" },
             body: JSON.stringify({
-              displayName,
               identity,
               password: entryPassword,
               start,
               publish,
+              tabId: roomTabId,
             }),
           }),
           data = (await response.json().catch(() => ({}))) as {
@@ -1240,7 +1310,7 @@ export function ClassRoomClient({
             error?: string;
           };
         if (!response.ok || !data.authToken) {
-          if (data.error !== "STREAM_NOT_ACTIVE")
+          if (data.error !== "STREAM_NOT_ACTIVE" && data.error !== "Waiting for another member" && data.error !== "Provider room is starting" && data.error !== "Provider room is closing")
             setError(data.error || "Unable to connect");
           return;
         }
@@ -1301,7 +1371,7 @@ export function ClassRoomClient({
         setConnecting(false);
       }
     },
-    [client, disconnect, displayName, entryPassword, identity, initClient, joined, room.code],
+    [client, disconnect, entryPassword, identity, initClient, joined, room.code, roomTabId, roomAdmissionError],
   );
   const changeMedia = useCallback(
     async (nextMic: boolean, nextCamera: boolean) => {
@@ -1392,6 +1462,45 @@ export function ClassRoomClient({
     [camera, client, connect, identity, joined, mic, role, room.code],
   );
   useEffect(() => {
+    if (!waitingIntent || roomAdmissionError || !presenceConfirmed || resourceBusy) return;
+    const now=Date.now();
+    if(!shouldJoinGroupAudioLobby({ready:true,onlineCount,joined,busy:connecting||joining.current,now,lastAttemptAt:lastWaitingJoinAttempt.current}))return;
+    lastWaitingJoinAttempt.current=now;
+    const intent=waitingIntent;
+    void changeMedia(intent.mic,intent.camera).catch(issue=>setError(issue instanceof Error?issue.message:"Unable to start media"));
+  },[changeMedia,connecting,joined,onlineCount,presenceRevision,presenceConfirmed,resourceBusy,roomAdmissionError,waitingIntent]);
+  useEffect(()=>{if(joined&&waitingIntent)setWaitingIntent(null);},[joined,waitingIntent]);
+  useEffect(() => {
+    if(!joined||onlineCount>1)return;
+    const timer=window.setTimeout(async()=>{
+      const status=await fetch(`/api/classes/${room.code}/room-presence`,{cache:"no-store"}).catch(()=>null);
+      if(!status?.ok)return;
+      const count=Number(((await status.json()) as {onlineCount:number}).onlineCount||0);
+      if(count>1)return;
+      const intent=mediaIntent.current;
+      await disconnect(true);
+      if(intent.mic||intent.camera)setWaitingIntent(intent);
+    },9_000);
+    return()=>window.clearTimeout(timer);
+  },[disconnect,joined,onlineCount,room.code,room.realtimeMode]);
+  useEffect(() => {
+    if(!joined||presenceConfirmed)return;
+    let active=true;
+    let timer:number|undefined;
+    const check=()=>{
+      if(!active)return;
+      const hasRemote=Boolean(client?.participants.joined.toArray()
+        .some(peer=>peer.id!==client.self.id));
+      if(hasRemote){timer=window.setTimeout(check,3_000);return;}
+      const intent=mediaIntent.current;
+      void disconnect(true).then(()=>{
+        if(active&&(intent.mic||intent.camera))setWaitingIntent(intent);
+      });
+    };
+    timer=window.setTimeout(check,18_000);
+    return()=>{active=false;if(timer!==undefined)window.clearTimeout(timer);};
+  },[client,disconnect,joined,presenceConfirmed]);
+  useEffect(() => {
     if (!joined || !client) {
       setLocalTrackHealth({ audio: false, video: false });
       return;
@@ -1478,9 +1587,15 @@ export function ClassRoomClient({
     }).catch(() => undefined);
   }, [identity, room.code]);
   const leave = useCallback(async () => {
+    leavingRoom.current=true;
+    await presenceInFlight.current?.catch(()=>undefined);
     await disconnect(true);
+    await fetch(`/api/classes/${room.code}/room-presence`,{
+      method:"POST",headers:{"content-type":"application/json"},
+      body:JSON.stringify({action:"leave",tabId:roomTabId}),keepalive:true,
+    }).catch(()=>undefined);
     window.location.assign(`/${lang}/classes/${room.code}`);
-  }, [disconnect, lang, room.code]);
+  }, [disconnect, lang, room.code,roomTabId]);
   const confirmStillAlone = useCallback(async () => {
     try {
       const response = await fetch(
@@ -1512,13 +1627,7 @@ export function ClassRoomClient({
       setPlaylistEnabled(active);
       if (mediaState) {
         setHostOnline(Boolean(mediaState.hostOnline) || manager);
-        setHasAudience(
-          manager
-            ? mediaState.users.some(
-                (user) => user.identity !== identity && !user.isManager,
-              )
-            : mediaState.users.some((user) => user.identity !== identity),
-        );
+        setHasAudience(onlineCount>1);
         const nextHumanStreamActive = Boolean(
           mediaState.users?.some((user) =>
             Boolean(user.micOn || user.cameraOn),
@@ -1527,13 +1636,12 @@ export function ClassRoomClient({
         setHumanStreamActive(nextHumanStreamActive);
         if (nextHumanStreamActive) setHumanStreamSeen(true);
       }
-      if (mediaState && shouldAutoJoinClassRoom(mediaState) && !joined && !joining.current)
+      if (mediaState && shouldAutoJoinClassRoom(mediaState) && onlineCount>1 && !roomAdmissionError && !joined && !joining.current)
         void connect();
       if (
         mediaState &&
         !mediaState.streamActive &&
-        joined &&
-        !manager
+        joined
       )
         void disconnect(true);
     };
@@ -1548,7 +1656,7 @@ export function ClassRoomClient({
       window.clearInterval(poll);
       document.removeEventListener("visibilitychange", visible);
     };
-  }, [connect, disconnect, identity, joined, manager, room.code]);
+  }, [connect, disconnect, identity, joined, manager, onlineCount, room.code, roomAdmissionError]);
   useEffect(() => {
     if (!joined || manager || hostOnline) return;
     const timer = window.setTimeout(() => {
@@ -1597,28 +1705,41 @@ export function ClassRoomClient({
       <>
         {managerPanel}
         {waitingPlaylist}
+        <header className="class-room-controls">
+          <span className="sr-only">{room.title}</span>
+          <nav>
+            {(manager || room.realtimeMode === "group_call") && <button className={waitingIntent?.mic ? "pending" : ""} disabled={Boolean(roomAdmissionError)||!presenceConfirmed} onClick={() => setWaitingIntent(current => {const next={mic:!current?.mic,camera:Boolean(current?.camera)};return next.mic||next.camera?next:null;})} aria-label={lang === "zh" ? "麦克风" : "Microphone"}><MicIcon /></button>}
+            {(manager || room.realtimeMode === "group_call") && room.streamingMode === "video" && <button className={waitingIntent?.camera ? "pending" : ""} disabled={Boolean(roomAdmissionError)||!presenceConfirmed} onClick={() => setWaitingIntent(current => {const next={mic:Boolean(current?.mic),camera:!current?.camera};return next.mic||next.camera?next:null;})} aria-label={lang === "zh" ? "摄像头" : "Camera"}><CameraIcon /></button>}
+            <button type="button" className={speakerEnabled ? "pending" : ""} aria-pressed={speakerEnabled} aria-label={speakerEnabled ? (lang === "zh" ? "等待加入，点击关闭扬声器" : "Waiting for members; turn speaker off") : (lang === "zh" ? "扬声器已关闭，点击开启" : "Speaker off; turn on")} onClick={()=>setSpeakerEnabled(value=>!value)}><SpeakerIcon off={!speakerEnabled}/><span>{speakerEnabled ? (lang === "zh" ? "等待加入" : "Waiting for members") : (lang === "zh" ? "已关闭" : "Off")}</span></button>
+            <button type="button" onClick={()=>{setWaitingUsersOpen(false);setResourcePanel(value=>value==="recordings"?null:"recordings");}} aria-label={lang==="zh"?"课程录音":"Course recordings"}><AudioFileIcon/></button>
+            <button type="button" onClick={()=>{setWaitingUsersOpen(false);setResourcePanel(value=>value==="files"?null:"files");}} aria-label={lang==="zh"?"课程附件":"Course attachments"}><PaperclipIcon/></button>
+            <button type="button" onClick={()=>{setResourcePanel(null);setWaitingUsersOpen(true);}} aria-label={lang === "zh" ? `用户，在线 ${onlineCount}` : `Members, ${onlineCount} online`}><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="9" cy="8" r="3"/><circle cx="17" cy="9" r="2"/><path d="M3 20c0-4 3-6 6-6s6 2 6 6M15 15c3 0 5 2 5 5" fill="none" stroke="currentColor" strokeWidth="1.8"/></svg></button>
+            <button className="leave" onClick={() => void leave()} aria-label={lang === "zh" ? "挂断并离开" : "Hang up and leave"}>
+              <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.2 11.3a15.4 15.4 0 0 1 19.6 0c.7.6.8 1.7.2 2.4l-1.8 2.2a1.7 1.7 0 0 1-2.1.4l-2.9-1.5a1.7 1.7 0 0 1-.9-1.5v-1.8a14 14 0 0 0-4.6 0v1.8a1.7 1.7 0 0 1-.9 1.5l-2.9 1.5a1.7 1.7 0 0 1-2.1-.4L2 13.7c-.6-.7-.5-1.8.2-2.4Z" fill="currentColor" stroke="none" /></svg>
+            </button>
+          </nav>
+        </header>
+        {waitingUsersOpen&&<ClassRoomMembers members={onlineMembers} lang={lang} onClose={()=>setWaitingUsersOpen(false)}/>}
         <section className="class-waiting">
           <span className="stream-spinner" />
           <h2>
             {connecting
-              ? "Connecting…"
+              ? lang === "zh" ? "正在连接…" : "Connecting…"
               : manager
-                ? "Start the live course room"
-                : "Waiting for live course room"}
+                ? lang === "zh" ? "等待课程直播开始" : "Waiting to start the live course room"
+                : lang === "zh" ? "等待课程直播开始" : "Waiting for the live course room"}
           </h2>
           <p>
             {manager
-              ? "Start this site's independent live media session. Microphone and camera remain off until selected."
-              : "You join automatically as a viewer when streaming starts. No device permission is requested."}
+              ? lang === "zh" ? "其他成员进入后，所选的麦克风或摄像头将开始直播。" : "Your selected microphone or camera starts when another member enters."
+              : lang === "zh" ? "直播开始后将自动加入收听，无需开放设备权限。" : "You join automatically as a viewer when streaming starts. No device permission is requested."}
           </p>
-          {(manager || room.realtimeMode === "group_call") && (
-            <div className="class-waiting-media-actions">
-              <button disabled={connecting} onClick={() => void changeMedia(true, false)} aria-label={lang === "zh" ? "开启麦克风" : "Turn on microphone"}><MicIcon /></button>
-              {room.streamingMode === "video" && <button disabled={connecting} onClick={() => void changeMedia(false, true)} aria-label={lang === "zh" ? "开启摄像头" : "Turn on camera"}><CameraIcon /></button>}
-            </div>
-          )}
+          {roomAdmissionError && <p role="alert">{roomAdmissionError}</p>}
           {error && <p role="alert">{error}</p>}
         </section>
+        {room.streamingMode === "audio" && room.realtimeMode === "group_call" && <RoomPresenceTicker scope={room.code} events={presenceEvents} fallback={lang === "zh" ? "等待成员进入会议室" : "Waiting for members to enter the room"}/>}
+        {presenceConfirmed && !roomAdmissionError && <section className="class-chat"><header><h2>{lang === "zh" ? "私密支持聊天" : "Private support chat"}</h2><small>{lang === "zh" ? "仅发送者与主持团队可见" : "Visible to sender and host team only"}</small></header><ClassPrivateChat code={room.code} tabId={roomTabId} locale={lang} supportAgent={manager} reportError={setError}/></section>}
+        <ClassRoomResources code={room.code} lang={lang} manager={manager} roomTabId={roomTabId} selfStreaming={false} panel={resourcePanel} onClose={()=>setResourcePanel(null)} onLocalNoteBusyChange={setResourceBusy}/>
       </>
     );
   return (
@@ -1654,8 +1775,17 @@ export function ClassRoomClient({
           lang={lang}
           onMedia={changeMedia}
           onLeave={() => void leave()}
+          onlineCount={onlineCount}
+          presenceEvents={presenceEvents}
+          roomTabId={roomTabId}
+          onlineMembers={onlineMembers}
+          speakerEnabled={speakerEnabled}
+          onSpeakerEnabled={setSpeakerEnabled}
+          resourcePanel={resourcePanel}
+          onResourcePanelChange={setResourcePanel}
         />
       </RealtimeKitProvider>
+      <ClassRoomResources code={room.code} lang={lang} manager={manager} roomTabId={roomTabId} selfStreaming={mic||camera} panel={resourcePanel} onClose={()=>setResourcePanel(null)} onLocalNoteBusyChange={setResourceBusy}/>
     </>
   );
 }

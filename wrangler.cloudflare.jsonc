@@ -8,6 +8,7 @@
   ],
   "workers_dev": true,
   "preview_urls": true,
+  "triggers": { "crons": ["* * * * *"] },
   "keep_vars": true,
   "routes": [
     {

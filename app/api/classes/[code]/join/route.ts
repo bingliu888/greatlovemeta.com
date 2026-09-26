@@ -5,9 +5,12 @@ import {
   verifyClassEntryPassword,
 } from "@/lib/classrooms";
 import { createId, getDatabase, getSessionUser } from "@/lib/auth";
+import { classRoomOnlineMembers, hasClassRoomMemberTab, ROOM_TAB_ID } from "@/lib/class-room-member-presence";
+import { CLAIM_CLASS_PROVIDER_ROOM_SQL } from "@/lib/class-provider-room-claim";
+import { createClaimedClassProviderRoom, reconcileClassProviderRoom } from "@/lib/class-provider-lifecycle";
+import { classPublisherStartsAuthorized } from "@/lib/class-publishing-policy";
 import {
   createClassParticipant,
-  createClassProviderRoom,
 } from "@/lib/class-realtimekit";
 
 export async function POST(
@@ -15,49 +18,83 @@ export async function POST(
   { params }: { params: Promise<{ code: string }> },
 ) {
   try {
-    const { code } = await params,
-      room = await classByCode(code);
+    const { code } = await params;
+    let room = await classByCode(code);
     if (!room)
       return Response.json({ error: "Course not found" }, { status: 404 });
+    await reconcileClassProviderRoom(room.id);
+    room = await classByCode(code);
+    if (!room) return Response.json({error:"Course not found"},{status:404});
     const body = (await request.json().catch(() => ({}))) as {
-        displayName?: string;
         password?: string;
         identity?: string;
         publish?: boolean;
         start?: boolean;
         screenShareCompanion?: boolean;
+        tabId?: string;
       },
       user = await getSessionUser(request),
       access = await classAccess(room, user, true);
+    if (!user) return Response.json({error:"Sign in required"},{status:401});
     if (!access.allowed)
       return Response.json(
         { error: "Private course invitation required" },
         { status: 403 },
       );
+    const tabId=String(body.tabId||"");
+    if(!ROOM_TAB_ID.test(tabId)||!await hasClassRoomMemberTab(room.id,user.id,tabId))
+      return Response.json({error:"Enter the room on this device first",errorCode:"ROOM_PRESENCE_REQUIRED"},{status:409});
+    if((body.publish||body.start||body.screenShareCompanion)&&(await classRoomOnlineMembers(room.id)).length<2)
+      return Response.json({error:"Waiting for another member",errorCode:"WAITING_FOR_MEMBER"},{status:409});
     if (room.hasPassword && !access.manager && !await verifyClassEntryPassword(code, String(body.password || "")))
       return Response.json({ error: "Incorrect course password", errorCode: "INCORRECT_CLASS_PASSWORD" }, { status: 403 });
     const db = getDatabase(),
       now = Math.floor(Date.now() / 1000),
       identity = String(body.identity || crypto.randomUUID()).slice(0, 100),
-      displayName =
-        String(body.displayName || user?.displayName || "Guest")
-          .trim()
-          .slice(0, 80) || "Guest";
+      displayName = String(user.displayName || user.email || "Member")
+        .trim().slice(0,80);
+    let canPublish=classPublisherStartsAuthorized(room.realtimeMode,access.manager);
+    if(!canPublish&&room.realtimeMode==="webinar")
+      canPublish=Boolean(await db.prepare(`SELECT 1 FROM class_stage_requests
+        WHERE room_id=? AND identity=? AND user_id=? AND status='approved' LIMIT 1`)
+        .bind(room.id,identity,user.id).first());
+    if(!canPublish&&room.realtimeMode==="livestream")
+      canPublish=Boolean(await db.prepare(`SELECT 1 FROM class_stage_speakers
+        WHERE room_id=? AND lower(member_email)=lower(?) LIMIT 1`)
+        .bind(room.id,user.email).first());
+    if(body.publish&&!canPublish)
+      return Response.json({error:room.realtimeMode==="webinar"?
+        "Raise your hand and wait for host approval":
+        "The host has not added this member email as a speaker",
+        errorCode:"STAGE_ACCESS_REQUIRED"},{status:403});
+    const pending=await db.prepare(`SELECT provider_meeting_id AS providerMeetingId
+      FROM class_provider_teardown_jobs WHERE room_id=? LIMIT 1`).bind(room.id)
+      .first<{providerMeetingId:string}>();
+    if(pending)return Response.json({error:"Provider room is closing",
+      errorCode:"PROVIDER_ROOM_CLOSING"},{status:409});
     let providerMeetingId = room.providerMeetingId;
     if (
       body.publish &&
-      (access.manager || room.realtimeMode === "group_call") &&
+      canPublish &&
       !room.streamActive &&
       !providerMeetingId
     ) {
-      const created = await createClassProviderRoom(room.title);
-      providerMeetingId = created.id;
-      await db
-        .prepare(
-          "UPDATE class_rooms SET provider_meeting_id=?,stream_active=1,mute_all=0,updated_at=? WHERE id=?",
-        )
-        .bind(providerMeetingId, now, room.id)
-        .run();
+      const claimToken=crypto.randomUUID();
+      const claimed=await db.prepare(CLAIM_CLASS_PROVIDER_ROOM_SQL)
+        .bind(room.id,claimToken,now,now-60).run();
+      if(Number(claimed.meta?.changes||0)<1)
+        return Response.json({error:"Provider room is starting",errorCode:"PROVIDER_ROOM_STARTING"},{status:409});
+      try {
+        const current=await db.prepare("SELECT provider_meeting_id AS providerMeetingId FROM class_rooms WHERE id=?")
+          .bind(room.id).first<{providerMeetingId:string|null}>();
+        if(current?.providerMeetingId)providerMeetingId=current.providerMeetingId;
+        else {
+          providerMeetingId=await createClaimedClassProviderRoom(room.id,room.title,now);
+        }
+      } finally {
+        await db.prepare("DELETE FROM class_provider_room_claims WHERE room_id=? AND claim_token=?")
+          .bind(room.id,claimToken).run();
+      }
     }
     if (!providerMeetingId || (!room.streamActive && !body.start && !body.publish))
       return Response.json({ error: "STREAM_NOT_ACTIVE" }, { status: 409 });
@@ -69,10 +106,11 @@ export async function POST(
         );
       const participant = await createClassParticipant(
         providerMeetingId,
-        "screenshare-" + (user?.id || crypto.randomUUID()),
+        "screenshare-" + user.id,
         displayName + " · Screen",
         access.manager ? "host" : "viewer",
         room.realtimeMode,
+        room.streamingMode,
       );
       return Response.json({
         authToken: participant.token,
@@ -105,31 +143,7 @@ export async function POST(
         },
         { status: 409 },
       );
-    let role: "viewer" | "member" | "host" = "viewer",
-      canPublish =
-        access.manager ||
-        room.classType === "private" ||
-        room.realtimeMode === "group_call";
-    if (room.realtimeMode === "webinar" && !canPublish) {
-      canPublish = Boolean(
-        await db
-          .prepare(
-            "SELECT 1 FROM class_stage_requests WHERE room_id=? AND identity=? AND status='approved' LIMIT 1",
-          )
-          .bind(room.id, identity)
-          .first(),
-      );
-    }
-    if (room.realtimeMode === "livestream" && !canPublish && user) {
-      canPublish = Boolean(
-        await db
-          .prepare(
-            "SELECT 1 FROM class_stage_speakers WHERE room_id=? AND lower(member_email)=lower(?) LIMIT 1",
-          )
-          .bind(room.id, user.email)
-          .first(),
-      );
-    }
+    let role: "viewer" | "member" | "host" = "viewer";
     if (access.manager) role = "host";
     else if (body.publish) {
       if (!canPublish)
@@ -164,6 +178,7 @@ export async function POST(
       displayName,
       role,
       room.realtimeMode,
+      room.streamingMode,
     );
     await db
       .prepare(
@@ -173,13 +188,13 @@ export async function POST(
         createId(),
         room.id,
         identity,
-        user?.id || null,
+        user.id,
         displayName,
-        user ? 1 : 0,
+        1,
         now,
       )
       .run();
-    if (user) await recordClassJoin(user.id, room.id, now);
+    await recordClassJoin(user.id, room.id, now);
     return Response.json({
       authToken: participant.token,
       identity,

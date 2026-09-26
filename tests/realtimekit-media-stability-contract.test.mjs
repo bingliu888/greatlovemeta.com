@@ -13,11 +13,12 @@ test("classroom controls use live tracks and independently repair receivers", ()
 
   assert.match(client, /createLocalMediaHealthMonitor/);
   assert.match(client, /createRemoteMediaRecovery/);
-  assert.match(client, /participants\.subscribe\(ids, \["audio"\]\)/);
-  assert.match(client, /participants\.subscribe\(ids, \["video"\]\)/);
-  assert.doesNotMatch(client, /participants\.subscribe\(ids, \["audio", "video"\]\)/);
+  assert.match(client, /participants\.subscribe\(ids,\s*\["audio"\]\)/);
+  assert.match(client, /participants\.subscribe\(ids,\s*\["video"\]\)/);
+  assert.doesNotMatch(client, /participants\.subscribe\(ids,\s*\["audio",\s*"video"\]\)/);
   assert.match(client, /pendingMedia\?\.mic \?\? mic/);
-  assert.match(client, /playbackConfirmed \? "on" : "pending"/);
+  assert.match(client, /speakerPlaybackState\(\{/);
+  assert.match(client, /speakerControlAppearance\(speakerState\)/);
   assert.match(client, /mediaOperationBusy\.current/);
   assert.match(client, /addingSecondDevice/);
   assert.match(css, /button\.pending\{border-color:#d86b19;background:#e77820/);

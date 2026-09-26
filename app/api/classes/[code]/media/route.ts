@@ -1,18 +1,22 @@
 import { classAccess, classByCode } from "@/lib/classrooms";
 import { createId, getDatabase, getSessionUser } from "@/lib/auth";
+import { processClassProviderTeardown, queueClassProviderTeardown,
+  reconcileClassProviderRoom } from "@/lib/class-provider-lifecycle";
+import { classPublisherStartsAuthorized } from "@/lib/class-publishing-policy";
 
 export async function GET(
   request: Request,
   { params }: { params: Promise<{ code: string }> },
 ) {
-  const { code } = await params,
-    room = await classByCode(code);
+  const { code } = await params;
+  let room = await classByCode(code);
   if (!room) return Response.json({ error: "Not found" }, { status: 404 });
   const identity = String(
       new URL(request.url).searchParams.get("identity") || "",
     ).slice(0, 100),
     user = await getSessionUser(request),
     access = await classAccess(room, user, true);
+  if (!user) return Response.json({error:"Sign in required"},{status:401});
   if (!access.allowed)
     return Response.json({ error: "Access denied" }, { status: 403 });
   const now = Math.floor(Date.now() / 1000),
@@ -23,22 +27,9 @@ export async function GET(
     )
     .bind(room.id, now - 45)
     .run();
-  const activePresence = await db
-    .prepare(
-      "SELECT 1 AS active FROM class_media_presence WHERE room_id=? AND active=1 AND (mic_on=1 OR camera_on=1) AND last_seen_at>? LIMIT 1",
-    )
-    .bind(room.id, now - 45)
-    .first<{ active: number }>();
-  let streamActive = Boolean(room.streamActive);
-  if (streamActive && !activePresence && room.updatedAt <= now - 45) {
-    await db
-      .prepare(
-        "UPDATE class_rooms SET stream_active=0,provider_meeting_id=NULL,mute_all=0,updated_at=? WHERE id=? AND stream_active=1 AND updated_at<=?",
-      )
-      .bind(now, room.id, now - 45)
-      .run();
-    streamActive = false;
-  }
+  await reconcileClassProviderRoom(room.id,now);
+  room=(await classByCode(code))||room;
+  const streamActive=Boolean(room.streamActive);
   const users = (await db
     .prepare(
       "SELECT identity,user_id AS userId,display_name AS displayName,is_member AS isMember,mic_on AS micOn,camera_on AS cameraOn,last_seen_at AS lastSeenAt FROM class_media_presence WHERE room_id=? AND active=1 ORDER BY display_name LIMIT 1000",
@@ -99,10 +90,7 @@ export async function GET(
             .run()
         ).results || []
       : [];
-  let canPublish =
-    access.manager ||
-    room.classType === "private" ||
-    room.realtimeMode === "group_call";
+  let canPublish = classPublisherStartsAuthorized(room.realtimeMode,access.manager);
   if (!canPublish && room.realtimeMode === "webinar" && identity)
     canPublish = Boolean(
       await db
@@ -164,6 +152,7 @@ export async function POST(
     db = getDatabase(),
     now = Math.floor(Date.now() / 1000),
     identity = String(body.identity || "").slice(0, 100);
+  if (!user) return Response.json({error:"Sign in required"},{status:401});
   if (body.action === "screen-share") {
     if (!access.manager)
       return Response.json(
@@ -203,9 +192,9 @@ export async function POST(
       return Response.json({ error: "Invalid stage request" }, { status: 400 });
     const presence = await db
       .prepare(
-        "SELECT user_id AS userId,display_name AS displayName FROM class_media_presence WHERE room_id=? AND identity=? AND active=1",
+        "SELECT user_id AS userId,display_name AS displayName FROM class_media_presence WHERE room_id=? AND identity=? AND user_id=? AND active=1",
       )
-      .bind(room.id, identity)
+      .bind(room.id, identity,user.id)
       .first<{ userId: string | null; displayName: string }>();
     if (!presence)
       return Response.json(
@@ -292,6 +281,11 @@ export async function POST(
   }
   if (!identity)
     return Response.json({ error: "Identity required" }, { status: 400 });
+  if(["heartbeat","leave","media"].includes(body.action||"")){
+    const own=await db.prepare("SELECT 1 FROM class_media_presence WHERE room_id=? AND identity=? AND user_id=? LIMIT 1")
+      .bind(room.id,identity,user.id).first();
+    if(!own)return Response.json({error:"Participant session not found"},{status:403});
+  }
   if (body.action === "heartbeat") {
     await db
       .prepare(
@@ -308,6 +302,8 @@ export async function POST(
     return Response.json({ ok: true });
   }
   if (body.action === "leave") {
+    const leavingPublisher=await db.prepare("SELECT 1 FROM class_media_presence WHERE room_id=? AND identity=? AND active=1 AND (mic_on=1 OR camera_on=1) LIMIT 1")
+      .bind(room.id,identity).first();
     await db
       .prepare(
         "UPDATE class_media_presence SET active=0,mic_on=0,camera_on=0,last_seen_at=? WHERE room_id=? AND identity=?",
@@ -326,25 +322,26 @@ export async function POST(
       )
       .bind(room.id, now - 45)
       .first<{ count: number }>();
-    if (
-      Number(remaining?.count || 0) === 0 ||
-      (access.manager && Number(activePublishers?.count || 0) === 0)
-    )
-      await db
-        .prepare(
-          "UPDATE class_rooms SET stream_active=0,provider_meeting_id=NULL,mute_all=0,updated_at=? WHERE id=?",
-        )
-        .bind(now, room.id)
-        .run();
+    if (Number(remaining?.count || 0) === 0&&room.providerMeetingId){
+      await queueClassProviderTeardown(room.id,room.providerMeetingId,now);
+      await processClassProviderTeardown(room.providerMeetingId);
+    }
+    else if(leavingPublisher&&Number(activePublishers?.count||0)===0)
+      await db.prepare("UPDATE class_rooms SET updated_at=? WHERE id=? AND stream_active=1")
+        .bind(now,room.id).run();
     return Response.json({ ok: true });
   }
   if (body.action === "media") {
     if (!access.allowed)
       return Response.json({ error: "Access denied" }, { status: 403 });
-    let allowed =
-      access.manager ||
-      room.classType === "private" ||
-      room.realtimeMode === "group_call";
+    if (body.mic || body.camera) {
+      const closing=await db.prepare(`SELECT 1 FROM class_provider_teardown_jobs
+        WHERE room_id=? AND provider_meeting_id=? LIMIT 1`)
+        .bind(room.id,room.providerMeetingId).first();
+      if(closing)return Response.json({error:"Provider room is closing",
+        errorCode:"PROVIDER_ROOM_CLOSING"},{status:409});
+    }
+    let allowed = classPublisherStartsAuthorized(room.realtimeMode,access.manager);
     if (!allowed && room.realtimeMode === "webinar")
       allowed = Boolean(
         await db
@@ -384,12 +381,20 @@ export async function POST(
         );
     }
     if (body.authorizeOnly) return Response.json({ ok: true });
+    const wasPublishing=!(body.mic||body.camera)&&Boolean(await db.prepare("SELECT 1 FROM class_media_presence WHERE room_id=? AND identity=? AND active=1 AND (mic_on=1 OR camera_on=1) LIMIT 1")
+      .bind(room.id,identity).first());
     await db
       .prepare(
         "UPDATE class_media_presence SET mic_on=?,camera_on=?,last_seen_at=?,active=1 WHERE room_id=? AND identity=?",
       )
       .bind(body.mic ? 1 : 0, body.camera ? 1 : 0, now, room.id, identity)
       .run();
+    if(wasPublishing){
+      const another=await db.prepare("SELECT 1 FROM class_media_presence WHERE room_id=? AND identity<>? AND active=1 AND (mic_on=1 OR camera_on=1) AND last_seen_at>? LIMIT 1")
+        .bind(room.id,identity,now-45).first();
+      if(!another)await db.prepare("UPDATE class_rooms SET updated_at=? WHERE id=? AND stream_active=1")
+        .bind(now,room.id).run();
+    }
     return Response.json({ ok: true });
   }
   return Response.json({ error: "Invalid action" }, { status: 400 });

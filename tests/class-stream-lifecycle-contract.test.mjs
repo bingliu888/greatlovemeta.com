@@ -5,9 +5,9 @@ import test from "node:test";
 const media = fs.readFileSync(new URL("../app/api/classes/[code]/media/route.ts", import.meta.url), "utf8");
 const client = fs.readFileSync(new URL("../components/class-room-client.tsx", import.meta.url), "utf8");
 
-test("the final manager publisher closes streaming even while viewers remain", () => {
+test("the final publisher closes streaming even while viewers remain", () => {
   assert.match(media, /activePublishers/);
-  assert.match(media, /access\.manager\s*&&\s*Number\(activePublishers\?\.count\s*\|\|\s*0\)\s*===\s*0/);
+  assert.match(media, /leavingPublisher&&Number\(activePublishers\?\.count\|\|0\)===0/);
   assert.match(client, /livestream\.stop\(\)/);
   assert.match(client, /wasPublishing\s*=\s*Boolean\(\s*client\?\.self\.audioEnabled\s*\|\|\s*client\?\.self\.videoEnabled,?\s*\)/);
   assert.ok(client.indexOf("wasPublishing = Boolean") < client.indexOf("client?.self.disableAudio()"));
@@ -17,7 +17,7 @@ test("the final manager publisher closes streaming even while viewers remain", (
   assert.match(client, /humanStreamActive/);
   assert.match(client, /<LoneParticipantGuard/);
   assert.match(client, /confirmStillAlone=\{confirmStillAlone\}/);
-  assert.match(client, /user\.identity !== identity && !user\.isManager/);
+  assert.match(client, /setHasAudience\(onlineCount>1\)/);
   assert.match(media, /isManager: Boolean\(userId && managerIds\.has\(userId\)\)/);
 });
 

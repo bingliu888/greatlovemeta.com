@@ -79,3 +79,70 @@
 .class-waiting-media-actions svg{width:100%;height:100%}
 @media(max-width:640px) and (orientation:portrait){.class-video-grid[data-layout]{grid-template-columns:minmax(0,1fr)}}
 @media(max-width:900px) and (orientation:landscape){.class-video-grid[data-layout]{grid-template-columns:repeat(2,minmax(0,1fr))}}
+.class-room-controls button.pending{border-color:#d86b19;background:#e77820;color:#fff;box-shadow:0 7px 18px rgba(190,84,10,.22)}
+
+/* SmartMeeting v2 Gold meeting-room interaction layout. */
+.class-room-controls{padding:12px 14px;min-width:0}
+.class-room-controls nav{display:flex;align-items:center;flex-wrap:nowrap;gap:8px;min-width:0;width:100%;overflow-x:auto;scrollbar-width:thin}
+.class-room-controls nav button{flex:0 0 auto;border-radius:50%;display:inline-grid;place-items:center}
+.class-room-controls nav button.leave{margin-left:auto;min-width:48px;width:48px;padding:0;border-radius:50%}
+.class-room-controls nav button.leave svg{width:25px;height:25px}
+.class-room-controls nav button span{font-variant-numeric:tabular-nums;font-size:12px}
+.class-room-controls nav button:has(span){display:inline-flex;gap:5px;padding-inline:10px;border-radius:999px}
+.class-streaming-users{display:flex;gap:8px;min-width:0;overflow-x:auto;margin-top:12px;padding-bottom:4px}
+.class-streaming-users:empty{display:none}
+.class-streaming-users button{flex:0 0 auto;min-height:36px;padding:5px 12px;border:1px solid #a5e5cf;border-radius:999px;background:#effbf7;color:#08795c;font-weight:800}
+.class-chat{height:clamp(430px,68dvh,720px);min-height:0;display:grid;grid-template-rows:auto minmax(0,1fr) auto}
+.class-chat>header{align-items:center;gap:10px}
+.class-chat>header h2{font-size:17px}
+.class-chat>header small{color:#60727d;text-align:right}
+.class-chat>.chat-list{min-height:0;max-height:none;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch}
+.class-chat .chat-list article{padding:12px 0;border-bottom:1px solid #edf1f2}
+.class-chat .chat-list article>div{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.class-chat .chat-list article strong{min-width:0;overflow-wrap:anywhere}
+.class-chat .chat-list article p{margin:7px 0 0;white-space:pre-wrap;overflow-wrap:anywhere}
+.class-chat .chat-private-reply{margin-left:6px;color:#08795c;font-weight:600}
+.class-chat .chat-message-actions{display:flex;align-items:center;gap:5px;color:#849198;font-size:11px}
+.class-chat .chat-message-actions button{min-height:30px;padding:4px 7px;border:1px solid #dbe6e7;border-radius:7px;background:#effbf7;color:#08795c}
+.class-chat .chat-empty{min-height:100%;display:grid;place-content:center;text-align:center;color:#60727d}
+.class-chat .chat-empty span{font-size:25px;color:#00a889}
+.class-chat .chat-composer{display:grid;gap:8px;padding:12px;border-top:1px solid #e3ebec}
+.class-chat .chat-composer label{min-width:0}
+.class-chat .chat-composer textarea{box-sizing:border-box;width:100%;min-height:70px;font-size:16px}
+.class-chat .chat-composer>div:last-child{display:flex;justify-content:flex-end}
+.class-chat .chat-composer .send-button{min-width:42px;min-height:42px;padding:0;font-size:22px}
+.class-chat .chat-reply-target{display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:#08795c}
+.class-chat .chat-reply-target button{min-width:30px;min-height:30px;border:0;background:#effbf7;color:#08795c}
+.class-chat-retention{margin:10px 0;color:#60727d;text-align:center;font-size:11px}
+@media(max-width:760px){.class-room-controls{flex-direction:row}.class-room-controls nav{width:100%}.class-room-controls nav button{flex:0 0 auto}.class-chat{height:min(68dvh,620px)}.class-chat form{flex-direction:column}}
+.class-members-drawer{position:fixed;z-index:450;top:0;right:0;bottom:0;width:min(360px,100vw);display:grid;grid-template-rows:auto minmax(0,1fr);border-left:1px solid #dbe6e7;background:#fff;box-shadow:-20px 0 50px #052a3929}
+.class-members-drawer>header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:20px;border-bottom:1px solid #dbe6e7}
+.class-members-drawer h2{margin:0;font-size:20px}
+.class-members-drawer>header button{min-width:38px;min-height:38px;border:1px solid #dbe6e7;border-radius:50%;background:#fff;font-size:24px}
+.class-members-drawer>div{overflow-y:auto;padding:12px}
+.class-members-drawer article{padding:13px;border-bottom:1px solid #edf1f2;overflow-wrap:anywhere}
+.class-room-drawer{position:fixed;z-index:460;top:0;right:0;bottom:0;width:min(420px,100vw);display:flex;flex-direction:column;min-width:0;border-left:1px solid #d3e7e3;background:#f8fcfb;box-shadow:-16px 0 48px #052a3926}
+.class-room-drawer>header{min-height:76px;padding:20px;display:flex;align-items:center;justify-content:space-between;gap:12px;border-bottom:1px solid #d3e7e3;background:#fff}
+.class-room-drawer h2{margin:0;font-size:22px;overflow-wrap:anywhere}
+.class-room-drawer>header button{width:40px;height:40px;flex:0 0 auto;border:1px solid #d3e7e3;border-radius:50%;background:#fff;font-size:25px}
+.class-room-drawer-list{min-height:0;padding:16px;display:grid;align-content:start;gap:10px;overflow-y:auto}
+.class-room-drawer-list article,.class-room-drawer-list>button{min-width:0;padding:14px;border:1px solid #d3e7e3;border-radius:13px;background:#fff;text-align:left;overflow-wrap:anywhere}
+.class-room-drawer-list article{display:grid;gap:8px}
+.class-room-drawer-list audio{width:100%;min-width:0}
+.class-room-drawer-list small{color:#60727d}
+.class-room-drawer-list a{color:#078c70;font-weight:800}
+.class-room-drawer-actions{display:flex;align-items:center;gap:8px;flex:0 0 auto}
+.class-room-upload-menu,.class-room-recording-active,.class-room-recording-draft,.class-room-speech-editor{margin:12px 16px 0;padding:14px;border:1px solid #d3e7e3;border-radius:13px;background:#fff;color:#122a32;font-size:14px}
+.class-room-upload-menu{display:grid;gap:6px;box-shadow:0 8px 24px #052a3917}
+.class-room-upload-menu button,.class-room-recording-draft button,.class-room-speech-editor button,.class-room-recording-active button,.class-room-drawer-list article button{min-height:34px;padding:6px 12px;border:1px solid #d3e7e3;border-radius:8px;background:#fff;color:#122a32;font:inherit;text-align:left;white-space:normal;line-height:1.25}
+.class-room-recording-active{display:flex;align-items:center;gap:8px;color:#b02d30;font-weight:700}
+.class-room-recording-active button{margin-left:auto}
+.class-room-recording-pulse{width:10px;height:10px;border-radius:50%;background:#de3939;animation:class-record-pulse 1s infinite alternate}
+@keyframes class-record-pulse{to{opacity:.25;transform:scale(.7)}}
+.class-room-recording-draft,.class-room-speech-editor{display:grid;gap:10px}
+.class-room-recording-draft audio{width:100%;min-width:0}
+.class-room-speech-editor label{display:grid;gap:8px}
+.class-room-speech-editor textarea{width:100%;min-width:0;resize:vertical;padding:10px;border:1px solid #d3e7e3;border-radius:8px;font:inherit}
+.class-video-pages{grid-column:1/-1;display:flex;align-items:center;justify-content:center;gap:12px;padding:8px;color:#fff}
+.class-video-pages button{min-width:38px;min-height:38px;border:1px solid #8abdb0;border-radius:50%;background:#fff;color:#052a39;font-size:20px}
+.class-video-pages button:disabled{opacity:.45}
