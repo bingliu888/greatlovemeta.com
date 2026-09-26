@@ -2,6 +2,7 @@ import { readFile } from "node:fs/promises";
 
 const PUBLIC_ENTRY_FILES = [
   "app/[lang]/page.tsx",
+  "components/class-directory.tsx",
 ];
 
 const PROTECTED_ROUTE_MARKERS = [
@@ -11,6 +12,7 @@ const PROTECTED_ROUTE_MARKERS = [
   "/members",
   "/messages",
   "/share",
+  "/classes/${room.code}",
 ];
 
 function protectedDestination(linkTag) {

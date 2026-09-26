@@ -13,7 +13,7 @@ test("GreatLoveMeta D1 migrations apply in order with v2 Gold classroom tables",
       try{db.exec(readFileSync(new URL(name,directory),"utf8"));}
       catch(error){throw new Error(`Fresh GreatLoveMeta migration failed at ${name}`,{cause:error});}
     }
-    assert.equal(names.at(-1),"0132_class_provider_create_recovery.sql");
+    assert.equal(names.at(-1),"0133_site_help_room.sql");
     for(const table of ["class_room_member_presence","class_room_audio_notes",
       "class_provider_room_claims","class_provider_teardown_jobs",
       "class_provider_create_attempts"])

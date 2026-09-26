@@ -1,59 +1,83 @@
 {
   "schemaVersion": 1,
-  "releaseId": "greatlovemeta-com-v2-gold-rooms-20260925",
+  "releaseId": "greatlovemeta-com-public-help-room-20260926",
   "site": "greatlovemeta.com",
   "title": {
-    "en": "Bring SmartMeeting v2 Gold behavior to GreatLoveMeta course rooms",
-    "zh": "将 SmartMeeting v2 Gold 会议室体验迁移至 GreatLoveMeta 课程教室"
+    "en": "Add public Help audio course room",
+    "zh": "新增公开音频 Help 课程室"
   },
   "purpose": {
-    "en": "Make member presence, private support chat and RealtimeKit media lifecycle in GreatLoveMeta course rooms match the reviewed SmartMeeting v2 Gold contract.",
-    "zh": "让 GreatLoveMeta 课程教室的会员在线状态、私密支持聊天及 RealtimeKit 媒体生命周期符合已验证的 SmartMeeting v2 Gold 规则。"
+    "en": "Give signed-in members one administrator-hosted Help room with private support chat and optional host audio.",
+    "zh": "为登录会员提供一个由管理员主持的 Help 房间，支持私密服务聊天及按需主持音频。"
   },
   "features": {
     "en": [
-      "Count signed-in members from room entry, enforce one active tab per member, and show arrivals and departures in the room ticker.",
-      "Wait for a second distinct member before beginning audio or A/V streaming; retain listener connections while a speaker is muted and retire idle provider rooms after the grace period.",
-      "Use one responsive room action row, verified speaker state and timer, and private member-to-host/co-host chat.",
-      "Provide site-owned course materials, audio notes and local text-to-speech without enabling visual sharing controls."
+      "Show Help immediately before Sign out in the account menu.",
+      "Show the room as an ordinary public course tile without a description.",
+      "Require sign-in to enter; retain v2 Gold private chat, attachments and audio lifecycle."
     ],
     "zh": [
-      "从进入教室起统计已登录会员、限制同一会员只开一个活跃标签页，并用滚动条显示进入和离开。",
-      "等第二位不同会员进入后才启动音频或音视频传输；静音时保留收听连接，空闲宽限期后关闭提供商房间。",
-      "使用单行响应式操作栏、经播放确认的扬声器状态与计时器，以及会员对主持团队的私密聊天。",
-      "提供本站独立的课程附件、音频笔记和本地文字转语音，同时隐藏视觉分享控制。"
+      "在账户菜单退出登录前显示 Help。",
+      "将房间作为普通公开课程卡片显示，不显示介绍。",
+      "进入时须先登录，沿用 v2 Gold 私聊、附件及音频生命周期。"
     ]
   },
   "affected": {
-    "en": ["GreatLoveMeta course-room page and its presence, chat, media, material and audio-note APIs."],
-    "zh": ["GreatLoveMeta 课程教室页面及在线状态、聊天、媒体、附件和音频笔记接口。"]
+    "en": [
+      "GreatLoveMeta account menu, public course directory, Help route and course entry."
+    ],
+    "zh": [
+      "GreatLoveMeta 账户菜单、公开课程目录、Help 路由及课程入口。"
+    ]
   },
   "changes": {
-    "en": ["Reuse the reviewed SmartFi adaptation of SmartMeeting v2 Gold, while preserving GreatLoveMeta locale routes and its own subscription, identity, RealtimeKit and R2 bindings."],
-    "zh": ["复用已经过验证的 SmartFi 版 SmartMeeting v2 Gold 适配，同时保留 GreatLoveMeta 自己的语言路由、订阅、身份、RealtimeKit 与 R2 绑定。"]
+    "en": [
+      "Reuse the reviewed GlobalCitizen Help-room SQL, route and tests with GreatLoveMeta locale and class adapters.",
+      "Use full-document navigation for anonymous Help tile entry to preserve mobile Safari login redirect.",
+      "Create one free public audio Webinar in site-owned D1; it does not start media on page view."
+    ],
+    "zh": [
+      "复用已验证的 GlobalCitizen Help 房间 SQL、路由及测试，仅适配 GreatLoveMeta 语言和课程结构。",
+      "公开 Help 卡片使用整页导航，确保移动 Safari 登录跳转正常。",
+      "在本站 D1 创建一个免费公开音频 Webinar；浏览页面不会启动媒体。"
+    ]
   },
   "validation": {
-    "en": ["Run fresh D1 migration and room-behavior contracts, complete site tests, lint and production build; verify the exact deployment and production Project report."],
-    "zh": ["运行全新 D1 迁移及教室行为契约测试、完整站点测试、lint 与生产构建，并核对精确部署及 Project 发布记录。"]
+    "en": [
+      "Run Help contract, protected-navigation check, all repository tests, zero-warning lint, build, fresh migrations and exact deployment verification."
+    ],
+    "zh": [
+      "运行 Help 契约、受保护导航检查、全量仓库测试、零警告 lint、构建、空白迁移和精确部署核验。"
+    ]
   },
   "deferred": {
-    "en": ["This portfolio migration does not repeat interactive multi-device RealtimeKit acceptance on every target; automated lifecycle contracts and production availability are checked."],
-    "zh": ["本次跨站迁移不逐站重复多设备 RealtimeKit 交互验收；执行自动化生命周期契约及生产可用性检查。"]
+    "en": [
+      "Live multi-user media test is outside this Help-navigation-only rollout."
+    ],
+    "zh": [
+      "本次仅迁移 Help 导航，不重复多用户实时媒体测试。"
+    ]
   },
   "siteAdaptations": {
-    "en": ["Keep GreatLoveMeta's independent brand, locale-prefixed class routes, active site subscription for audio-note eligibility, verified-email lookup, and site-specific provider title and preset namespaces.", "Keep the existing team-managed Reown project, production domain allowlist and all site-owned cloud resources unchanged."],
-    "zh": ["保留 GreatLoveMeta 独立品牌、带语言前缀的课程路径、本站有效订阅判断录音资格、邮箱验证查询，以及本站独立的提供商标题与预设命名空间。", "保留现有团队可管理的 Reown 项目、生产域名白名单及全部本站云资源，不作改动。"]
+    "en": [
+      "Preserve GreatLoveMeta branding, locale routes, payments and site-owned Cloudflare resources."
+    ],
+    "zh": [
+      "保留 GreatLoveMeta 品牌、语言路由、支付及本站 Cloudflare 资源。"
+    ]
   },
   "dataMigration": {
     "included": true,
-    "migrations": ["0128_class_v2_room_presence_private_chat.sql", "0129_class_provider_room_claim.sql", "0130_class_room_audio_notes.sql", "0131_class_provider_teardown.sql", "0132_class_provider_create_recovery.sql"],
+    "migrations": [
+      "0133_site_help_room.sql"
+    ],
     "rollback": {
-      "en": "Roll back the application commit; retain forward-only production D1 migration history and site-owned room data.",
-      "zh": "回滚应用提交；保留只能前进的生产 D1 迁移记录及本站教室数据。"
+      "en": "Revert application while retaining the additive Help room record until safely retired.",
+      "zh": "可回退应用，新增 Help 房间记录保留至安全下线。"
     }
   },
   "productionVerification": {
-    "en": "Verify the exact GitHub Actions run, apex and www availability, and matching current Project release record.",
-    "zh": "核对精确的 GitHub Actions 运行、主域名与 www 可用性及相符的 Project 发布记录。"
+    "en": "Verify matching GitHub main commit, successful Cloudflare workflow, public Help tile, sign-in redirect and Project release record.",
+    "zh": "核对 GitHub main 提交、Cloudflare 工作流、公开 Help 卡片、登录跳转及 Project 发布记录。"
   }
 }
